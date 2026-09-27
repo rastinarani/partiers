@@ -10,7 +10,7 @@ export default async function ReviewsPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
       <h1 className="text-3xl font-bold tracking-tight">What families are saying</h1>
-      <p className="mt-2 text-muted">Real reviews from families we&rsquo;ve sat for.</p>
+      <p className="mt-2 text-muted">Real reviews from families we&rsquo;ve entertained for.</p>
 
       <div className="mt-8 space-y-4">
         {reviews.length === 0 && (

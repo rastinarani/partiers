@@ -8,13 +8,13 @@
 const team = [
   {
     name: "Your Name",
-    bio: "Hi! I'm ___ years old and I love spending time with kids. I've been babysitting for family friends for ___ and I'm great with ___.",
-    goodWith: "Ages 3-10, arts & crafts, board games, outdoor play",
+    bio: "Hi! I'm ___ years old and I love bringing energy to any party. I've been entertaining kids at family events for ___ and I'm great at ___.",
+    goodWith: "Ages 3-10, party games, arts & crafts, face painting",
   },
   {
     name: "Your Friend's Name",
-    bio: "Hey there! I'm ___ and I've always been the go-to babysitter in my family. I especially love ___.",
-    goodWith: "Ages 5-12, homework help, movie nights, backyard games",
+    bio: "Hey there! I'm ___ and I'm always the one running the games at family get-togethers. I especially love ___.",
+    goodWith: "Ages 5-12, group games, scavenger hunts, balloon animals",
   },
 ];
 
@@ -24,8 +24,8 @@ export default function AboutPage() {
       <div className="text-center">
         <h1 className="text-3xl font-bold tracking-tight">About Us</h1>
         <p className="mx-auto mt-2 max-w-xl text-muted">
-          We&rsquo;re two friends who love keeping kids entertained &mdash; here&rsquo;s a bit
-          about who we are.
+          We&rsquo;re two friends who love turning parties and get-togethers into something kids
+          actually remember &mdash; here&rsquo;s a bit about who we are.
         </p>
       </div>
 

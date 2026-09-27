@@ -54,7 +54,9 @@ export default function AdminBookingsList({ initialBookings }: { initialBookings
                 {b.parentName} &middot; <span className="text-muted">{b.contact}</span>
               </p>
               <p className="text-sm text-muted">
-                For {b.childName} (age {b.childAge}) &mdash; {formatDateTime(b.date, b.time)}
+                For {b.childName} (age {b.childAge}) &mdash; {b.numberOfChildren}{" "}
+                {b.numberOfChildren === 1 ? "child" : "children"} &mdash;{" "}
+                {formatDateTime(b.date, b.time)}
               </p>
               {b.notes && <p className="mt-1 text-sm text-muted italic">&ldquo;{b.notes}&rdquo;</p>}
             </div>

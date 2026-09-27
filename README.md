@@ -1,7 +1,7 @@
 # Partiers
 
-A small booking + reviews site for casual babysitting/kid-entertaining. Built with
-Next.js (App Router), MongoDB, and Tailwind CSS.
+A small booking + reviews site for a kids' entertainment business (parties, family
+events, get-togethers). Built with Next.js (App Router), MongoDB, and Tailwind CSS.
 
 ## Running locally
 
@@ -31,19 +31,27 @@ src/
       login/page.tsx         Admin login
       page.tsx               Dashboard: booking requests + review moderation
       calendar/page.tsx      Calendar of confirmed bookings
+    login/page.tsx           Customer login (demo account system)
+    signup/page.tsx          Customer signup
+    account/page.tsx         "Logged in" landing page
     api/
       bookings/route.ts      POST (public, create) / PATCH (admin, confirm/decline)
       reviews/route.ts       POST (public, create) / PATCH (admin, approve/reject)
       admin/login/route.ts   Checks the shared password, sets a session cookie
       admin/logout/route.ts  Clears the session cookie
+      auth/signup/route.ts   Creates a customer account (hashed password)
+      auth/login/route.ts    Verifies credentials, sets a session cookie
+      auth/logout/route.ts   Clears the session cookie
   components/                Reusable UI (calendar, forms, star rating, admin lists)
   lib/
     mongodb.ts                DB connection
     bookings.ts, reviews.ts   Data access functions
-    auth.ts                   Admin session cookie logic
+    users.ts                  Customer account data access (password hashing)
+    auth.ts                   Session cookie logic (admin + customer)
     validation.ts             Server-side input validation
     types.ts                  Shared TypeScript types
-proxy.ts                      Redirects unauthenticated visitors away from /admin/*
+proxy.ts                      Redirects unauthenticated visitors away from
+                               /admin/* and /account/*
 ```
 
 ### Data model
@@ -52,7 +60,7 @@ proxy.ts                      Redirects unauthenticated visitors away from /admi
 
 ```
 {
-  parentName, contact, childName, childAge,
+  parentName, contact, childName, childAge, numberOfChildren,
   date ("YYYY-MM-DD"), time ("HH:MM"), notes,
   status: "pending" | "confirmed" | "declined",
   createdAt, updatedAt
@@ -69,12 +77,36 @@ proxy.ts                      Redirects unauthenticated visitors away from /admi
 }
 ```
 
+**users** collection (customer accounts — see below):
+
+```
+{ name, email, passwordSalt, passwordHash, createdAt }
+```
+
 ### Admin auth
 
-There's no user database — just one shared password (`ADMIN_PASSWORD`). Logging
-in sets an httpOnly cookie whose value is an HMAC signed with `ADMIN_SESSION_SECRET`.
-`proxy.ts` checks that cookie on every `/admin/*` page, and each admin API route
-double-checks it independently.
+There's no admin *database* — just one shared password (`ADMIN_PASSWORD`).
+Logging in sets an httpOnly cookie whose value is an HMAC signed with
+`ADMIN_SESSION_SECRET`. `proxy.ts` checks that cookie on every `/admin/*`
+page, and each admin API route double-checks it independently.
+
+### Customer accounts (login / signup demo)
+
+This is a working demo of a real account system — no third-party auth
+provider, everything stored in your own MongoDB:
+
+- Passwords are never stored in plain text. `lib/users.ts` salts and hashes
+  them with Node's built-in `scrypt` before saving.
+- Signing up or logging in sets a cookie shaped like `<userId>.<hmac>`, so
+  the server can verify it wasn't tampered with without a separate
+  sessions table.
+- `/account` is gated by `proxy.ts` the same way `/admin` is, just with a
+  separate cookie (`partiers_user_session` vs `partiers_admin_session`).
+
+Right now this is a self-contained demo (accounts don't yet link to
+bookings or reviews) — the natural next step is to prefill the booking
+form from a logged-in user's saved details, or show "your bookings" on
+the account page.
 
 ## Deploying to production
 

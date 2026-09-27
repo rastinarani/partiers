@@ -6,6 +6,7 @@ export interface Booking {
   contact: string;
   childName: string;
   childAge: number;
+  numberOfChildren: number;
   date: string; // "YYYY-MM-DD"
   time: string; // "HH:MM", 24h
   notes: string;
@@ -16,7 +17,14 @@ export interface Booking {
 
 export type NewBooking = Pick<
   Booking,
-  "parentName" | "contact" | "childName" | "childAge" | "date" | "time" | "notes"
+  | "parentName"
+  | "contact"
+  | "childName"
+  | "childAge"
+  | "numberOfChildren"
+  | "date"
+  | "time"
+  | "notes"
 >;
 
 export type ReviewStatus = "pending" | "approved" | "rejected";

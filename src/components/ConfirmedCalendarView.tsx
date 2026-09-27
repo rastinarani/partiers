@@ -56,7 +56,8 @@ export default function ConfirmedCalendarView({ bookings }: { bookings: Booking[
               <div key={b._id} className="rounded-2xl border border-card-border bg-card p-4 shadow-sm">
                 <p className="font-medium">{formatTime(b.time)}</p>
                 <p className="text-sm text-muted">
-                  {b.parentName} &middot; {b.childName} (age {b.childAge})
+                  {b.parentName} &middot; {b.childName} (age {b.childAge}) &middot;{" "}
+                  {b.numberOfChildren} {b.numberOfChildren === 1 ? "child" : "children"}
                 </p>
               </div>
             ))}

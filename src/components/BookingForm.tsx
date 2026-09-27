@@ -22,6 +22,7 @@ export default function BookingForm() {
   const [contact, setContact] = useState("");
   const [childName, setChildName] = useState("");
   const [childAge, setChildAge] = useState("");
+  const [numberOfChildren, setNumberOfChildren] = useState("1");
   const [notes, setNotes] = useState("");
 
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
@@ -48,6 +49,7 @@ export default function BookingForm() {
           contact,
           childName,
           childAge: Number(childAge),
+          numberOfChildren: Number(numberOfChildren),
           date,
           time,
           notes,
@@ -87,9 +89,10 @@ export default function BookingForm() {
             setContact("");
             setChildName("");
             setChildAge("");
+            setNumberOfChildren("1");
             setNotes("");
           }}
-          className="mt-6 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
+          className="mt-6 rounded-lg bg-gradient-to-r from-primary to-secondary px-4 py-2 text-sm font-medium text-white hover:opacity-90"
         >
           Submit another request
         </button>
@@ -175,6 +178,16 @@ export default function BookingForm() {
           max={17}
           placeholder="6"
         />
+        <Field
+          label="Number of children"
+          value={numberOfChildren}
+          onChange={setNumberOfChildren}
+          required
+          type="number"
+          min={1}
+          max={50}
+          placeholder="1"
+        />
       </div>
 
       <div>
@@ -187,7 +200,7 @@ export default function BookingForm() {
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
           maxLength={1000}
-          placeholder="Allergies, favorite activities, bedtime routine, etc."
+          placeholder="Allergies, favorite games, party theme, anything else we should know."
           className="w-full rounded-xl border border-card-border bg-card px-4 py-3 text-sm focus:border-primary focus:outline-none"
         />
       </div>
@@ -199,7 +212,7 @@ export default function BookingForm() {
       <button
         type="submit"
         disabled={status === "submitting"}
-        className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60 sm:w-auto"
+        className="w-full rounded-xl bg-gradient-to-r from-primary to-secondary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-60 sm:w-auto"
       >
         {status === "submitting" ? "Sending request..." : "Request this time"}
       </button>

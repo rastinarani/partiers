@@ -38,3 +38,27 @@ export function checkAdminPassword(password: unknown): boolean {
   if (a.length !== b.length) return false;
   return timingSafeEqual(a, b);
 }
+
+// Customer accounts: a per-user session cookie of the form
+// "<userId>.<hmac(userId)>". Unlike the single shared admin cookie, this
+// needs to carry *which* user is signed in, so it's a signed id rather
+// than a fixed value.
+export const USER_COOKIE_NAME = "partiers_user_session";
+
+export function createUserSessionToken(userId: string): string {
+  const signature = createHmac("sha256", getSecret()).update(userId).digest("hex");
+  return `${userId}.${signature}`;
+}
+
+export function verifyUserSessionToken(token: string | undefined | null): string | null {
+  if (!token) return null;
+  const [userId, signature] = token.split(".");
+  if (!userId || !signature) return null;
+
+  const expected = createHmac("sha256", getSecret()).update(userId).digest("hex");
+  const a = Buffer.from(signature);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
+
+  return userId;
+}

@@ -1,15 +1,26 @@
 @import "tailwindcss";
 
+/* A single vibrant light theme, always-on regardless of OS dark-mode
+   preference — this site should read as fun and colorful, never as a
+   dim "system dark mode" app. */
 :root {
-  --background: #fafaf9;
-  --foreground: #1c1917;
+  color-scheme: light;
+
+  --background: #fbf7ff;
+  --foreground: #221c35;
   --card: #ffffff;
-  --card-border: #e7e5e4;
-  --primary: #0d9488; /* teal-600 */
-  --primary-hover: #0f766e; /* teal-700 */
-  --primary-soft: #ccfbf1; /* teal-100 */
-  --accent: #f59e0b; /* amber-500, used sparingly (stars, highlights) */
-  --muted: #78716c; /* stone-500 */
+  --card-border: #ece3fb;
+
+  --primary: #7c3aed; /* violet-600 */
+  --primary-hover: #6d28d9; /* violet-700 */
+  --primary-soft: #f1e8fe; /* violet-100 */
+
+  --secondary: #fb7185; /* rose-400, used for playful highlights */
+  --secondary-soft: #ffe4e8;
+
+  --accent: #f59e0b; /* amber-500 — stars, dots, sparkle bits */
+  --muted: #6b6280;
+
   --danger: #dc2626;
   --danger-soft: #fee2e2;
   --success: #16a34a;
@@ -24,6 +35,8 @@
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--secondary);
+  --color-secondary-soft: var(--secondary-soft);
   --color-accent: var(--accent);
   --color-muted: var(--muted);
   --color-danger: var(--danger);
@@ -34,23 +47,50 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1c1917;
-    --foreground: #f5f5f4;
-    --card: #292524;
-    --card-border: #44403c;
-    --primary: #2dd4bf;
-    --primary-hover: #5eead4;
-    --primary-soft: #134e4a;
-    --muted: #a8a29e;
-    --danger-soft: #450a0a;
-    --success-soft: #052e16;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Soft blurred color blobs used behind hero sections for a bit of fun
+   without adding any images. Usage: <div class="blob-field"><span
+   class="blob blob-1" />...</div> positioned inside a `relative` parent. */
+.blob-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(60px);
+  opacity: 0.35;
+}
+
+.blob-1 {
+  top: -80px;
+  left: -60px;
+  width: 260px;
+  height: 260px;
+  background: var(--primary);
+}
+
+.blob-2 {
+  top: -40px;
+  right: -80px;
+  width: 220px;
+  height: 220px;
+  background: var(--secondary);
+}
+
+.blob-3 {
+  bottom: -100px;
+  left: 30%;
+  width: 240px;
+  height: 240px;
+  background: var(--accent);
 }

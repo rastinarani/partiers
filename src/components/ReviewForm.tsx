@@ -87,7 +87,7 @@ export default function ReviewForm() {
         <button
           type="submit"
           disabled={status === "submitting"}
-          className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
+          className="rounded-xl bg-gradient-to-r from-primary to-secondary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-60"
         >
           {status === "submitting" ? "Submitting..." : "Submit review"}
         </button>

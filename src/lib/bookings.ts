@@ -11,6 +11,7 @@ function toBooking(doc: Document): Booking {
     contact: doc.contact,
     childName: doc.childName,
     childAge: doc.childAge,
+    numberOfChildren: doc.numberOfChildren ?? 1,
     date: doc.date,
     time: doc.time,
     notes: doc.notes ?? "",
