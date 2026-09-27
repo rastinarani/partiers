@@ -5,6 +5,7 @@ import { useState } from "react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -17,13 +18,13 @@ export default function AdminLoginPage() {
     const res = await fetch("/api/admin/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ email, password }),
     });
 
     if (!res.ok) {
       setSubmitting(false);
       const data = await res.json().catch(() => ({}));
-      setError(data.error || "Incorrect password.");
+      setError(data.error || "Incorrect email or password.");
       return;
     }
 
@@ -36,6 +37,21 @@ export default function AdminLoginPage() {
       <h1 className="text-center text-2xl font-bold tracking-tight">Admin Login</h1>
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
+          <label htmlFor="email" className="mb-2 block text-sm font-medium">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            required
+            autoFocus
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-xl border border-card-border bg-card px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
+          />
+        </div>
+
+        <div>
           <label htmlFor="password" className="mb-2 block text-sm font-medium">
             Password
           </label>
@@ -43,7 +59,6 @@ export default function AdminLoginPage() {
             id="password"
             type="password"
             required
-            autoFocus
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full rounded-xl border border-card-border bg-card px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
@@ -57,7 +72,7 @@ export default function AdminLoginPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
+          className="w-full rounded-xl bg-gradient-to-r from-primary to-secondary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-60"
         >
           {submitting ? "Logging in..." : "Log in"}
         </button>

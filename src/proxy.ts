@@ -1,10 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { ADMIN_COOKIE_NAME, USER_COOKIE_NAME, isValidSessionToken, verifyUserSessionToken } from "@/lib/auth";
+import {
+  ADMIN_COOKIE_NAME,
+  USER_COOKIE_NAME,
+  verifyAdminSessionToken,
+  verifyUserSessionToken,
+} from "@/lib/auth";
 
-// Gate every /admin page behind the shared admin login (except the login
-// page itself), and every /account page behind a customer login. API
-// routes verify their own session cookie too (see app/api/*/route.ts)
-// rather than relying on this alone.
+// Gate every /admin page behind admin login (except the login page
+// itself), and every /account page behind a customer login. API routes
+// verify their own session cookie too (see app/api/*/route.ts) rather
+// than relying on this alone.
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -13,7 +18,7 @@ export function proxy(request: NextRequest) {
       return NextResponse.next();
     }
     const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
-    if (!isValidSessionToken(token)) {
+    if (!verifyAdminSessionToken(token)) {
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
     return NextResponse.next();

@@ -1,15 +1,23 @@
 import { NextResponse } from "next/server";
-import { ADMIN_COOKIE_NAME, checkAdminPassword, createSessionToken } from "@/lib/auth";
+import { ADMIN_COOKIE_NAME, createAdminSessionToken } from "@/lib/auth";
+import { verifyAdminCredentials } from "@/lib/admins";
+import { validateLoginInput } from "@/lib/validation";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
+  const input = validateLoginInput(body);
 
-  if (!checkAdminPassword(body?.password)) {
-    return NextResponse.json({ error: "Incorrect password." }, { status: 401 });
+  if (!input) {
+    return NextResponse.json({ error: "Please enter your email and password." }, { status: 400 });
   }
 
-  const response = NextResponse.json({ success: true });
-  response.cookies.set(ADMIN_COOKIE_NAME, createSessionToken(), {
+  const admin = await verifyAdminCredentials(input.email, input.password);
+  if (!admin) {
+    return NextResponse.json({ error: "Incorrect email or password." }, { status: 401 });
+  }
+
+  const response = NextResponse.json({ admin });
+  response.cookies.set(ADMIN_COOKIE_NAME, createAdminSessionToken(admin.id), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
