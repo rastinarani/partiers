@@ -1,20 +1,19 @@
-// Edit the copy below (names, bios, ages comfortable with, photos) to match
-// the two of you. Swap each placeholder <div> for a real photo using
-// next/image once you have one, e.g.:
+// Photos aren't in yet — swap each placeholder <div> below for a real one
+// using next/image once you have them, e.g.:
 //   import Image from "next/image";
-//   <Image src="/photos/you.jpg" alt="..." width={160} height={160} className="rounded-full object-cover" />
+//   <Image src="/photos/nikki.jpg" alt="Nikki Mazloomi" width={160} height={160} className="rounded-full object-cover" />
 // and drop the image file in the `public/photos/` folder.
 
 const team = [
   {
-    name: "Your Name",
-    bio: "Hi! I'm ___ years old and I love bringing energy to any party. I've been entertaining kids at family events for ___ and I'm great at ___.",
-    goodWith: "Ages 3-10, party games, arts & crafts, face painting",
+    name: "Nikki Mazloomi",
+    bio: "Hi, I'm Nikki! I've spent years entertaining cousins and family friends' kids, and I've picked up a few tricks for keeping even the trickiest crowd having fun — from surprise scavenger hunts to games that somehow never get old. I'm all about high energy, easy laughs, and making sure every kid feels included.",
+    goodWith: "Ages 3-10, scavenger hunts, arts & crafts, group games",
   },
   {
-    name: "Your Friend's Name",
-    bio: "Hey there! I'm ___ and I'm always the one running the games at family get-togethers. I especially love ___.",
-    goodWith: "Ages 5-12, group games, scavenger hunts, balloon animals",
+    name: "Manna Ghahremani",
+    bio: "Hey, I'm Manna! Give me a group of kids and I'll have a game running in five minutes flat. I love face painting, balloon animals, and coming up with new party themes — my goal is always to leave a party more fun than I found it.",
+    goodWith: "Ages 5-12, face painting, balloon animals, party games",
   },
 ];
 
