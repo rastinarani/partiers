@@ -5,9 +5,18 @@
 //
 // Usage:
 //   npm run create-admin -- "Full Name" you@example.com "a real password"
+//
+// Reads MONGODB_URI / MONGODB_DB from .env.local when it exists. Values
+// already set in the shell win, so you can point it at production with:
+//   MONGODB_URI="mongodb+srv://..." npm run create-admin -- ...
 
+import { existsSync } from "node:fs";
 import { MongoClient } from "mongodb";
 import { randomBytes, scryptSync } from "node:crypto";
+
+if (existsSync(".env.local")) {
+  process.loadEnvFile(".env.local");
+}
 
 const [, , name, email, password] = process.argv;
 
@@ -26,7 +35,7 @@ const dbName = process.env.MONGODB_DB || "partiers";
 
 if (!uri) {
   console.error(
-    "MONGODB_URI is not set. Run this with --env-file=.env.local (already wired up via `npm run create-admin`)."
+    "MONGODB_URI is not set. Add it to .env.local, or pass it inline: MONGODB_URI=\"...\" npm run create-admin -- ..."
   );
   process.exit(1);
 }

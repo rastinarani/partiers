@@ -168,10 +168,14 @@ the account page.
 
 5. Deploy. Vercel gives you a free `*.vercel.app` URL immediately; you can
    attach a custom domain later from the same project settings.
-6. Create your production admin account by running `create-admin` locally
-   but pointed at your Atlas database — temporarily set `MONGODB_URI` in
-   your local `.env.local` to the Atlas connection string, run the command,
-   then switch `.env.local` back to your local MongoDB URI.
+6. Create your production admin account by running `create-admin` from
+   your computer, pointed at your Atlas database with an inline
+   `MONGODB_URI` (it takes priority over `.env.local`, which you don't
+   need to edit):
+
+   ```bash
+   MONGODB_URI="<your Atlas connection string>" npm run create-admin -- "Full Name" you@example.com "a real password"
+   ```
 
 That's it — no payment processing to configure since bookings are paid in
 person.
