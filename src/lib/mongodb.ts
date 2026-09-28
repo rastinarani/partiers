@@ -1,34 +1,38 @@
 import { MongoClient, type Db } from "mongodb";
 
-const uri = process.env.MONGODB_URI;
 const dbName = process.env.MONGODB_DB || "partiers";
 
-if (!uri) {
-  throw new Error(
-    "Missing MONGODB_URI environment variable. Add it to .env.local (see .env.example)."
-  );
-}
-
-// Reuse the client across hot reloads in dev so we don't open a new
-// connection pool on every file save.
+// Shared across requests (and across hot reloads in dev) so we reuse one
+// connection pool instead of opening a new one per request.
 declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
-let clientPromise: Promise<MongoClient>;
+function getClientPromise(): Promise<MongoClient> {
+  if (!globalThis._mongoClientPromise) {
+    const uri = process.env.MONGODB_URI;
+    if (!uri) {
+      throw new Error(
+        "Missing MONGODB_URI environment variable. Add it to .env.local (see .env.example)."
+      );
+    }
 
-if (process.env.NODE_ENV === "development") {
-  if (!global._mongoClientPromise) {
-    global._mongoClientPromise = new MongoClient(uri).connect();
+    const promise = new MongoClient(uri).connect();
+    // Never keep a failed connection around: otherwise one bad attempt
+    // (e.g. the database was briefly unreachable) makes every later request
+    // fail until the server restarts. The next request retries instead.
+    promise.catch((err) => {
+      console.error("MongoDB connection failed:", err);
+      if (globalThis._mongoClientPromise === promise) {
+        globalThis._mongoClientPromise = undefined;
+      }
+    });
+    globalThis._mongoClientPromise = promise;
   }
-  clientPromise = global._mongoClientPromise;
-} else {
-  clientPromise = new MongoClient(uri).connect();
+  return globalThis._mongoClientPromise;
 }
 
-export default clientPromise;
-
 export async function getDb(): Promise<Db> {
-  const client = await clientPromise;
+  const client = await getClientPromise();
   return client.db(dbName);
 }
