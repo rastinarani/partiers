@@ -43,7 +43,7 @@ errors. Fixing that is Phase 8; the core app comes first.
 
 Small investments that make every later step safer.
 
-### [ ] 0.1 Add a unit test setup
+### [x] 0.1 Add a unit test setup
 
 - Add Vitest with a `npm test` script.
 - Write tests for `src/lib/validation.ts` (valid input, each missing or
@@ -367,3 +367,6 @@ Add one line per finished step: date, step, commit, notes.
 
 - 2026-10-23 — Roadmap created. Core features from the first build are in
   place (see "Where things stand").
+- 2026-10-23 — 0.1 Unit test setup: Vitest (`npm test`), 68 tests for
+  `validation.ts` and session signing in `auth.ts`. Bumped `@types/node` to
+  ^22 (Vitest 5 peer requirement).

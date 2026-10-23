@@ -30,6 +30,7 @@ person, so there is no payment system.
 npm run dev          # http://localhost:3000
 npm run lint
 npm run typecheck
+npm test             # Vitest unit tests (src/**/*.test.ts)
 npm run build        # must pass before a step counts as done
 npm run check-db     # diagnose a MongoDB connection string (hides the password)
 mongosh mongodb://127.0.0.1:27017/partiers   # inspect local data
@@ -79,9 +80,9 @@ Local MongoDB runs as a Homebrew service:
 1. Pick the **first unchecked step** in `ROADMAP.md` (or the one the owner
    names). Do only that step.
 2. Briefly say what you'll change, then build it.
-3. Verify: `npm run lint`, `npm run typecheck`, `npm run build` all pass, then
-   run the dev server and try the feature in a browser — the main path and at
-   least one edge case. If you can't test in a browser, say so.
+3. Verify: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`
+   all pass, then run the dev server and try the feature in a browser — the
+   main path and at least one edge case. If you can't test in a browser, say so.
 4. Remove any test data you created in the local database.
 5. Tick the step's checkbox in `ROADMAP.md` and add a line to its
    "Progress log".
