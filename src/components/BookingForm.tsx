@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import MonthCalendar from "./MonthCalendar";
+import { Button, Card, FormError, Input, Label, Select, Textarea } from "./ui";
 
 const TIME_SLOTS = Array.from({ length: 27 }, (_, i) => {
   const minutes = 9 * 60 + i * 30; // 9:00am through 10:00pm
@@ -70,7 +71,7 @@ export default function BookingForm() {
 
   if (status === "done") {
     return (
-      <div className="rounded-2xl border border-card-border bg-card p-8 text-center shadow-sm">
+      <Card className="p-8 text-center">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-success-soft text-2xl text-success">
           &#10003;
         </div>
@@ -79,8 +80,7 @@ export default function BookingForm() {
           Thanks! We&rsquo;ll get back to you soon to confirm the date and time. Nothing is
           booked until you hear back from us.
         </p>
-        <button
-          type="button"
+        <Button
           onClick={() => {
             setStatus("idle");
             setDate("");
@@ -92,11 +92,11 @@ export default function BookingForm() {
             setNumberOfChildren("1");
             setNotes("");
           }}
-          className="mt-6 rounded-lg bg-gradient-to-r from-primary to-secondary px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+          className="mt-6"
         >
           Submit another request
-        </button>
-      </div>
+        </Button>
+      </Card>
     );
   }
 
@@ -104,20 +104,18 @@ export default function BookingForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-6 md:grid-cols-2">
         <div>
-          <label className="mb-2 block text-sm font-medium">Pick a date</label>
+          <Label>Pick a date</Label>
           <MonthCalendar selectedDate={date} onSelectDate={setDate} />
         </div>
 
         <div>
-          <label htmlFor="time" className="mb-2 block text-sm font-medium">
-            Pick a time
-          </label>
-          <select
+          <Label htmlFor="time">Pick a time</Label>
+          <Select
             id="time"
+            size="lg"
             required
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            className="w-full rounded-xl border border-card-border bg-card px-4 py-3 text-sm focus:border-primary focus:outline-none"
           >
             <option value="" disabled>
               Select a time&hellip;
@@ -127,7 +125,7 @@ export default function BookingForm() {
                 {slot.label}
               </option>
             ))}
-          </select>
+          </Select>
 
           {date && (
             <p className="mt-3 rounded-xl bg-primary-soft px-4 py-3 text-sm text-primary-hover">
@@ -191,31 +189,30 @@ export default function BookingForm() {
       </div>
 
       <div>
-        <label htmlFor="notes" className="mb-2 block text-sm font-medium">
+        <Label htmlFor="notes">
           Anything we should know? <span className="font-normal text-muted">(optional)</span>
-        </label>
-        <textarea
+        </Label>
+        <Textarea
           id="notes"
+          size="lg"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
           maxLength={1000}
           placeholder="Allergies, favorite games, party theme, anything else we should know."
-          className="w-full rounded-xl border border-card-border bg-card px-4 py-3 text-sm focus:border-primary focus:outline-none"
         />
       </div>
 
-      {status === "error" && (
-        <p className="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">{errorMessage}</p>
-      )}
+      {status === "error" && <FormError>{errorMessage}</FormError>}
 
-      <button
+      <Button
         type="submit"
+        size="lg"
         disabled={status === "submitting"}
-        className="w-full rounded-xl bg-gradient-to-r from-primary to-secondary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-60 sm:w-auto"
+        className="w-full sm:w-auto"
       >
         {status === "submitting" ? "Sending request..." : "Request this time"}
-      </button>
+      </Button>
     </form>
   );
 }
@@ -241,8 +238,9 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium">{label}</label>
-      <input
+      <Label>{label}</Label>
+      <Input
+        size="lg"
         type={type}
         required={required}
         value={value}
@@ -250,7 +248,6 @@ function Field({
         max={max}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-card-border bg-card px-4 py-3 text-sm focus:border-primary focus:outline-none"
       />
     </div>
   );

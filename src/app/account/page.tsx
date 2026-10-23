@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { USER_COOKIE_NAME, verifyUserSessionToken } from "@/lib/auth";
 import { getUserById } from "@/lib/users";
 import LogoutButton from "@/components/LogoutButton";
+import { Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,7 @@ export default async function AccountPage() {
 
   return (
     <div className="mx-auto flex max-w-sm flex-col justify-center px-6 py-24">
-      <div className="rounded-2xl border border-card-border bg-card p-8 text-center shadow-sm">
+      <Card className="p-8 text-center">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-soft text-xl font-semibold text-primary">
           {user.name
             .split(" ")
@@ -32,7 +33,7 @@ export default async function AccountPage() {
         <div className="mt-6">
           <LogoutButton endpoint="/api/auth/logout" redirectTo="/login" />
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

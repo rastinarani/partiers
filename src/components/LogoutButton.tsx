@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Button } from "./ui";
 
 interface LogoutButtonProps {
   endpoint?: string;
@@ -22,12 +23,8 @@ export default function LogoutButton({
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleLogout}
-      className="rounded-lg border border-card-border px-3 py-1.5 text-sm font-medium hover:bg-primary-soft hover:text-primary"
-    >
+    <Button variant="secondary" size="sm" onClick={handleLogout}>
       {label}
-    </button>
+    </Button>
   );
 }

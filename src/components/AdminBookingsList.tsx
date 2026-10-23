@@ -2,12 +2,7 @@
 
 import { useState } from "react";
 import type { Booking, BookingStatus } from "@/lib/types";
-
-const STATUS_STYLES: Record<BookingStatus, string> = {
-  pending: "bg-accent/15 text-accent",
-  confirmed: "bg-success-soft text-success",
-  declined: "bg-danger-soft text-danger",
-};
+import { Button, Card, StatusBadge } from "./ui";
 
 function formatDateTime(date: string, time: string) {
   const d = new Date(`${date}T${time}:00`);
@@ -47,7 +42,7 @@ export default function AdminBookingsList({ initialBookings }: { initialBookings
   return (
     <div className="space-y-3">
       {bookings.map((b) => (
-        <div key={b._id} className="rounded-2xl border border-card-border bg-card p-4 shadow-sm">
+        <Card key={b._id} className="p-4">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
               <p className="font-semibold">
@@ -60,30 +55,28 @@ export default function AdminBookingsList({ initialBookings }: { initialBookings
               </p>
               {b.notes && <p className="mt-1 text-sm text-muted italic">&ldquo;{b.notes}&rdquo;</p>}
             </div>
-            <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${STATUS_STYLES[b.status]}`}>
-              {b.status}
-            </span>
+            <StatusBadge status={b.status} />
           </div>
 
           <div className="mt-3 flex gap-2">
-            <button
-              type="button"
+            <Button
+              variant="success"
+              size="xs"
               disabled={updatingId === b._id || b.status === "confirmed"}
               onClick={() => updateStatus(b._id, "confirmed")}
-              className="rounded-lg bg-success px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40"
             >
               Confirm
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="danger"
+              size="xs"
               disabled={updatingId === b._id || b.status === "declined"}
               onClick={() => updateStatus(b._id, "declined")}
-              className="rounded-lg bg-danger px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40"
             >
               Decline
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
       ))}
     </div>
   );

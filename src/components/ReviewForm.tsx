@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import StarRating from "./StarRating";
+import { Button, Card, FormError, Input, Label, Textarea } from "./ui";
 
 export default function ReviewForm() {
   const [name, setName] = useState("");
@@ -36,62 +37,56 @@ export default function ReviewForm() {
 
   if (status === "done") {
     return (
-      <div className="rounded-2xl border border-card-border bg-card p-6 text-center shadow-sm">
+      <Card className="p-6 text-center">
         <p className="font-medium">Thanks for the review!</p>
         <p className="mt-1 text-sm text-muted">
           It&rsquo;ll show up here once we&rsquo;ve approved it.
         </p>
-      </div>
+      </Card>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-card-border bg-card p-6 shadow-sm">
-      <h2 className="mb-4 text-lg font-semibold">Leave a review</h2>
+    <Card className="p-6">
+      <form onSubmit={handleSubmit}>
+        <h2 className="mb-4 text-lg font-semibold">Leave a review</h2>
 
-      <div className="space-y-4">
-        <div>
-          <label className="mb-2 block text-sm font-medium">Your name</label>
-          <input
-            type="text"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Jamie Smith"
-            className="w-full rounded-xl border border-card-border bg-card px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
-          />
+        <div className="space-y-4">
+          <div>
+            <Label>Your name</Label>
+            <Input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Jamie Smith"
+            />
+          </div>
+
+          <div>
+            <Label>Rating</Label>
+            <StarRating value={rating} onChange={setRating} />
+          </div>
+
+          <div>
+            <Label>Comment</Label>
+            <Textarea
+              required
+              rows={3}
+              maxLength={1000}
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="How did it go?"
+            />
+          </div>
+
+          {status === "error" && <FormError>{errorMessage}</FormError>}
+
+          <Button type="submit" disabled={status === "submitting"}>
+            {status === "submitting" ? "Submitting..." : "Submit review"}
+          </Button>
         </div>
-
-        <div>
-          <label className="mb-2 block text-sm font-medium">Rating</label>
-          <StarRating value={rating} onChange={setRating} />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-sm font-medium">Comment</label>
-          <textarea
-            required
-            rows={3}
-            maxLength={1000}
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="How did it go?"
-            className="w-full rounded-xl border border-card-border bg-card px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
-          />
-        </div>
-
-        {status === "error" && (
-          <p className="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">{errorMessage}</p>
-        )}
-
-        <button
-          type="submit"
-          disabled={status === "submitting"}
-          className="rounded-xl bg-gradient-to-r from-primary to-secondary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-60"
-        >
-          {status === "submitting" ? "Submitting..." : "Submit review"}
-        </button>
-      </div>
-    </form>
+      </form>
+    </Card>
   );
 }

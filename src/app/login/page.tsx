@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button, FormError, Input, Label } from "@/components/ui";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -42,45 +43,33 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
-          <label htmlFor="email" className="mb-2 block text-sm font-medium">
-            Email
-          </label>
-          <input
+          <Label htmlFor="email">Email</Label>
+          <Input
             id="email"
             type="email"
             required
             autoFocus
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-card-border bg-card px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="mb-2 block text-sm font-medium">
-            Password
-          </label>
-          <input
+          <Label htmlFor="password">Password</Label>
+          <Input
             id="password"
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl border border-card-border bg-card px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
           />
         </div>
 
-        {error && (
-          <p className="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">{error}</p>
-        )}
+        {error && <FormError>{error}</FormError>}
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-xl bg-gradient-to-r from-primary to-secondary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-60"
-        >
+        <Button type="submit" disabled={submitting} className="w-full">
           {submitting ? "Logging in..." : "Log in"}
-        </button>
+        </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-muted">

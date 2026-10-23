@@ -53,7 +53,7 @@ Small investments that make every later step safer.
 - **Done when:** `npm test` passes, and CLAUDE.md's verification list includes
   `npm test`.
 
-### [ ] 0.2 Shared UI building blocks
+### [x] 0.2 Shared UI building blocks
 
 - The same Tailwind class strings for buttons, inputs, cards and status
   badges are repeated across many files. Create small components in
@@ -370,3 +370,11 @@ Add one line per finished step: date, step, commit, notes.
 - 2026-10-23 — 0.1 Unit test setup: Vitest (`npm test`), 68 tests for
   `validation.ts` and session signing in `auth.ts`. Bumped `@types/node` to
   ^22 (Vitest 5 peer requirement).
+- 2026-10-23 — 0.2 Shared UI building blocks: `src/components/ui/` (`Button`
+  + `buttonClasses`, `Input`/`Select`/`Textarea`/`Label`/`FormError`, `Card`,
+  `StatusBadge`); all pages switched over; `date-fns` removed (unused).
+  Rendered markup diffed before/after on every page (logged out, customer,
+  admin): class lists identical. Only intentional change: the "Submit another
+  request" button now matches the other primary buttons. Browser click-through
+  skipped at the owner's request (Chrome extension not responding); owner will
+  check visually.

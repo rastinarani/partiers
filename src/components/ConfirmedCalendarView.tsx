@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { Booking } from "@/lib/types";
 import MonthCalendar from "./MonthCalendar";
+import { Card } from "./ui";
 
 function formatTime(time: string) {
   return new Date(`2000-01-01T${time}:00`).toLocaleTimeString("en-US", {
@@ -53,13 +54,13 @@ export default function ConfirmedCalendarView({ bookings }: { bookings: Booking[
         ) : (
           <div className="space-y-3">
             {dayBookings.map((b) => (
-              <div key={b._id} className="rounded-2xl border border-card-border bg-card p-4 shadow-sm">
+              <Card key={b._id} className="p-4">
                 <p className="font-medium">{formatTime(b.time)}</p>
                 <p className="text-sm text-muted">
                   {b.parentName} &middot; {b.childName} (age {b.childAge}) &middot;{" "}
                   {b.numberOfChildren} {b.numberOfChildren === 1 ? "child" : "children"}
                 </p>
-              </div>
+              </Card>
             ))}
           </div>
         )}

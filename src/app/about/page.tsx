@@ -4,6 +4,8 @@
 //   <Image src="/photos/nikki.jpg" alt="Nikki Mazloomi" width={160} height={160} className="rounded-full object-cover" />
 // and drop the image file in the `public/photos/` folder.
 
+import { Card } from "@/components/ui";
+
 const team = [
   {
     name: "Nikki Mazloomi",
@@ -30,7 +32,7 @@ export default function AboutPage() {
 
       <div className="mt-10 grid gap-8 sm:grid-cols-2">
         {team.map((person) => (
-          <div key={person.name} className="rounded-2xl border border-card-border bg-card p-6 text-center shadow-sm">
+          <Card key={person.name} className="p-6 text-center">
             {/* Photo placeholder — replace with a real photo, see comment above */}
             <div className="mx-auto mb-4 flex h-28 w-28 items-center justify-center rounded-full bg-primary-soft text-3xl font-semibold text-primary">
               {person.name
@@ -43,18 +45,18 @@ export default function AboutPage() {
             <p className="mt-3 text-xs font-medium uppercase tracking-wide text-primary">
               {person.goodWith}
             </p>
-          </div>
+          </Card>
         ))}
       </div>
 
-      <div className="mt-10 rounded-2xl border border-card-border bg-card p-6 text-sm text-muted">
+      <Card flat className="mt-10 p-6 text-sm text-muted">
         <h3 className="mb-2 font-semibold text-foreground">A few more things</h3>
         <ul className="list-inside list-disc space-y-1">
           <li>We&rsquo;re available on weekends and some weeknights &mdash; just ask!</li>
           <li>Payment is cash or e-transfer, arranged directly with you.</li>
           <li>We&rsquo;re happy to bring games and activities, or use what you have at home.</li>
         </ul>
-      </div>
+      </Card>
     </div>
   );
 }

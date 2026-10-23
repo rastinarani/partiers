@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button, FormError, Input, Label } from "@/components/ui";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -44,60 +45,45 @@ export default function SignupPage() {
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
-          <label htmlFor="name" className="mb-2 block text-sm font-medium">
-            Name
-          </label>
-          <input
+          <Label htmlFor="name">Name</Label>
+          <Input
             id="name"
             type="text"
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-xl border border-card-border bg-card px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
           />
         </div>
 
         <div>
-          <label htmlFor="email" className="mb-2 block text-sm font-medium">
-            Email
-          </label>
-          <input
+          <Label htmlFor="email">Email</Label>
+          <Input
             id="email"
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-card-border bg-card px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="mb-2 block text-sm font-medium">
-            Password
-          </label>
-          <input
+          <Label htmlFor="password">Password</Label>
+          <Input
             id="password"
             type="password"
             required
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl border border-card-border bg-card px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
           />
           <p className="mt-1.5 text-xs text-muted">At least 8 characters.</p>
         </div>
 
-        {error && (
-          <p className="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">{error}</p>
-        )}
+        {error && <FormError>{error}</FormError>}
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-xl bg-gradient-to-r from-primary to-secondary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-60"
-        >
+        <Button type="submit" disabled={submitting} className="w-full">
           {submitting ? "Creating account..." : "Sign up"}
-        </button>
+        </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-muted">

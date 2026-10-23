@@ -8,6 +8,7 @@ import { getAllReviews } from "@/lib/reviews";
 import AdminBookingsList from "@/components/AdminBookingsList";
 import AdminReviewsList from "@/components/AdminReviewsList";
 import LogoutButton from "@/components/LogoutButton";
+import { buttonClasses } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -42,10 +43,7 @@ export default async function AdminDashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Link
-            href="/admin/calendar"
-            className="rounded-lg border border-card-border px-3 py-1.5 text-sm font-medium hover:bg-primary-soft hover:text-primary"
-          >
+          <Link href="/admin/calendar" className={buttonClasses({ variant: "secondary", size: "sm" })}>
             Confirmed bookings calendar
           </Link>
           <LogoutButton />

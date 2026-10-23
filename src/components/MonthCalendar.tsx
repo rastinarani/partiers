@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Card } from "./ui";
 
 const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -57,7 +58,7 @@ export default function MonthCalendar({
   const monthLabel = viewDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
   return (
-    <div className="rounded-2xl border border-card-border bg-card p-4 shadow-sm">
+    <Card className="p-4">
       <div className="mb-3 flex items-center justify-between">
         <button
           type="button"
@@ -123,6 +124,6 @@ export default function MonthCalendar({
           );
         })}
       </div>
-    </div>
+    </Card>
   );
 }

@@ -1,6 +1,7 @@
 import { getApprovedReviews } from "@/lib/reviews";
 import ReviewForm from "@/components/ReviewForm";
 import StarRating from "@/components/StarRating";
+import { Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -14,19 +15,19 @@ export default async function ReviewsPage() {
 
       <div className="mt-8 space-y-4">
         {reviews.length === 0 && (
-          <p className="rounded-2xl border border-card-border bg-card p-6 text-center text-muted">
+          <Card flat className="p-6 text-center text-muted">
             No reviews yet &mdash; be the first!
-          </p>
+          </Card>
         )}
 
         {reviews.map((review) => (
-          <div key={review._id} className="rounded-2xl border border-card-border bg-card p-5 shadow-sm">
+          <Card key={review._id} className="p-5">
             <div className="flex items-center justify-between">
               <p className="font-semibold">{review.name}</p>
               <StarRating value={review.rating} readOnly size="sm" />
             </div>
             <p className="mt-2 text-sm text-muted">{review.comment}</p>
-          </div>
+          </Card>
         ))}
       </div>
 

@@ -3,12 +3,7 @@
 import { useState } from "react";
 import type { Review, ReviewStatus } from "@/lib/types";
 import StarRating from "./StarRating";
-
-const STATUS_STYLES: Record<ReviewStatus, string> = {
-  pending: "bg-accent/15 text-accent",
-  approved: "bg-success-soft text-success",
-  rejected: "bg-danger-soft text-danger",
-};
+import { Button, Card, StatusBadge } from "./ui";
 
 export default function AdminReviewsList({ initialReviews }: { initialReviews: Review[] }) {
   const [reviews, setReviews] = useState(initialReviews);
@@ -37,7 +32,7 @@ export default function AdminReviewsList({ initialReviews }: { initialReviews: R
   return (
     <div className="space-y-3">
       {reviews.map((r) => (
-        <div key={r._id} className="rounded-2xl border border-card-border bg-card p-4 shadow-sm">
+        <Card key={r._id} className="p-4">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
               <div className="flex items-center gap-2">
@@ -46,30 +41,28 @@ export default function AdminReviewsList({ initialReviews }: { initialReviews: R
               </div>
               <p className="mt-1 text-sm text-muted">{r.comment}</p>
             </div>
-            <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${STATUS_STYLES[r.status]}`}>
-              {r.status}
-            </span>
+            <StatusBadge status={r.status} />
           </div>
 
           <div className="mt-3 flex gap-2">
-            <button
-              type="button"
+            <Button
+              variant="success"
+              size="xs"
               disabled={updatingId === r._id || r.status === "approved"}
               onClick={() => updateStatus(r._id, "approved")}
-              className="rounded-lg bg-success px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40"
             >
               Approve
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="danger"
+              size="xs"
               disabled={updatingId === r._id || r.status === "rejected"}
               onClick={() => updateStatus(r._id, "rejected")}
-              className="rounded-lg bg-danger px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-40"
             >
               Reject
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
       ))}
     </div>
   );
