@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "create-admin": "node scripts/create-admin.mjs"
+    "typecheck": "next typegen && tsc --noEmit",
+    "create-admin": "node scripts/create-admin.mjs",
+    "check-db": "node scripts/check-db.mjs"
   },
   "dependencies": {
     "date-fns": "^4.4.0",
