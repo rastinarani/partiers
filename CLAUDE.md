@@ -75,11 +75,46 @@ Local MongoDB runs as a Homebrew service:
   modern, not babyish.
 - Code comments only where the *why* isn't obvious.
 
+## Talking to the owner
+
+The owner is learning to build with Claude and is new to coding. Everything
+you say to them should be easy to follow with no programming background.
+
+- Use plain, everyday language. Describe changes by what someone sees or does
+  on the website ("parents can now see their bookings on their account page"),
+  not by files, functions or libraries.
+- If a technical word is unavoidable, explain it in a few words the first time
+  ("tests — small automatic checks that the booking form still rejects bad
+  input").
+- Keep it short. No file lists, commit hashes, package versions or command
+  output unless the owner asks for details.
+- If a step changes nothing visible on the site (tests, cleanup, security), say
+  so plainly and say in one sentence why it still matters.
+
+**Before starting a step:** say in 1–3 plain sentences what the step will do
+and why it's useful, then ask "Should I go ahead?" and wait for a yes.
+
+**After finishing a step,** reply in this shape and then wait:
+
+- **What changed:** 1–3 plain sentences.
+- **Try it:** exact steps to see it, e.g. "With `npm run dev` running in
+  another Terminal tab, open http://localhost:3000/account and click …". Or
+  "Nothing to see on the site this time."
+- **Anything you need to decide:** only if there is something; otherwise leave
+  this out.
+- **Next up:** the next roadmap step in plain words, then ask "Want me to
+  continue?"
+
+Technical details (files touched, test counts, notes for later) go in the
+commit message and the ROADMAP progress log, not in the message to the owner.
+If the owner asks "what exactly changed?", then give the details.
+
 ## How to work
 
 1. Pick the **first unchecked step** in `ROADMAP.md` (or the one the owner
    names). Do only that step.
-2. Briefly say what you'll change, then build it.
+2. Explain it in plain words and ask for a go-ahead (see "Talking to the
+   owner"), then build it.
 3. Verify: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`
    all pass, then run the dev server and try the feature in a browser — the
    main path and at least one edge case. If you can't test in a browser, say so.
@@ -87,4 +122,4 @@ Local MongoDB runs as a Homebrew service:
 5. Tick the step's checkbox in `ROADMAP.md` and add a line to its
    "Progress log".
 6. Commit with a clear message. Don't push unless the owner asks.
-7. Stop and summarize what changed and how to try it.
+7. Report back in the "After finishing a step" format, then wait.
