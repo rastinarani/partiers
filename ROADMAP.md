@@ -69,6 +69,11 @@ Small investments that make every later step safer.
 
 ## Phase 1 — Customer accounts (the core)
 
+**How accounts work (owner's decision):** keep it simple. An email address
+acts as the username, plus a password. No verification emails, no Google
+sign-in, no checking that the email is real. Logging in again with the same
+email and password shows that person's past and upcoming bookings.
+
 ### [ ] 1.1 Link bookings to accounts
 
 - When a logged-in customer books, store their `userId` on the booking
@@ -299,7 +304,8 @@ settings only.
 ### [ ] 6.2 Password reset
 
 - "Forgot password?" link: single-use, short-lived reset link by email; the
-  reset token is stored hashed.
+  reset token is stored hashed. (This only helps people who signed up with a
+  real email they can open, since emails aren't verified; see Phase 1.)
 - **Done when:** a used or expired link is rejected.
 
 ---
