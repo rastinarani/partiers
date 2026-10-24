@@ -150,3 +150,20 @@ export function safeNextPath(value: unknown): string | null {
   if (/[\\\s\x00-\x1f]/.test(value)) return null;
   return value;
 }
+
+export function isDateString(value: unknown): value is string {
+  return typeof value === "string" && DATE_RE.test(value);
+}
+
+/** Admin: block a date, with an optional private note. */
+export function validateBlockDateInput(body: unknown) {
+  if (typeof body !== "object" || body === null) return null;
+  const b = body as Record<string, unknown>;
+
+  if (!isDateString(b.date)) return null;
+  const reasonRaw = b.reason === undefined || b.reason === null ? "" : b.reason;
+  const reason = cleanString(reasonRaw, 100) ?? (reasonRaw === "" ? "" : null);
+  if (reason === null) return null;
+
+  return { date: b.date, reason };
+}

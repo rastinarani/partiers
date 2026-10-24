@@ -1,14 +1,22 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { BlockedDate } from "@/lib/blockedDates";
 import { todayString } from "@/lib/bookingDates";
 import { formatTimeRange } from "@/lib/schedule";
 import type { Booking } from "@/lib/types";
+import BlockDatePanel from "./BlockDatePanel";
 import EventDetails from "./EventDetails";
 import MonthCalendar from "./MonthCalendar";
 import { Card } from "./ui";
 
-export default function ConfirmedCalendarView({ bookings }: { bookings: Booking[] }) {
+export default function ConfirmedCalendarView({
+  bookings,
+  blockedDates,
+}: {
+  bookings: Booking[];
+  blockedDates: BlockedDate[];
+}) {
   const today = todayString();
   const [selectedDate, setSelectedDate] = useState(today);
 
@@ -23,6 +31,12 @@ export default function ConfirmedCalendarView({ bookings }: { bookings: Booking[
     return map;
   }, [bookings]);
 
+  const blockedByDate = useMemo(
+    () => new Map(blockedDates.map((b) => [b.date, b.reason])),
+    [blockedDates]
+  );
+  const unavailableDates = useMemo(() => new Set(blockedByDate.keys()), [blockedByDate]);
+
   const dayBookings = (bookingsByDate.get(selectedDate) ?? []).sort((a, b) =>
     a.time.localeCompare(b.time)
   );
@@ -34,6 +48,8 @@ export default function ConfirmedCalendarView({ bookings }: { bookings: Booking[
         onSelectDate={setSelectedDate}
         markedDates={markedDates}
         disablePast={false}
+        unavailableDates={unavailableDates}
+        allowSelectingUnavailable
       />
 
       <div>
@@ -44,6 +60,13 @@ export default function ConfirmedCalendarView({ bookings }: { bookings: Booking[
             day: "numeric",
           })}
         </h2>
+
+        <BlockDatePanel
+          key={selectedDate}
+          date={selectedDate}
+          blockedReason={blockedByDate.get(selectedDate) ?? null}
+          isPast={selectedDate < today}
+        />
 
         {dayBookings.length === 0 ? (
           <p className="text-sm text-muted">No confirmed bookings this day.</p>

@@ -12,6 +12,8 @@ import {
   getTakenRanges,
   updateBookingStatus,
 } from "@/lib/bookings";
+import { todayString } from "@/lib/bookingDates";
+import { isDateBlocked } from "@/lib/blockedDates";
 import { findOverlap, formatTimeRange, toRange } from "@/lib/schedule";
 import { getUserById } from "@/lib/users";
 import { validateBookingInput } from "@/lib/validation";
@@ -28,6 +30,16 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "Please fill in all required fields correctly." },
       { status: 400 }
+    );
+  }
+
+  if (input.date < todayString()) {
+    return NextResponse.json({ error: "Please pick a date in the future." }, { status: 400 });
+  }
+  if (await isDateBlocked(input.date)) {
+    return NextResponse.json(
+      { error: "Sorry, we're not available that day. Please pick another date." },
+      { status: 409 }
     );
   }
 

@@ -2,12 +2,17 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import BookingForm from "@/components/BookingForm";
 import { USER_COOKIE_NAME, verifyUserSessionToken } from "@/lib/auth";
+import { todayString } from "@/lib/bookingDates";
+import { getBlockedDates } from "@/lib/blockedDates";
 import { getUserById } from "@/lib/users";
 
 export default async function Home() {
   const cookieStore = await cookies();
   const userId = verifyUserSessionToken(cookieStore.get(USER_COOKIE_NAME)?.value);
-  const user = userId ? await getUserById(userId) : null;
+  const [user, blocked] = await Promise.all([
+    userId ? getUserById(userId) : null,
+    getBlockedDates(todayString()),
+  ]);
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
@@ -48,6 +53,7 @@ export default async function Home() {
       <BookingForm
         defaultParentName={user?.name ?? ""} defaultContact={user?.email ?? ""}
         loggedIn={Boolean(user)}
+        blockedDates={blocked.map((b) => b.date)}
       />
     </div>
   );

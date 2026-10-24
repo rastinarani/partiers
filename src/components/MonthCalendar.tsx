@@ -23,6 +23,10 @@ interface MonthCalendarProps {
   markedDates?: Set<string>;
   /** Disable dates before today. Defaults to true. */
   disablePast?: boolean;
+  /** Dates shown crossed out, e.g. blocked days. */
+  unavailableDates?: Set<string>;
+  /** Whether crossed-out dates can still be clicked (admins can). Defaults to false. */
+  allowSelectingUnavailable?: boolean;
 }
 
 export default function MonthCalendar({
@@ -30,6 +34,8 @@ export default function MonthCalendar({
   onSelectDate,
   markedDates,
   disablePast = true,
+  unavailableDates,
+  allowSelectingUnavailable = false,
 }: MonthCalendarProps) {
   const initial = selectedDate ? new Date(`${selectedDate}T00:00:00`) : new Date();
   const [viewDate, setViewDate] = useState(new Date(initial.getFullYear(), initial.getMonth(), 1));
@@ -94,7 +100,8 @@ export default function MonthCalendar({
           const isSelected = key === selectedDate;
           const isPast = disablePast && startOfDay(date) < today;
           const isMarked = markedDates?.has(key);
-          const disabled = isPast || !inMonth;
+          const isUnavailable = inMonth && Boolean(unavailableDates?.has(key));
+          const disabled = isPast || !inMonth || (isUnavailable && !allowSelectingUnavailable);
 
           return (
             <button
@@ -102,10 +109,13 @@ export default function MonthCalendar({
               type="button"
               disabled={disabled}
               onClick={() => onSelectDate(key)}
+              aria-label={isUnavailable ? `${date.toDateString()} (unavailable)` : undefined}
               className={[
                 "relative aspect-square rounded-lg text-sm transition-colors",
                 !inMonth ? "text-muted/30" : "",
                 isPast && inMonth ? "text-muted/40 cursor-not-allowed" : "",
+                isUnavailable && !isSelected ? "bg-danger-soft/60 text-muted line-through" : "",
+                isUnavailable && disabled ? "cursor-not-allowed" : "",
                 !disabled && !isSelected ? "hover:bg-primary-soft" : "",
                 isSelected ? "bg-primary text-white font-semibold" : "",
                 isToday && !isSelected ? "ring-1 ring-primary/50" : "",

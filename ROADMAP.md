@@ -29,9 +29,8 @@ owner's go-ahead) · 🔑 needs the owner to create an account or provide a key
   confirmed-bookings calendar.
 - Vibrant violet/rose/amber theme, mobile-friendly layout.
 
-**Known gaps:** customers can't see their bookings; nothing stops two
-bookings at the same time; no animations or loading states; no emails; no
-rate limiting; no automated tests.
+**Known gaps:** no animations or loading states; no emails; no rate
+limiting; no end-to-end tests. (Phases 0–2 are done: see the progress log.)
 
 **Live site:** a Vercel project exists at `partiers.vercel.app`, but its
 database connection string is wrong, so pages that use the database return
@@ -150,7 +149,7 @@ email and password shows that person's past and upcoming bookings.
 - **Done when:** the reference code is saved on the booking and visible to
   both the customer and the admin.
 
-### [ ] 2.4 Blocked dates
+### [x] 2.4 Blocked dates
 
 - Admins can mark dates as unavailable (vacations, school events) from the
   admin calendar. Those dates appear disabled on the public calendar, and the
@@ -458,3 +457,14 @@ Add one line per finished step: date, step, commit, notes.
   "What happens next". Code shown in My bookings, the admin list and the
   admin calendar. Verified via curl: code stored and shown, duplicate code
   rejected by the index, older bookings without a code unaffected.
+- 2026-10-23 — 2.4 Blocked dates: `blockedDates` collection (unique `date`,
+  private `reason`) in `src/lib/blockedDates.ts`. Admin
+  `POST`/`DELETE /api/admin/blocked-dates` (session checked; new
+  `validateBlockDateInput`/`isDateString`, +3 tests, 156 total). Admin
+  calendar (renamed "Calendar") has a block/unblock panel; blocked days are
+  crossed out on both calendars. Public calendar gets future blocked dates
+  only (no reasons); `/api/availability` also returns `blocked`.
+  `POST /api/bookings` now rejects blocked dates (409) and past dates (400).
+  Verified via curl: auth, bad input, idempotent block, reason not leaked
+  to the home page, unblock re-enables booking. Browser click-through for
+  all of Phase 1.5–2 skipped (Chrome extension not responding).

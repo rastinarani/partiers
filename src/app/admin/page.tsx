@@ -44,7 +44,7 @@ export default async function AdminDashboardPage() {
         </div>
         <div className="flex items-center gap-3">
           <Link href="/admin/calendar" className={buttonClasses({ variant: "secondary", size: "sm" })}>
-            Confirmed bookings calendar
+            Calendar &amp; blocked dates
           </Link>
           <LogoutButton />
         </div>

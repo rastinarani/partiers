@@ -27,10 +27,12 @@ export default function BookingForm({
   defaultParentName = "",
   defaultContact = "",
   loggedIn = false,
+  blockedDates = [],
 }: {
   defaultParentName?: string;
   defaultContact?: string;
   loggedIn?: boolean;
+  blockedDates?: string[];
 }) {
   const [date, setDate] = useState<string>("");
   const [time, setTime] = useState<string>("");
@@ -50,9 +52,12 @@ export default function BookingForm({
   const [submitted, setSubmitted] = useState<BookingSummary | null>(null);
 
   // Times already taken by confirmed bookings, for the selected date.
-  const [availability, setAvailability] = useState<{ date: string; taken: TimeRange[] } | null>(
-    null
-  );
+  const [availability, setAvailability] = useState<{
+    date: string;
+    taken: TimeRange[];
+    blocked: boolean;
+  } | null>(null);
+  const [unavailableDates] = useState(() => new Set(blockedDates));
   const [availabilityVersion, setAvailabilityVersion] = useState(0);
 
   useEffect(() => {
@@ -60,13 +65,15 @@ export default function BookingForm({
     let ignore = false;
     fetch(`/api/availability?date=${date}`)
       .then((res) => (res.ok ? res.json() : { taken: [] }))
-      .then((data: { taken?: TimeRange[] }) => {
-        if (!ignore) setAvailability({ date, taken: data.taken ?? [] });
+      .then((data: { taken?: TimeRange[]; blocked?: boolean }) => {
+        if (!ignore) {
+          setAvailability({ date, taken: data.taken ?? [], blocked: Boolean(data.blocked) });
+        }
       })
       .catch(() => {
         // The server re-checks on submit, so a failed lookup just means
         // nothing is greyed out.
-        if (!ignore) setAvailability({ date, taken: [] });
+        if (!ignore) setAvailability({ date, taken: [], blocked: false });
       });
     return () => {
       ignore = true;
@@ -74,6 +81,8 @@ export default function BookingForm({
   }, [date, availabilityVersion]);
 
   const taken = availability?.date === date ? availability.taken : [];
+  // Blocked after the page loaded (the calendar only knows about earlier blocks).
+  const dateBlocked = availability?.date === date && availability.blocked;
 
   function isSlotAvailable(slot: string) {
     return (
@@ -90,6 +99,11 @@ export default function BookingForm({
     if (!date || !time) {
       setStatus("error");
       setErrorMessage("Please pick a date and a time.");
+      return;
+    }
+    if (dateBlocked) {
+      setStatus("error");
+      setErrorMessage("Sorry, we're not available that day. Please pick another date.");
       return;
     }
     if (selectedTimeUnavailable) {
@@ -176,7 +190,16 @@ export default function BookingForm({
       <div className="grid gap-6 md:grid-cols-2">
         <div>
           <Label>Pick a date</Label>
-          <MonthCalendar selectedDate={date} onSelectDate={setDate} />
+          <MonthCalendar
+            selectedDate={date}
+            onSelectDate={setDate}
+            unavailableDates={unavailableDates}
+          />
+          {dateBlocked && (
+            <p className="mt-2 text-sm font-medium text-danger">
+              Sorry, we&rsquo;re not available that day. Please pick another date.
+            </p>
+          )}
         </div>
 
         <div className="space-y-4">

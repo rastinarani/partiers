@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   cleanString,
+  isDateString,
   safeNextPath,
+  validateBlockDateInput,
   validateBookingInput,
   validateChangePasswordInput,
   validateLoginInput,
@@ -291,5 +293,32 @@ describe("safeNextPath", () => {
   it("rejects non-strings", () => {
     expect(safeNextPath(["/account"])).toBeNull();
     expect(safeNextPath(undefined)).toBeNull();
+  });
+});
+
+describe("validateBlockDateInput", () => {
+  it("accepts a date with or without a reason", () => {
+    expect(validateBlockDateInput({ date: "2026-12-24", reason: " Holidays " })).toEqual({
+      date: "2026-12-24",
+      reason: "Holidays",
+    });
+    expect(validateBlockDateInput({ date: "2026-12-24" })).toEqual({
+      date: "2026-12-24",
+      reason: "",
+    });
+  });
+
+  it("rejects bad dates and reasons", () => {
+    expect(validateBlockDateInput({ date: "24/12/2026" })).toBeNull();
+    expect(validateBlockDateInput({ date: { $gt: "" } })).toBeNull();
+    expect(validateBlockDateInput({ date: "2026-12-24", reason: "a".repeat(101) })).toBeNull();
+    expect(validateBlockDateInput({ date: "2026-12-24", reason: 5 })).toBeNull();
+    expect(validateBlockDateInput(null)).toBeNull();
+  });
+
+  it("isDateString only accepts YYYY-MM-DD strings", () => {
+    expect(isDateString("2026-12-24")).toBe(true);
+    expect(isDateString("2026-12-24T00:00")).toBe(false);
+    expect(isDateString(20261224)).toBe(false);
   });
 });
