@@ -110,7 +110,7 @@ email and password shows that person's past and upcoming bookings.
 - **Done when:** after changing the password, the old one no longer logs in
   and the new one does.
 
-### [ ] 1.5 Smooth login flow
+### [x] 1.5 Smooth login flow
 
 - If a logged-out visitor clicks "Log in" from the booking page, send them
   back to the booking page afterwards (a safe, same-site `?next=` redirect;
@@ -421,3 +421,12 @@ Add one line per finished step: date, step, commit, notes.
   password stops working and new one logs in, other accounts unaffected.
   Note: existing sessions stay logged in after a password change; that's
   7.3. Browser click-through skipped (Chrome extension not responding).
+- 2026-10-23 — 1.5 Smooth login flow: `/login` and `/signup` pages are now
+  server components that read `?next=` through `safeNextPath` (same-site
+  "/path" only; rejects `//`, backslashes, whitespace, absolute URLs; +14
+  tests, 98 total) and pass it to `LoginForm`/`SignupForm` in
+  `src/components/auth/`. The nav "Log in" link (`LoginLink`) and the
+  proxy/account redirects add `next`. Guests see a "Log in or create an
+  account" hint above the booking form. Verified rendered links and
+  redirects via curl; the client-side push after login wasn't clicked
+  through (Chrome extension not responding).

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   cleanString,
+  safeNextPath,
   validateBookingInput,
   validateChangePasswordInput,
   validateLoginInput,
@@ -206,5 +207,31 @@ describe("validateChangePasswordInput", () => {
     expect(validateChangePasswordInput({ ...valid, currentPassword: "" })).toBeNull();
     expect(validateChangePasswordInput({ ...valid, currentPassword: { $ne: "" } })).toBeNull();
     expect(validateChangePasswordInput({ newPassword: valid.newPassword })).toBeNull();
+  });
+});
+
+describe("safeNextPath", () => {
+  it.each(["/", "/account", "/reviews?x=1#top"])("accepts %j", (path) => {
+    expect(safeNextPath(path)).toBe(path);
+  });
+
+  it.each([
+    "https://evil.com",
+    "//evil.com",
+    "/\\evil.com",
+    "\\evil.com",
+    "javascript:alert(1)",
+    "account",
+    "/ evil",
+    "/\tevil",
+    "",
+    "/" + "a".repeat(200),
+  ])("rejects %j", (path) => {
+    expect(safeNextPath(path)).toBeNull();
+  });
+
+  it("rejects non-strings", () => {
+    expect(safeNextPath(["/account"])).toBeNull();
+    expect(safeNextPath(undefined)).toBeNull();
   });
 });

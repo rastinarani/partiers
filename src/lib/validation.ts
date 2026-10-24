@@ -113,3 +113,16 @@ export function validateChangePasswordInput(body: unknown) {
 
   return { currentPassword, newPassword };
 }
+
+/**
+ * Where to send someone after login/signup. Only same-site paths are
+ * allowed: "//evil.com" and "/\evil.com" are treated by browsers as other
+ * sites, so anything that isn't a plain "/path" falls back to null.
+ */
+export function safeNextPath(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  if (value.length === 0 || value.length > 200) return null;
+  if (!value.startsWith("/") || value.startsWith("//")) return null;
+  if (/[\\\s\x00-\x1f]/.test(value)) return null;
+  return value;
+}

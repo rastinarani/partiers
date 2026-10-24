@@ -27,7 +27,9 @@ export function proxy(request: NextRequest) {
   if (pathname.startsWith("/account")) {
     const token = request.cookies.get(USER_COOKIE_NAME)?.value;
     if (!verifyUserSessionToken(token)) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("next", pathname);
+      return NextResponse.redirect(loginUrl);
     }
     return NextResponse.next();
   }

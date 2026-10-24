@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { USER_COOKIE_NAME, verifyUserSessionToken } from "@/lib/auth";
 import { getUserById } from "@/lib/users";
+import LoginLink from "./LoginLink";
 
 const links = [
   { href: "/", label: "Book Us" },
@@ -40,12 +41,7 @@ export default async function NavBar() {
               Hi, {user.name.split(" ")[0]}
             </Link>
           ) : (
-            <Link
-              href="/login"
-              className="shrink-0 rounded-full bg-primary-soft px-2.5 py-1.5 text-primary hover:opacity-80 sm:px-3"
-            >
-              Log in
-            </Link>
+            <LoginLink className="shrink-0 rounded-full bg-primary-soft px-2.5 py-1.5 text-primary hover:opacity-80 sm:px-3" />
           )}
         </nav>
       </div>

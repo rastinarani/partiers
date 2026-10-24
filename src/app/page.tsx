@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cookies } from "next/headers";
 import BookingForm from "@/components/BookingForm";
 import { USER_COOKIE_NAME, verifyUserSessionToken } from "@/lib/auth";
@@ -30,6 +31,19 @@ export default async function Home() {
           </p>
         </div>
       </div>
+
+      {!user && (
+        <p className="mb-6 rounded-2xl bg-secondary-soft px-5 py-3 text-center text-sm">
+          <Link href="/login?next=/" className="font-semibold text-primary hover:underline">
+            Log in
+          </Link>{" "}
+          or{" "}
+          <Link href="/signup?next=/" className="font-semibold text-primary hover:underline">
+            create an account
+          </Link>{" "}
+          to keep track of your bookings. You can also book as a guest.
+        </p>
+      )}
 
       <BookingForm defaultParentName={user?.name ?? ""} defaultContact={user?.email ?? ""} />
     </div>

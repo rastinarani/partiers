@@ -18,7 +18,7 @@ export default async function AccountPage() {
   const user = userId ? await getUserById(userId) : null;
 
   if (!user) {
-    redirect("/login");
+    redirect("/login?next=/account");
   }
 
   // Query by the id from the verified session, never by anything the browser sends.
