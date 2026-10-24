@@ -11,6 +11,7 @@ export interface Booking {
   time: string; // "HH:MM", 24h
   notes: string;
   status: BookingStatus;
+  userId?: string; // set when booked while logged in; guests have none
   createdAt: string; // ISO string
   updatedAt: string; // ISO string
 }

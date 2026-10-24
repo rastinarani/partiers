@@ -1,6 +1,13 @@
+import { cookies } from "next/headers";
 import BookingForm from "@/components/BookingForm";
+import { USER_COOKIE_NAME, verifyUserSessionToken } from "@/lib/auth";
+import { getUserById } from "@/lib/users";
 
-export default function Home() {
+export default async function Home() {
+  const cookieStore = await cookies();
+  const userId = verifyUserSessionToken(cookieStore.get(USER_COOKIE_NAME)?.value);
+  const user = userId ? await getUserById(userId) : null;
+
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
       <div className="relative mb-10 overflow-hidden rounded-3xl px-6 py-14 text-center">
@@ -24,7 +31,7 @@ export default function Home() {
         </div>
       </div>
 
-      <BookingForm />
+      <BookingForm defaultParentName={user?.name ?? ""} defaultContact={user?.email ?? ""} />
     </div>
   );
 }

@@ -16,16 +16,18 @@ function toBooking(doc: Document): Booking {
     time: doc.time,
     notes: doc.notes ?? "",
     status: doc.status,
+    ...(doc.userId ? { userId: doc.userId } : {}),
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   };
 }
 
-export async function createBooking(input: NewBooking): Promise<string> {
+export async function createBooking(input: NewBooking, userId?: string): Promise<string> {
   const db = await getDb();
   const now = new Date().toISOString();
   const result = await db.collection(COLLECTION).insertOne({
     ...input,
+    ...(userId ? { userId } : {}),
     status: "pending" satisfies BookingStatus,
     createdAt: now,
     updatedAt: now,

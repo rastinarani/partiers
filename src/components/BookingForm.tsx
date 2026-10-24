@@ -16,11 +16,17 @@ const TIME_SLOTS = Array.from({ length: 27 }, (_, i) => {
   return { value, label };
 });
 
-export default function BookingForm() {
+export default function BookingForm({
+  defaultParentName = "",
+  defaultContact = "",
+}: {
+  defaultParentName?: string;
+  defaultContact?: string;
+}) {
   const [date, setDate] = useState<string>("");
   const [time, setTime] = useState<string>("");
-  const [parentName, setParentName] = useState("");
-  const [contact, setContact] = useState("");
+  const [parentName, setParentName] = useState(defaultParentName);
+  const [contact, setContact] = useState(defaultContact);
   const [childName, setChildName] = useState("");
   const [childAge, setChildAge] = useState("");
   const [numberOfChildren, setNumberOfChildren] = useState("1");
@@ -85,8 +91,8 @@ export default function BookingForm() {
             setStatus("idle");
             setDate("");
             setTime("");
-            setParentName("");
-            setContact("");
+            setParentName(defaultParentName);
+            setContact(defaultContact);
             setChildName("");
             setChildAge("");
             setNumberOfChildren("1");

@@ -74,7 +74,7 @@ acts as the username, plus a password. No verification emails, no Google
 sign-in, no checking that the email is real. Logging in again with the same
 email and password shows that person's past and upcoming bookings.
 
-### [ ] 1.1 Link bookings to accounts
+### [x] 1.1 Link bookings to accounts
 
 - When a logged-in customer books, store their `userId` on the booking
   (optional field; guest bookings stay allowed).
@@ -384,3 +384,10 @@ Add one line per finished step: date, step, commit, notes.
   request" button now matches the other primary buttons. Browser click-through
   skipped at the owner's request (Chrome extension not responding); owner will
   check visually.
+- 2026-10-23 — 1.1 Link bookings to accounts: `POST /api/bookings` reads the
+  customer session cookie and stores `userId` (string) when it maps to a real
+  user; never taken from the request body. Home page prefills name and
+  contact (email) for logged-in customers. Verified via curl: guest booking
+  has no `userId`, logged-in booking has it, a forged body `userId` and a
+  badly signed cookie are ignored, prefill only appears when logged in.
+  Browser click-through skipped (Chrome extension not responding).
