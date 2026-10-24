@@ -1,0 +1,59 @@
+import { describe, expect, it } from "vitest";
+import { splitUpcomingAndPast, todayString } from "./bookingDates";
+import type { Booking } from "./types";
+
+function booking(date: string, time: string): Booking {
+  return {
+    _id: `${date}-${time}`,
+    parentName: "Jamie",
+    contact: "jamie@example.com",
+    childName: "Alex",
+    childAge: 6,
+    numberOfChildren: 1,
+    date,
+    time,
+    notes: "",
+    status: "pending",
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  };
+}
+
+describe("todayString", () => {
+  it("formats a local date as YYYY-MM-DD", () => {
+    expect(todayString(new Date(2026, 0, 5, 23, 30))).toBe("2026-01-05");
+  });
+});
+
+describe("splitUpcomingAndPast", () => {
+  const today = "2026-10-23";
+
+  it("counts today as upcoming", () => {
+    const { upcoming, past } = splitUpcomingAndPast([booking(today, "09:00")], today);
+    expect(upcoming).toHaveLength(1);
+    expect(past).toHaveLength(0);
+  });
+
+  it("sorts upcoming soonest first and past most recent first", () => {
+    const { upcoming, past } = splitUpcomingAndPast(
+      [
+        booking("2026-11-02", "10:00"),
+        booking("2026-09-01", "10:00"),
+        booking("2026-10-30", "15:00"),
+        booking("2026-10-30", "09:30"),
+        booking("2026-10-22", "18:00"),
+      ],
+      today
+    );
+    expect(upcoming.map((b) => b._id)).toEqual([
+      "2026-10-30-09:30",
+      "2026-10-30-15:00",
+      "2026-11-02-10:00",
+    ]);
+    expect(past.map((b) => b._id)).toEqual(["2026-10-22-18:00", "2026-09-01-10:00"]);
+  });
+
+  it("handles no bookings", () => {
+    expect(splitUpcomingAndPast([], today)).toEqual({ upcoming: [], past: [] });
+  });
+});

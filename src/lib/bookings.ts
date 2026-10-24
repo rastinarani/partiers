@@ -74,3 +74,13 @@ export async function updateBookingStatus(
     );
   return result.matchedCount > 0;
 }
+
+export async function getBookingsForUser(userId: string): Promise<Booking[]> {
+  const db = await getDb();
+  const docs = await db
+    .collection(COLLECTION)
+    .find({ userId })
+    .sort({ date: 1, time: 1 })
+    .toArray();
+  return docs.map(toBooking);
+}

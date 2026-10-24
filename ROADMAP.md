@@ -83,7 +83,7 @@ email and password shows that person's past and upcoming bookings.
 - **Done when:** a booking made while logged in has `userId` in MongoDB, and a
   guest booking still works.
 
-### [ ] 1.2 "My bookings" on the account page
+### [x] 1.2 "My bookings" on the account page
 
 - On `/account`, list the customer's bookings: date, time, child, number of
   children, and a status badge (pending / confirmed / declined).
@@ -391,3 +391,11 @@ Add one line per finished step: date, step, commit, notes.
   has no `userId`, logged-in booking has it, a forged body `userId` and a
   badly signed cookie are ignored, prefill only appears when logged in.
   Browser click-through skipped (Chrome extension not responding).
+- 2026-10-23 — 1.2 My bookings: `/account` lists the customer's bookings
+  (`getBookingsForUser`, queried by the session's user id) split into
+  Upcoming (today or later, soonest first) and Past (most recent first) via
+  `src/lib/bookingDates.ts` (+4 tests, 72 total). New `MyBookings` component
+  with empty states and "Book now" links. Verified via curl with two
+  accounts: each sees only its own bookings; empty state and logged-out
+  redirect work. Browser click-through skipped (Chrome extension not
+  responding).
