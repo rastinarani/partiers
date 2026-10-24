@@ -93,7 +93,7 @@ email and password shows that person's past and upcoming bookings.
   server).
 - **Done when:** two test accounts each see only their own bookings.
 
-### [ ] 1.3 Customers can cancel
+### [x] 1.3 Customers can cancel
 
 - Add a `cancelled` status. Customers can cancel their own pending or
   confirmed upcoming bookings (with an "Are you sure?" step).
@@ -399,3 +399,14 @@ Add one line per finished step: date, step, commit, notes.
   accounts: each sees only its own bookings; empty state and logged-out
   redirect work. Browser click-through skipped (Chrome extension not
   responding).
+- 2026-10-23 — 1.3 Customers can cancel: new `cancelled` status (grey
+  badge). `POST /api/account/bookings/[id]/cancel` checks the user session;
+  `cancelBookingForUser` puts owner, pending/confirmed and date >= today in
+  the update filter (someone else's booking -> 404, not cancellable -> 409).
+  Inline "Are you sure?" on upcoming bookings in My bookings. Admin list
+  shows "Cancelled by the customer" instead of Confirm/Decline, and the admin
+  PATCH refuses to change a cancelled booking (409). Verified via curl:
+  logged out 401, other user 404, past/declined/already-cancelled 409, bad id
+  404, own upcoming 200; admin dashboard shows the badge. Tested admin side
+  with a throwaway password-less admin doc, deleted afterwards. Browser
+  click-through skipped (Chrome extension not responding).

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Booking } from "@/lib/types";
+import CancelBookingButton from "./CancelBookingButton";
 import { buttonClasses, Card, StatusBadge } from "./ui";
 
 function formatDate(date: string) {
@@ -46,6 +47,7 @@ export default function MyBookings({
         title="Upcoming"
         bookings={upcoming}
         emptyText="Nothing coming up right now."
+        cancellable
       />
       {past.length > 0 && <BookingSection title="Past" bookings={past} muted />}
     </div>
@@ -57,11 +59,13 @@ function BookingSection({
   bookings,
   emptyText,
   muted,
+  cancellable,
 }: {
   title: string;
   bookings: Booking[];
   emptyText?: string;
   muted?: boolean;
+  cancellable?: boolean;
 }) {
   return (
     <section>
@@ -93,6 +97,11 @@ function BookingSection({
                   </p>
                 </div>
                 <StatusBadge status={b.status} />
+                {cancellable && (b.status === "pending" || b.status === "confirmed") && (
+                  <div className="w-full border-t border-card-border pt-3">
+                    <CancelBookingButton bookingId={b._id} />
+                  </div>
+                )}
               </Card>
             </li>
           ))}

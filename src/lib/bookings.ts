@@ -55,24 +55,64 @@ export async function getConfirmedBookings(): Promise<Booking[]> {
   return docs.map(toBooking);
 }
 
+/**
+ * Admin confirm/decline. Returns "not_found" for unknown ids and
+ * "cancelled" if the customer already cancelled (admins can't undo that).
+ */
 export async function updateBookingStatus(
   id: string,
   status: BookingStatus
-): Promise<boolean> {
+): Promise<"updated" | "not_found" | "cancelled"> {
   const db = await getDb();
   let objectId: ObjectId;
   try {
     objectId = new ObjectId(id);
   } catch {
-    return false;
+    return "not_found";
   }
   const result = await db
     .collection(COLLECTION)
     .updateOne(
-      { _id: objectId },
+      { _id: objectId, status: { $ne: "cancelled" } },
       { $set: { status, updatedAt: new Date().toISOString() } }
     );
-  return result.matchedCount > 0;
+  if (result.matchedCount > 0) return "updated";
+  const exists = await db.collection(COLLECTION).countDocuments({ _id: objectId }, { limit: 1 });
+  return exists ? "cancelled" : "not_found";
+}
+
+/**
+ * Customer cancel. Only matches the user's own booking, and only while it
+ * is pending or confirmed and today or later; the checks live in the
+ * update filter so there's no gap between checking and writing.
+ * Someone else's booking is reported as "not_found", same as a missing id.
+ */
+export async function cancelBookingForUser(
+  id: string,
+  userId: string,
+  today: string
+): Promise<"cancelled" | "not_found" | "not_cancellable"> {
+  const db = await getDb();
+  let objectId: ObjectId;
+  try {
+    objectId = new ObjectId(id);
+  } catch {
+    return "not_found";
+  }
+  const result = await db.collection(COLLECTION).updateOne(
+    {
+      _id: objectId,
+      userId,
+      status: { $in: ["pending", "confirmed"] },
+      date: { $gte: today },
+    },
+    { $set: { status: "cancelled" satisfies BookingStatus, updatedAt: new Date().toISOString() } }
+  );
+  if (result.matchedCount > 0) return "cancelled";
+  const owned = await db
+    .collection(COLLECTION)
+    .countDocuments({ _id: objectId, userId }, { limit: 1 });
+  return owned ? "not_cancellable" : "not_found";
 }
 
 export async function getBookingsForUser(userId: string): Promise<Booking[]> {

@@ -50,9 +50,15 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const updated = await updateBookingStatus(id, status);
-  if (!updated) {
+  const result = await updateBookingStatus(id, status);
+  if (result === "not_found") {
     return NextResponse.json({ error: "Booking not found." }, { status: 404 });
+  }
+  if (result === "cancelled") {
+    return NextResponse.json(
+      { error: "The customer cancelled this booking." },
+      { status: 409 }
+    );
   }
 
   return NextResponse.json({ success: true });

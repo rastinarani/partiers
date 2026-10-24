@@ -58,24 +58,28 @@ export default function AdminBookingsList({ initialBookings }: { initialBookings
             <StatusBadge status={b.status} />
           </div>
 
-          <div className="mt-3 flex gap-2">
-            <Button
-              variant="success"
-              size="xs"
-              disabled={updatingId === b._id || b.status === "confirmed"}
-              onClick={() => updateStatus(b._id, "confirmed")}
-            >
-              Confirm
-            </Button>
-            <Button
-              variant="danger"
-              size="xs"
-              disabled={updatingId === b._id || b.status === "declined"}
-              onClick={() => updateStatus(b._id, "declined")}
-            >
-              Decline
-            </Button>
-          </div>
+          {b.status === "cancelled" ? (
+            <p className="mt-3 text-sm text-muted">Cancelled by the customer.</p>
+          ) : (
+            <div className="mt-3 flex gap-2">
+              <Button
+                variant="success"
+                size="xs"
+                disabled={updatingId === b._id || b.status === "confirmed"}
+                onClick={() => updateStatus(b._id, "confirmed")}
+              >
+                Confirm
+              </Button>
+              <Button
+                variant="danger"
+                size="xs"
+                disabled={updatingId === b._id || b.status === "declined"}
+                onClick={() => updateStatus(b._id, "declined")}
+              >
+                Decline
+              </Button>
+            </div>
+          )}
         </Card>
       ))}
     </div>

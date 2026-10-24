@@ -6,6 +6,7 @@ const STATUS_STYLES: Record<BookingStatus | ReviewStatus, string> = {
   approved: "bg-success-soft text-success",
   declined: "bg-danger-soft text-danger",
   rejected: "bg-danger-soft text-danger",
+  cancelled: "bg-muted/15 text-muted",
 };
 
 export function StatusBadge({ status }: { status: BookingStatus | ReviewStatus }) {
