@@ -35,6 +35,9 @@ describe("validateBookingInput", () => {
     date: "2026-11-14",
     time: "14:30",
     durationMinutes: 120,
+    eventType: "birthday",
+    location: "Riverdale, near the park",
+    activities: ["games", "facePainting"],
     notes: "Loves dinosaurs",
   };
 
@@ -61,6 +64,8 @@ describe("validateBookingInput", () => {
     "childAge",
     "numberOfChildren",
     "durationMinutes",
+    "eventType",
+    "location",
   ])(
     "rejects a missing %s",
     (field) => {
@@ -110,6 +115,34 @@ describe("validateBookingInput", () => {
     expect(validateBookingInput({ ...valid, time: "22:00", durationMinutes: 120 })).not.toBeNull();
     expect(validateBookingInput({ ...valid, time: "22:00", durationMinutes: 180 })).toBeNull();
   });
+
+  it.each(["birthday", "playdate", "family", "other"])("accepts event type %j", (eventType) => {
+    expect(validateBookingInput({ ...valid, eventType })?.eventType).toBe(eventType);
+  });
+
+  it.each(["wedding", "", "toString", "__proto__", 1])("rejects event type %j", (eventType) => {
+    expect(validateBookingInput({ ...valid, eventType })).toBeNull();
+  });
+
+  it("rejects a blank or overlong location", () => {
+    expect(validateBookingInput({ ...valid, location: "   " })).toBeNull();
+    expect(validateBookingInput({ ...valid, location: "a".repeat(200) })).not.toBeNull();
+    expect(validateBookingInput({ ...valid, location: "a".repeat(201) })).toBeNull();
+  });
+
+  it("treats missing activities as none and removes duplicates", () => {
+    expect(validateBookingInput({ ...valid, activities: undefined })?.activities).toEqual([]);
+    expect(validateBookingInput({ ...valid, activities: ["games", "games"] })?.activities).toEqual([
+      "games",
+    ]);
+  });
+
+  it.each([["skydiving"], "games", [{ $ne: "" }], ["constructor"]])(
+    "rejects activities %j",
+    (activities) => {
+      expect(validateBookingInput({ ...valid, activities })).toBeNull();
+    }
+  );
 
   it.each([undefined, null, ""])("treats notes %j as empty", (notes) => {
     expect(validateBookingInput({ ...valid, notes })?.notes).toBe("");

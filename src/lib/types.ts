@@ -1,3 +1,5 @@
+import type { Activity, EventType } from "./eventOptions";
+
 export type BookingStatus = "pending" | "confirmed" | "declined" | "cancelled";
 
 export interface Booking {
@@ -10,6 +12,10 @@ export interface Booking {
   date: string; // "YYYY-MM-DD"
   time: string; // "HH:MM", 24h
   durationMinutes: number;
+  // Event details; missing on bookings made before they were added.
+  eventType?: EventType;
+  location?: string;
+  activities?: Activity[];
   notes: string;
   status: BookingStatus;
   userId?: string; // set when booked while logged in; guests have none
@@ -28,7 +34,8 @@ export type NewBooking = Pick<
   | "time"
   | "durationMinutes"
   | "notes"
->;
+> &
+  Required<Pick<Booking, "eventType" | "location" | "activities">>;
 
 export type ReviewStatus = "pending" | "approved" | "rejected";
 

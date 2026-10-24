@@ -1,3 +1,4 @@
+import { isActivity, isEventType } from "./eventOptions";
 import { endsByMidnight, isDuration } from "./schedule";
 
 // Shared server-side validation for the public booking and review forms.
@@ -31,6 +32,9 @@ export function validateBookingInput(body: unknown) {
   const childAge = Number(b.childAge);
   const numberOfChildren = Number(b.numberOfChildren);
   const durationMinutes = Number(b.durationMinutes);
+  const eventType = b.eventType;
+  const location = cleanString(b.location, 200);
+  const activitiesRaw = b.activities === undefined || b.activities === null ? [] : b.activities;
 
   if (!parentName || !contact || !childName || !date || !time) return null;
   if (notes === null) return null;
@@ -40,6 +44,9 @@ export function validateBookingInput(body: unknown) {
     return null;
   }
   if (!isDuration(durationMinutes) || !endsByMidnight(time, durationMinutes)) return null;
+  if (!isEventType(eventType) || !location) return null;
+  if (!Array.isArray(activitiesRaw) || !activitiesRaw.every(isActivity)) return null;
+  const activities = [...new Set(activitiesRaw)];
 
   return {
     parentName,
@@ -50,6 +57,9 @@ export function validateBookingInput(body: unknown) {
     date,
     time,
     durationMinutes,
+    eventType,
+    location,
+    activities,
     notes,
   };
 }

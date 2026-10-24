@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ACTIVITIES, EVENT_TYPES, type Activity, type EventType } from "@/lib/eventOptions";
 import {
   DEFAULT_DURATION,
   DURATION_OPTIONS,
@@ -36,6 +37,9 @@ export default function BookingForm({
   const [childName, setChildName] = useState("");
   const [childAge, setChildAge] = useState("");
   const [numberOfChildren, setNumberOfChildren] = useState("1");
+  const [eventType, setEventType] = useState<EventType | "">("");
+  const [location, setLocation] = useState("");
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [notes, setNotes] = useState("");
 
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
@@ -106,6 +110,9 @@ export default function BookingForm({
           date,
           time,
           durationMinutes,
+          eventType,
+          location,
+          activities,
           notes,
         }),
       });
@@ -145,6 +152,9 @@ export default function BookingForm({
             setChildName("");
             setChildAge("");
             setNumberOfChildren("1");
+            setEventType("");
+            setLocation("");
+            setActivities([]);
             setNotes("");
           }}
           className="mt-6"
@@ -275,6 +285,70 @@ export default function BookingForm({
           placeholder="1"
         />
       </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <Label htmlFor="eventType">What kind of event?</Label>
+          <Select
+            id="eventType"
+            size="lg"
+            required
+            value={eventType}
+            onChange={(e) => setEventType(e.target.value as EventType)}
+          >
+            <option value="" disabled>
+              Choose one&hellip;
+            </option>
+            {Object.entries(EVENT_TYPES).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <Field
+          label="Address or general area"
+          value={location}
+          onChange={setLocation}
+          required
+          placeholder="123 Maple St, or 'near High Park'"
+        />
+      </div>
+
+      <fieldset>
+        <legend className="mb-2 text-sm font-medium">
+          Activities you&rsquo;d like <span className="font-normal text-muted">(pick any)</span>
+        </legend>
+        <div className="flex flex-wrap gap-2">
+          {(Object.entries(ACTIVITIES) as [Activity, string][]).map(([value, label]) => {
+            const checked = activities.includes(value);
+            return (
+              <label
+                key={value}
+                className={[
+                  "cursor-pointer rounded-full border px-4 py-2 text-sm font-medium transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary/50",
+                  checked
+                    ? "border-primary bg-primary-soft text-primary"
+                    : "border-card-border hover:bg-primary-soft/50",
+                ].join(" ")}
+              >
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={checked}
+                  onChange={() =>
+                    setActivities((prev) =>
+                      checked ? prev.filter((a) => a !== value) : [...prev, value]
+                    )
+                  }
+                />
+                {checked ? "✓ " : ""}
+                {label}
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
 
       <div>
         <Label htmlFor="notes">

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatTimeRange } from "@/lib/schedule";
+import EventDetails from "./EventDetails";
 import type { Booking, BookingStatus } from "@/lib/types";
 import { Button, Card, StatusBadge } from "./ui";
 
@@ -63,6 +64,7 @@ export default function AdminBookingsList({ initialBookings }: { initialBookings
                 {b.numberOfChildren === 1 ? "child" : "children"} &mdash;{" "}
                 {formatDateTime(b.date, b.time, b.durationMinutes)}
               </p>
+              <EventDetails booking={b} />
               {b.notes && <p className="mt-1 text-sm text-muted italic">&ldquo;{b.notes}&rdquo;</p>}
             </div>
             <StatusBadge status={b.status} />

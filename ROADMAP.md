@@ -135,7 +135,7 @@ email and password shows that person's past and upcoming bookings.
 - **Done when:** you can't book a slot that overlaps a confirmed booking, from
   the page or by calling the API.
 
-### [ ] 2.2 Event details
+### [x] 2.2 Event details
 
 - Add event type (birthday party, playdate, family gathering, other), address
   or general area, and wanted activities (checkboxes: games, crafts, face
@@ -442,3 +442,11 @@ Add one line per finished step: date, step, commit, notes.
   show as ranges in admin, admin calendar and My bookings (admin calendar
   "today" also fixed to local time). Verified via curl, including touching
   ranges and the admin warning/force path.
+- 2026-10-23 — 2.2 Event details: `eventType` (birthday / playdate / family /
+  other), `location` (required, 200 chars) and `activities` (any of games,
+  crafts, facePainting, balloonAnimals, scavengerHunt; deduplicated) in
+  `src/lib/eventOptions.ts` + `validateBookingInput` (+17 tests, 151 total).
+  Optional on the `Booking` type so older bookings still load. Form gets an
+  event-type select, address field and activity chips; `EventDetails` shows
+  them in My bookings, the admin list and the admin calendar. Verified via
+  curl (stored, shown on /account and /admin; bad activities rejected).

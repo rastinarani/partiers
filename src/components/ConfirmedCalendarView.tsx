@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { todayString } from "@/lib/bookingDates";
 import { formatTimeRange } from "@/lib/schedule";
 import type { Booking } from "@/lib/types";
+import EventDetails from "./EventDetails";
 import MonthCalendar from "./MonthCalendar";
 import { Card } from "./ui";
 
@@ -55,6 +56,7 @@ export default function ConfirmedCalendarView({ bookings }: { bookings: Booking[
                   {b.parentName} &middot; {b.childName} (age {b.childAge}) &middot;{" "}
                   {b.numberOfChildren} {b.numberOfChildren === 1 ? "child" : "children"}
                 </p>
+                <EventDetails booking={b} />
               </Card>
             ))}
           </div>

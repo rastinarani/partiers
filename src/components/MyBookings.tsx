@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatTimeRange } from "@/lib/schedule";
+import EventDetails from "./EventDetails";
 import type { Booking } from "@/lib/types";
 import CancelBookingButton from "./CancelBookingButton";
 import { buttonClasses, Card, StatusBadge } from "./ui";
@@ -89,6 +90,7 @@ function BookingSection({
                     {b.childName} ({b.childAge}) &middot; {b.numberOfChildren}{" "}
                     {b.numberOfChildren === 1 ? "child" : "children"}
                   </p>
+                  <EventDetails booking={b} />
                 </div>
                 <StatusBadge status={b.status} />
                 {cancellable && (b.status === "pending" || b.status === "confirmed") && (
