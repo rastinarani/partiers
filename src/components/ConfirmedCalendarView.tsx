@@ -1,19 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { todayString } from "@/lib/bookingDates";
+import { formatTimeRange } from "@/lib/schedule";
 import type { Booking } from "@/lib/types";
 import MonthCalendar from "./MonthCalendar";
 import { Card } from "./ui";
 
-function formatTime(time: string) {
-  return new Date(`2000-01-01T${time}:00`).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
-
 export default function ConfirmedCalendarView({ bookings }: { bookings: Booking[] }) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayString();
   const [selectedDate, setSelectedDate] = useState(today);
 
   const markedDates = useMemo(() => new Set(bookings.map((b) => b.date)), [bookings]);
@@ -55,7 +50,7 @@ export default function ConfirmedCalendarView({ bookings }: { bookings: Booking[
           <div className="space-y-3">
             {dayBookings.map((b) => (
               <Card key={b._id} className="p-4">
-                <p className="font-medium">{formatTime(b.time)}</p>
+                <p className="font-medium">{formatTimeRange(b.time, b.durationMinutes)}</p>
                 <p className="text-sm text-muted">
                   {b.parentName} &middot; {b.childName} (age {b.childAge}) &middot;{" "}
                   {b.numberOfChildren} {b.numberOfChildren === 1 ? "child" : "children"}

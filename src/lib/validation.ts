@@ -1,3 +1,5 @@
+import { endsByMidnight, isDuration } from "./schedule";
+
 // Shared server-side validation for the public booking and review forms.
 // Keep this defensive: these are the only two write paths that accept
 // unauthenticated input, and everything here ends up in MongoDB.
@@ -28,6 +30,7 @@ export function validateBookingInput(body: unknown) {
 
   const childAge = Number(b.childAge);
   const numberOfChildren = Number(b.numberOfChildren);
+  const durationMinutes = Number(b.durationMinutes);
 
   if (!parentName || !contact || !childName || !date || !time) return null;
   if (notes === null) return null;
@@ -36,8 +39,19 @@ export function validateBookingInput(body: unknown) {
   if (!Number.isInteger(numberOfChildren) || numberOfChildren < 1 || numberOfChildren > 50) {
     return null;
   }
+  if (!isDuration(durationMinutes) || !endsByMidnight(time, durationMinutes)) return null;
 
-  return { parentName, contact, childName, childAge, numberOfChildren, date, time, notes };
+  return {
+    parentName,
+    contact,
+    childName,
+    childAge,
+    numberOfChildren,
+    date,
+    time,
+    durationMinutes,
+    notes,
+  };
 }
 
 export function validateReviewInput(body: unknown) {

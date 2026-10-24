@@ -1,5 +1,6 @@
 import { ObjectId, type Document } from "mongodb";
 import { getDb } from "./mongodb";
+import { DEFAULT_DURATION, toRange, type TimeRange } from "./schedule";
 import type { Booking, BookingStatus, NewBooking } from "./types";
 
 const COLLECTION = "bookings";
@@ -14,6 +15,7 @@ function toBooking(doc: Document): Booking {
     numberOfChildren: doc.numberOfChildren ?? 1,
     date: doc.date,
     time: doc.time,
+    durationMinutes: doc.durationMinutes ?? DEFAULT_DURATION,
     notes: doc.notes ?? "",
     status: doc.status,
     ...(doc.userId ? { userId: doc.userId } : {}),
@@ -123,4 +125,39 @@ export async function getBookingsForUser(userId: string): Promise<Booking[]> {
     .sort({ date: 1, time: 1 })
     .toArray();
   return docs.map(toBooking);
+}
+
+export async function getBookingById(id: string): Promise<Booking | null> {
+  let objectId: ObjectId;
+  try {
+    objectId = new ObjectId(id);
+  } catch {
+    return null;
+  }
+  const db = await getDb();
+  const doc = await db.collection(COLLECTION).findOne({ _id: objectId });
+  return doc ? toBooking(doc) : null;
+}
+
+/**
+ * Time ranges taken by confirmed bookings on a date. Safe to expose
+ * publicly once the ids are stripped: no names or contact details.
+ */
+export async function getTakenRanges(
+  date: string,
+  excludeId?: string
+): Promise<Array<TimeRange & { id: string }>> {
+  const db = await getDb();
+  const docs = await db
+    .collection(COLLECTION)
+    .find({ date, status: "confirmed" })
+    .project({ time: 1, durationMinutes: 1 })
+    .sort({ time: 1 })
+    .toArray();
+  return docs
+    .filter((d) => d._id.toString() !== excludeId)
+    .map((d) => ({
+      id: d._id.toString(),
+      ...toRange(d.time, d.durationMinutes ?? DEFAULT_DURATION),
+    }));
 }

@@ -12,6 +12,7 @@ function booking(date: string, time: string): Booking {
     numberOfChildren: 1,
     date,
     time,
+    durationMinutes: 120,
     notes: "",
     status: "pending",
     createdAt: "2026-01-01T00:00:00.000Z",

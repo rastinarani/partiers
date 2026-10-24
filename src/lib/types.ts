@@ -9,6 +9,7 @@ export interface Booking {
   numberOfChildren: number;
   date: string; // "YYYY-MM-DD"
   time: string; // "HH:MM", 24h
+  durationMinutes: number;
   notes: string;
   status: BookingStatus;
   userId?: string; // set when booked while logged in; guests have none
@@ -25,6 +26,7 @@ export type NewBooking = Pick<
   | "numberOfChildren"
   | "date"
   | "time"
+  | "durationMinutes"
   | "notes"
 >;
 

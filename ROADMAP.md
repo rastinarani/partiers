@@ -123,7 +123,7 @@ email and password shows that person's past and upcoming bookings.
 
 ## Phase 2 — Booking quality
 
-### [ ] 2.1 Event length and no double-booking
+### [x] 2.1 Event length and no double-booking
 
 - Add a duration field (1, 1.5, 2, 3 or 4 hours).
 - A public API returns the time ranges already taken by **confirmed**
@@ -430,3 +430,15 @@ Add one line per finished step: date, step, commit, notes.
   account" hint above the booking form. Verified rendered links and
   redirects via curl; the client-side push after login wasn't clicked
   through (Chrome extension not responding).
+- 2026-10-23 — 2.1 Event length and no double-booking: `durationMinutes`
+  (60/90/120/180/240; events must end by midnight) validated in
+  `validateBookingInput`; older bookings without it count as 120 min.
+  `src/lib/schedule.ts` holds the shared range maths (+23 tests).
+  `GET /api/availability?date=` returns confirmed start/end times only.
+  The form has a "How long?" select and disables start times that clash or
+  run past midnight; `POST /api/bookings` rejects overlaps with confirmed
+  bookings (409). Admin Confirm returns 409 with the clashing booking unless
+  `force: true`; the list shows a "Confirm anyway?" warning. Times now
+  show as ranges in admin, admin calendar and My bookings (admin calendar
+  "today" also fixed to local time). Verified via curl, including touching
+  ranges and the admin warning/force path.

@@ -34,6 +34,7 @@ describe("validateBookingInput", () => {
     numberOfChildren: 10,
     date: "2026-11-14",
     time: "14:30",
+    durationMinutes: 120,
     notes: "Loves dinosaurs",
   };
 
@@ -51,7 +52,16 @@ describe("validateBookingInput", () => {
     expect(validateBookingInput(body)).toBeNull();
   });
 
-  it.each(["parentName", "contact", "childName", "date", "time", "childAge", "numberOfChildren"])(
+  it.each([
+    "parentName",
+    "contact",
+    "childName",
+    "date",
+    "time",
+    "childAge",
+    "numberOfChildren",
+    "durationMinutes",
+  ])(
     "rejects a missing %s",
     (field) => {
       const body: Record<string, unknown> = { ...valid };
@@ -84,6 +94,21 @@ describe("validateBookingInput", () => {
 
   it.each([0, 51, 1.5])("rejects %j children", (numberOfChildren) => {
     expect(validateBookingInput({ ...valid, numberOfChildren })).toBeNull();
+  });
+
+  it.each([60, 90, 120, 180, 240, "90"])("accepts duration %j", (durationMinutes) => {
+    expect(validateBookingInput({ ...valid, durationMinutes })?.durationMinutes).toBe(
+      Number(durationMinutes)
+    );
+  });
+
+  it.each([0, 30, 150, 300, "two hours"])("rejects duration %j", (durationMinutes) => {
+    expect(validateBookingInput({ ...valid, durationMinutes })).toBeNull();
+  });
+
+  it("rejects events that would run past midnight", () => {
+    expect(validateBookingInput({ ...valid, time: "22:00", durationMinutes: 120 })).not.toBeNull();
+    expect(validateBookingInput({ ...valid, time: "22:00", durationMinutes: 180 })).toBeNull();
   });
 
   it.each([undefined, null, ""])("treats notes %j as empty", (notes) => {

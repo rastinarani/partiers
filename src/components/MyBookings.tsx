@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatTimeRange } from "@/lib/schedule";
 import type { Booking } from "@/lib/types";
 import CancelBookingButton from "./CancelBookingButton";
 import { buttonClasses, Card, StatusBadge } from "./ui";
@@ -9,13 +10,6 @@ function formatDate(date: string) {
     month: "short",
     day: "numeric",
     year: "numeric",
-  });
-}
-
-function formatTime(time: string) {
-  return new Date(`2000-01-01T${time}:00`).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
   });
 }
 
@@ -89,7 +83,7 @@ function BookingSection({
               >
                 <div>
                   <p className="font-semibold">
-                    {formatDate(b.date)} &middot; {formatTime(b.time)}
+                    {formatDate(b.date)} &middot; {formatTimeRange(b.time, b.durationMinutes)}
                   </p>
                   <p className="mt-1 text-sm text-muted">
                     {b.childName} ({b.childAge}) &middot; {b.numberOfChildren}{" "}

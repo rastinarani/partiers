@@ -6,7 +6,13 @@ import {
   verifyAdminSessionToken,
   verifyUserSessionToken,
 } from "@/lib/auth";
-import { createBooking, updateBookingStatus } from "@/lib/bookings";
+import {
+  createBooking,
+  getBookingById,
+  getTakenRanges,
+  updateBookingStatus,
+} from "@/lib/bookings";
+import { findOverlap, formatTimeRange, toRange } from "@/lib/schedule";
 import { getUserById } from "@/lib/users";
 import { validateBookingInput } from "@/lib/validation";
 
@@ -22,6 +28,16 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "Please fill in all required fields correctly." },
       { status: 400 }
+    );
+  }
+
+  // Only confirmed bookings block a slot; two pending requests for the same
+  // time are fine, and the admin gets a warning when confirming the second.
+  const taken = await getTakenRanges(input.date);
+  if (findOverlap(toRange(input.time, input.durationMinutes), taken)) {
+    return NextResponse.json(
+      { error: "Sorry, that time overlaps another booking. Please pick a different time." },
+      { status: 409 }
     );
   }
 
@@ -48,6 +64,29 @@ export async function PATCH(request: Request) {
 
   if (!id || (status !== "confirmed" && status !== "declined")) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+  }
+
+  // Warn (don't block) when confirming would clash with another confirmed
+  // booking; the admin can resend with force: true to confirm anyway.
+  if (status === "confirmed" && body?.force !== true) {
+    const booking = await getBookingById(id);
+    if (booking) {
+      const taken = await getTakenRanges(booking.date, booking._id);
+      const clash = findOverlap(toRange(booking.time, booking.durationMinutes), taken);
+      if (clash) {
+        const other = await getBookingById(clash.id);
+        return NextResponse.json(
+          {
+            error: "overlap",
+            overlap: {
+              parentName: other?.parentName ?? "another booking",
+              time: other ? formatTimeRange(other.time, other.durationMinutes) : "",
+            },
+          },
+          { status: 409 }
+        );
+      }
+    }
   }
 
   const result = await updateBookingStatus(id, status);

@@ -1,19 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  DEFAULT_DURATION,
+  DURATION_OPTIONS,
+  endsByMidnight,
+  findOverlap,
+  formatClock,
+  formatDuration,
+  formatTimeRange,
+  minutesToTime,
+  toRange,
+  type TimeRange,
+} from "@/lib/schedule";
 import MonthCalendar from "./MonthCalendar";
 import { Button, Card, FormError, Input, Label, Select, Textarea } from "./ui";
 
 const TIME_SLOTS = Array.from({ length: 27 }, (_, i) => {
-  const minutes = 9 * 60 + i * 30; // 9:00am through 10:00pm
-  const h24 = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  const label = new Date(2000, 0, 1, h24, m).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-  const value = `${String(h24).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-  return { value, label };
+  const value = minutesToTime(9 * 60 + i * 30); // 9:00am through 10:00pm
+  return { value, label: formatClock(value) };
 });
 
 export default function BookingForm({
@@ -25,6 +30,7 @@ export default function BookingForm({
 }) {
   const [date, setDate] = useState<string>("");
   const [time, setTime] = useState<string>("");
+  const [durationMinutes, setDurationMinutes] = useState<number>(DEFAULT_DURATION);
   const [parentName, setParentName] = useState(defaultParentName);
   const [contact, setContact] = useState(defaultContact);
   const [childName, setChildName] = useState("");
@@ -35,12 +41,52 @@ export default function BookingForm({
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Times already taken by confirmed bookings, for the selected date.
+  const [availability, setAvailability] = useState<{ date: string; taken: TimeRange[] } | null>(
+    null
+  );
+  const [availabilityVersion, setAvailabilityVersion] = useState(0);
+
+  useEffect(() => {
+    if (!date) return;
+    let ignore = false;
+    fetch(`/api/availability?date=${date}`)
+      .then((res) => (res.ok ? res.json() : { taken: [] }))
+      .then((data: { taken?: TimeRange[] }) => {
+        if (!ignore) setAvailability({ date, taken: data.taken ?? [] });
+      })
+      .catch(() => {
+        // The server re-checks on submit, so a failed lookup just means
+        // nothing is greyed out.
+        if (!ignore) setAvailability({ date, taken: [] });
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [date, availabilityVersion]);
+
+  const taken = availability?.date === date ? availability.taken : [];
+
+  function isSlotAvailable(slot: string) {
+    return (
+      endsByMidnight(slot, durationMinutes) &&
+      !findOverlap(toRange(slot, durationMinutes), taken)
+    );
+  }
+
+  const selectedTimeUnavailable = Boolean(time) && !isSlotAvailable(time);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     if (!date || !time) {
       setStatus("error");
       setErrorMessage("Please pick a date and a time.");
+      return;
+    }
+    if (selectedTimeUnavailable) {
+      setStatus("error");
+      setErrorMessage("That time isn't available. Please pick another one.");
       return;
     }
 
@@ -59,12 +105,14 @@ export default function BookingForm({
           numberOfChildren: Number(numberOfChildren),
           date,
           time,
+          durationMinutes,
           notes,
         }),
       });
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
+        if (res.status === 409) setAvailabilityVersion((v) => v + 1);
         throw new Error(data.error || "Something went wrong. Please try again.");
       }
 
@@ -91,6 +139,7 @@ export default function BookingForm({
             setStatus("idle");
             setDate("");
             setTime("");
+            setDurationMinutes(DEFAULT_DURATION);
             setParentName(defaultParentName);
             setContact(defaultContact);
             setChildName("");
@@ -114,24 +163,58 @@ export default function BookingForm({
           <MonthCalendar selectedDate={date} onSelectDate={setDate} />
         </div>
 
-        <div>
-          <Label htmlFor="time">Pick a time</Label>
-          <Select
-            id="time"
-            size="lg"
-            required
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-          >
-            <option value="" disabled>
-              Select a time&hellip;
-            </option>
-            {TIME_SLOTS.map((slot) => (
-              <option key={slot.value} value={slot.value}>
-                {slot.label}
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="duration">How long?</Label>
+            <Select
+              id="duration"
+              size="lg"
+              required
+              value={durationMinutes}
+              onChange={(e) => setDurationMinutes(Number(e.target.value))}
+            >
+              {DURATION_OPTIONS.map((d) => (
+                <option key={d} value={d}>
+                  {formatDuration(d)}
+                </option>
+              ))}
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="time">Start time</Label>
+            <Select
+              id="time"
+              size="lg"
+              required
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+            >
+              <option value="" disabled>
+                Select a time&hellip;
               </option>
-            ))}
-          </Select>
+              {TIME_SLOTS.map((slot) => {
+                const available = isSlotAvailable(slot.value);
+                return (
+                  <option key={slot.value} value={slot.value} disabled={!available}>
+                    {slot.label}
+                    {available ? "" : " (unavailable)"}
+                  </option>
+                );
+              })}
+            </Select>
+            {taken.length > 0 && (
+              <p className="mt-1.5 text-xs text-muted">
+                Already booked this day:{" "}
+                {taken.map((r) => `${formatClock(r.start)}–${formatClock(r.end)}`).join(", ")}
+              </p>
+            )}
+            {selectedTimeUnavailable && (
+              <p className="mt-1.5 text-sm font-medium text-danger">
+                That time doesn&rsquo;t fit. Please pick another start time or a shorter event.
+              </p>
+            )}
+          </div>
 
           {date && (
             <p className="mt-3 rounded-xl bg-primary-soft px-4 py-3 text-sm text-primary-hover">
@@ -143,8 +226,7 @@ export default function BookingForm({
                   day: "numeric",
                 })}
               </strong>
-              {time &&
-                ` at ${TIME_SLOTS.find((s) => s.value === time)?.label}`}
+              {time && `, ${formatTimeRange(time, durationMinutes)}`}
             </p>
           )}
         </div>
