@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   cleanString,
   validateBookingInput,
+  validateChangePasswordInput,
   validateLoginInput,
+  validateProfileInput,
   validateReviewInput,
   validateSignupInput,
 } from "./validation";
@@ -152,5 +154,57 @@ describe("validateLoginInput", () => {
     expect(validateLoginInput({ password: "secret" })).toBeNull();
     expect(validateLoginInput({ email: "sam@example.com", password: { $ne: "" } })).toBeNull();
     expect(validateLoginInput(null)).toBeNull();
+  });
+});
+
+describe("validateProfileInput", () => {
+  it("accepts a name and phone, trimming both", () => {
+    expect(validateProfileInput({ name: " Sam ", phone: " (555) 123-4567 " })).toEqual({
+      name: "Sam",
+      phone: "(555) 123-4567",
+    });
+  });
+
+  it("allows an empty or missing phone", () => {
+    expect(validateProfileInput({ name: "Sam", phone: "" })).toEqual({ name: "Sam", phone: "" });
+    expect(validateProfileInput({ name: "Sam" })).toEqual({ name: "Sam", phone: "" });
+  });
+
+  it.each(["123456", "1".repeat(16), "call me", "555-1234 ext 5", "+1 555 <b>"])(
+    "rejects phone %j",
+    (phone) => {
+      expect(validateProfileInput({ name: "Sam", phone })).toBeNull();
+    }
+  );
+
+  it("accepts international numbers", () => {
+    expect(validateProfileInput({ name: "Sam", phone: "+44 20 7946 0958" })).not.toBeNull();
+  });
+
+  it("rejects a missing name or wrongly typed fields", () => {
+    expect(validateProfileInput({ name: "  ", phone: "" })).toBeNull();
+    expect(validateProfileInput({ name: "Sam", phone: 5551234567 })).toBeNull();
+    expect(validateProfileInput({ name: { $ne: "" } })).toBeNull();
+    expect(validateProfileInput(null)).toBeNull();
+  });
+});
+
+describe("validateChangePasswordInput", () => {
+  const valid = { currentPassword: "old-password", newPassword: "a".repeat(8) };
+
+  it("accepts valid input", () => {
+    expect(validateChangePasswordInput(valid)).toEqual(valid);
+  });
+
+  it("enforces new password length 8–200", () => {
+    expect(validateChangePasswordInput({ ...valid, newPassword: "a".repeat(7) })).toBeNull();
+    expect(validateChangePasswordInput({ ...valid, newPassword: "a".repeat(200) })).not.toBeNull();
+    expect(validateChangePasswordInput({ ...valid, newPassword: "a".repeat(201) })).toBeNull();
+  });
+
+  it("rejects missing or wrongly typed passwords", () => {
+    expect(validateChangePasswordInput({ ...valid, currentPassword: "" })).toBeNull();
+    expect(validateChangePasswordInput({ ...valid, currentPassword: { $ne: "" } })).toBeNull();
+    expect(validateChangePasswordInput({ newPassword: valid.newPassword })).toBeNull();
   });
 });

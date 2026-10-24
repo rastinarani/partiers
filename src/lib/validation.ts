@@ -5,6 +5,7 @@
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_RE = /^\+?[0-9\s().-]{1,30}$/;
 
 export function cleanString(value: unknown, maxLength: number): string | null {
   if (typeof value !== "string") return null;
@@ -78,4 +79,37 @@ export function validateLoginInput(body: unknown) {
   if (!email || !password) return null;
 
   return { email, password };
+}
+
+/** Phone is optional: an empty string clears it. */
+export function validateProfileInput(body: unknown) {
+  if (typeof body !== "object" || body === null) return null;
+  const b = body as Record<string, unknown>;
+
+  const name = cleanString(b.name, 100);
+  if (!name) return null;
+
+  const phoneRaw = b.phone === undefined || b.phone === null ? "" : b.phone;
+  if (typeof phoneRaw !== "string") return null;
+  const phone = phoneRaw.trim();
+  if (phone !== "") {
+    if (!PHONE_RE.test(phone)) return null;
+    const digits = phone.replace(/\D/g, "").length;
+    if (digits < 7 || digits > 15) return null;
+  }
+
+  return { name, phone };
+}
+
+export function validateChangePasswordInput(body: unknown) {
+  if (typeof body !== "object" || body === null) return null;
+  const b = body as Record<string, unknown>;
+
+  const currentPassword = typeof b.currentPassword === "string" ? b.currentPassword : null;
+  const newPassword = typeof b.newPassword === "string" ? b.newPassword : null;
+
+  if (!currentPassword || !newPassword) return null;
+  if (newPassword.length < 8 || newPassword.length > 200) return null;
+
+  return { currentPassword, newPassword };
 }

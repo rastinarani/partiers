@@ -4,8 +4,10 @@ import { USER_COOKIE_NAME, verifyUserSessionToken } from "@/lib/auth";
 import { getBookingsForUser } from "@/lib/bookings";
 import { splitUpcomingAndPast, todayString } from "@/lib/bookingDates";
 import { getUserById } from "@/lib/users";
+import ChangePasswordForm from "@/components/ChangePasswordForm";
 import LogoutButton from "@/components/LogoutButton";
 import MyBookings from "@/components/MyBookings";
+import ProfileForm from "@/components/ProfileForm";
 import { Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -45,6 +47,12 @@ export default async function AccountPage() {
 
       <h2 className="mt-10 mb-4 text-2xl font-bold tracking-tight">My bookings</h2>
       <MyBookings upcoming={upcoming} past={past} />
+
+      <h2 className="mt-12 mb-4 text-2xl font-bold tracking-tight">Account settings</h2>
+      <div className="grid gap-6 md:grid-cols-2 md:items-start">
+        <ProfileForm initialName={user.name} initialPhone={user.phone} />
+        <ChangePasswordForm />
+      </div>
     </div>
   );
 }

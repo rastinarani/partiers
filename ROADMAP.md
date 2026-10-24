@@ -103,7 +103,7 @@ email and password shows that person's past and upcoming bookings.
 - **Done when:** a customer can't cancel someone else's booking, even by
   calling the API directly with another booking's id.
 
-### [ ] 1.4 Edit profile and change password
+### [x] 1.4 Edit profile and change password
 
 - On `/account`: edit name and phone number; change password (requires the
   current password).
@@ -410,3 +410,14 @@ Add one line per finished step: date, step, commit, notes.
   404, own upcoming 200; admin dashboard shows the badge. Tested admin side
   with a throwaway password-less admin doc, deleted afterwards. Browser
   click-through skipped (Chrome extension not responding).
+- 2026-10-23 — 1.4 Edit profile and change password: "Account settings" on
+  `/account` with `ProfileForm` (name, optional phone) and
+  `ChangePasswordForm` (current + new + repeat). Routes
+  `PATCH /api/account/profile` and `POST /api/account/password` check the
+  user session; new `validateProfileInput` (phone: 7–15 digits, common
+  punctuation) and `validateChangePasswordInput` (+12 tests, 84 total).
+  Users gain an optional `phone` field. Verified via curl: logged out 401,
+  bad input 400, extra fields ignored, wrong current password rejected, old
+  password stops working and new one logs in, other accounts unaffected.
+  Note: existing sessions stay logged in after a password change; that's
+  7.3. Browser click-through skipped (Chrome extension not responding).
