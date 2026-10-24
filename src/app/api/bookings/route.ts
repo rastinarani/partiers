@@ -47,8 +47,8 @@ export async function POST(request: Request) {
   // deleted account) is treated as a guest.
   const user = sessionUserId ? await getUserById(sessionUserId) : null;
 
-  const id = await createBooking(input, user?.id);
-  return NextResponse.json({ id }, { status: 201 });
+  const { id, referenceCode } = await createBooking(input, user?.id);
+  return NextResponse.json({ id, referenceCode }, { status: 201 });
 }
 
 // Admin only: confirm or decline a booking request.

@@ -1,9 +1,27 @@
-import { ObjectId, type Document } from "mongodb";
+import { MongoServerError, ObjectId, type Db, type Document } from "mongodb";
 import { getDb } from "./mongodb";
+import { generateReferenceCode } from "./referenceCode";
 import { DEFAULT_DURATION, toRange, type TimeRange } from "./schedule";
 import type { Booking, BookingStatus, NewBooking } from "./types";
 
 const COLLECTION = "bookings";
+
+let indexesReady: Promise<unknown> | null = null;
+
+function ensureIndexes(db: Db) {
+  indexesReady ??= Promise.all([
+    // Partial so older bookings without a code don't count as duplicates.
+    db.collection(COLLECTION).createIndex(
+      { referenceCode: 1 },
+      { unique: true, partialFilterExpression: { referenceCode: { $type: "string" } } }
+    ),
+    db.collection(COLLECTION).createIndex({ userId: 1 }),
+  ]).catch((err) => {
+    indexesReady = null;
+    throw err;
+  });
+  return indexesReady;
+}
 
 function toBooking(doc: Document): Booking {
   return {
@@ -21,23 +39,40 @@ function toBooking(doc: Document): Booking {
     ...(doc.activities ? { activities: doc.activities } : {}),
     notes: doc.notes ?? "",
     status: doc.status,
+    ...(doc.referenceCode ? { referenceCode: doc.referenceCode } : {}),
     ...(doc.userId ? { userId: doc.userId } : {}),
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   };
 }
 
-export async function createBooking(input: NewBooking, userId?: string): Promise<string> {
+export async function createBooking(
+  input: NewBooking,
+  userId?: string
+): Promise<{ id: string; referenceCode: string }> {
   const db = await getDb();
+  await ensureIndexes(db);
   const now = new Date().toISOString();
-  const result = await db.collection(COLLECTION).insertOne({
-    ...input,
-    ...(userId ? { userId } : {}),
-    status: "pending" satisfies BookingStatus,
-    createdAt: now,
-    updatedAt: now,
-  });
-  return result.insertedId.toString();
+
+  // ~920k possible codes, so a clash is rare; retry a few times if it happens.
+  for (let attempt = 0; ; attempt++) {
+    const referenceCode = generateReferenceCode();
+    try {
+      const result = await db.collection(COLLECTION).insertOne({
+        ...input,
+        ...(userId ? { userId } : {}),
+        referenceCode,
+        status: "pending" satisfies BookingStatus,
+        createdAt: now,
+        updatedAt: now,
+      });
+      return { id: result.insertedId.toString(), referenceCode };
+    } catch (err) {
+      const duplicateCode =
+        err instanceof MongoServerError && err.code === 11000 && attempt < 4;
+      if (!duplicateCode) throw err;
+    }
+  }
 }
 
 export async function getAllBookings(): Promise<Booking[]> {

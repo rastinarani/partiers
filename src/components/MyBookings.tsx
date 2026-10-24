@@ -86,6 +86,9 @@ function BookingSection({
                   <p className="font-semibold">
                     {formatDate(b.date)} &middot; {formatTimeRange(b.time, b.durationMinutes)}
                   </p>
+                  {b.referenceCode && (
+                    <p className="mt-0.5 font-mono text-xs text-muted">Ref {b.referenceCode}</p>
+                  )}
                   <p className="mt-1 text-sm text-muted">
                     {b.childName} ({b.childAge}) &middot; {b.numberOfChildren}{" "}
                     {b.numberOfChildren === 1 ? "child" : "children"}

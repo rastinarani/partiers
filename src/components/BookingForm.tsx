@@ -14,8 +14,9 @@ import {
   toRange,
   type TimeRange,
 } from "@/lib/schedule";
+import BookingConfirmation, { type BookingSummary } from "./BookingConfirmation";
 import MonthCalendar from "./MonthCalendar";
-import { Button, Card, FormError, Input, Label, Select, Textarea } from "./ui";
+import { Button, FormError, Input, Label, Select, Textarea } from "./ui";
 
 const TIME_SLOTS = Array.from({ length: 27 }, (_, i) => {
   const value = minutesToTime(9 * 60 + i * 30); // 9:00am through 10:00pm
@@ -25,9 +26,11 @@ const TIME_SLOTS = Array.from({ length: 27 }, (_, i) => {
 export default function BookingForm({
   defaultParentName = "",
   defaultContact = "",
+  loggedIn = false,
 }: {
   defaultParentName?: string;
   defaultContact?: string;
+  loggedIn?: boolean;
 }) {
   const [date, setDate] = useState<string>("");
   const [time, setTime] = useState<string>("");
@@ -44,6 +47,7 @@ export default function BookingForm({
 
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [submitted, setSubmitted] = useState<BookingSummary | null>(null);
 
   // Times already taken by confirmed bookings, for the selected date.
   const [availability, setAvailability] = useState<{ date: string; taken: TimeRange[] } | null>(
@@ -93,28 +97,34 @@ export default function BookingForm({
       setErrorMessage("That time isn't available. Please pick another one.");
       return;
     }
+    if (!eventType) {
+      setStatus("error");
+      setErrorMessage("Please choose what kind of event it is.");
+      return;
+    }
 
     setStatus("submitting");
     setErrorMessage("");
 
     try {
+      const request = {
+        parentName,
+        contact,
+        childName,
+        childAge: Number(childAge),
+        numberOfChildren: Number(numberOfChildren),
+        date,
+        time,
+        durationMinutes,
+        eventType,
+        location,
+        activities,
+        notes,
+      };
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          parentName,
-          contact,
-          childName,
-          childAge: Number(childAge),
-          numberOfChildren: Number(numberOfChildren),
-          date,
-          time,
-          durationMinutes,
-          eventType,
-          location,
-          activities,
-          notes,
-        }),
+        body: JSON.stringify(request),
       });
 
       if (!res.ok) {
@@ -123,6 +133,16 @@ export default function BookingForm({
         throw new Error(data.error || "Something went wrong. Please try again.");
       }
 
+      const data = await res.json();
+      setSubmitted({
+        ...request,
+        parentName: parentName.trim(),
+        contact: contact.trim(),
+        childName: childName.trim(),
+        location: location.trim(),
+        notes: notes.trim(),
+        referenceCode: data.referenceCode,
+      });
       setStatus("done");
     } catch (err) {
       setStatus("error");
@@ -130,39 +150,25 @@ export default function BookingForm({
     }
   }
 
-  if (status === "done") {
-    return (
-      <Card className="p-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-success-soft text-2xl text-success">
-          &#10003;
-        </div>
-        <h2 className="text-xl font-semibold">Request sent!</h2>
-        <p className="mt-2 text-muted">
-          Thanks! We&rsquo;ll get back to you soon to confirm the date and time. Nothing is
-          booked until you hear back from us.
-        </p>
-        <Button
-          onClick={() => {
-            setStatus("idle");
-            setDate("");
-            setTime("");
-            setDurationMinutes(DEFAULT_DURATION);
-            setParentName(defaultParentName);
-            setContact(defaultContact);
-            setChildName("");
-            setChildAge("");
-            setNumberOfChildren("1");
-            setEventType("");
-            setLocation("");
-            setActivities([]);
-            setNotes("");
-          }}
-          className="mt-6"
-        >
-          Submit another request
-        </Button>
-      </Card>
-    );
+  function reset() {
+    setStatus("idle");
+    setDate("");
+    setTime("");
+    setDurationMinutes(DEFAULT_DURATION);
+    setParentName(defaultParentName);
+    setContact(defaultContact);
+    setChildName("");
+    setChildAge("");
+    setNumberOfChildren("1");
+    setEventType("");
+    setLocation("");
+    setActivities([]);
+    setNotes("");
+    setSubmitted(null);
+  }
+
+  if (status === "done" && submitted) {
+    return <BookingConfirmation summary={submitted} loggedIn={loggedIn} onReset={reset} />;
   }
 
   return (

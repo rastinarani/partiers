@@ -18,6 +18,7 @@ export interface Booking {
   activities?: Activity[];
   notes: string;
   status: BookingStatus;
+  referenceCode?: string; // e.g. "PT-4F2K"; missing on older bookings
   userId?: string; // set when booked while logged in; guests have none
   createdAt: string; // ISO string
   updatedAt: string; // ISO string

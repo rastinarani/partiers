@@ -58,6 +58,11 @@ export default function AdminBookingsList({ initialBookings }: { initialBookings
             <div>
               <p className="font-semibold">
                 {b.parentName} &middot; <span className="text-muted">{b.contact}</span>
+                {b.referenceCode && (
+                  <span className="ml-2 rounded-md bg-primary-soft px-1.5 py-0.5 font-mono text-xs text-primary">
+                    {b.referenceCode}
+                  </span>
+                )}
               </p>
               <p className="text-sm text-muted">
                 For {b.childName} (age {b.childAge}) &mdash; {b.numberOfChildren}{" "}

@@ -45,7 +45,10 @@ export default async function Home() {
         </p>
       )}
 
-      <BookingForm defaultParentName={user?.name ?? ""} defaultContact={user?.email ?? ""} />
+      <BookingForm
+        defaultParentName={user?.name ?? ""} defaultContact={user?.email ?? ""}
+        loggedIn={Boolean(user)}
+      />
     </div>
   );
 }

@@ -51,7 +51,12 @@ export default function ConfirmedCalendarView({ bookings }: { bookings: Booking[
           <div className="space-y-3">
             {dayBookings.map((b) => (
               <Card key={b._id} className="p-4">
-                <p className="font-medium">{formatTimeRange(b.time, b.durationMinutes)}</p>
+                <p className="font-medium">
+                  {formatTimeRange(b.time, b.durationMinutes)}
+                  {b.referenceCode && (
+                    <span className="ml-2 font-mono text-xs text-muted">{b.referenceCode}</span>
+                  )}
+                </p>
                 <p className="text-sm text-muted">
                   {b.parentName} &middot; {b.childName} (age {b.childAge}) &middot;{" "}
                   {b.numberOfChildren} {b.numberOfChildren === 1 ? "child" : "children"}

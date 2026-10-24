@@ -143,7 +143,7 @@ email and password shows that person's past and upcoming bookings.
 - Show these on the admin dashboard and in "My bookings".
 - **Done when:** a full booking shows every detail in both places.
 
-### [ ] 2.3 Confirmation screen
+### [x] 2.3 Confirmation screen
 
 - After submitting, show a summary card of everything requested plus a short
   reference code (e.g. `PT-4F2K`), and what happens next.
@@ -450,3 +450,11 @@ Add one line per finished step: date, step, commit, notes.
   event-type select, address field and activity chips; `EventDetails` shows
   them in My bookings, the admin list and the admin calendar. Verified via
   curl (stored, shown on /account and /admin; bad activities rejected).
+- 2026-10-23 — 2.3 Confirmation screen: bookings get a `referenceCode`
+  (`PT-` + 4 chars, no 0/O/1/I/L; `src/lib/referenceCode.ts`, +2 tests).
+  `createBooking` ensures a unique partial index on `referenceCode` (plus an
+  index on `userId`) and retries on a duplicate. `POST /api/bookings`
+  returns the code; `BookingConfirmation` shows it with a full summary and
+  "What happens next". Code shown in My bookings, the admin list and the
+  admin calendar. Verified via curl: code stored and shown, duplicate code
+  rejected by the index, older bookings without a code unaffected.
