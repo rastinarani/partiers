@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ADMIN_COOKIE_NAME, verifyAdminSessionToken } from "@/lib/auth";
 import { getAdminById } from "@/lib/admins";
 import { getAllBookings } from "@/lib/bookings";
+import { todayString } from "@/lib/bookingDates";
 import { getAllReviews } from "@/lib/reviews";
 import AdminBookingsList from "@/components/AdminBookingsList";
 import AdminReviewsList from "@/components/AdminReviewsList";
@@ -52,7 +53,7 @@ export default async function AdminDashboardPage() {
 
       <section className="mb-12">
         <h2 className="mb-4 text-xl font-semibold">Booking requests</h2>
-        <AdminBookingsList initialBookings={bookings} />
+        <AdminBookingsList initialBookings={bookings} today={todayString()} />
       </section>
 
       <section>

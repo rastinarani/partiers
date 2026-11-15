@@ -163,7 +163,7 @@ email and password shows that person's past and upcoming bookings.
 The admin login page already exists. **Admin credentials are deliberately
 not set up yet** — see 3.4.
 
-### [ ] 3.1 Dashboard tabs and search
+### [x] 3.1 Dashboard tabs and search
 
 - Tabs for Pending / Confirmed / Declined / Cancelled with counts; a search
   box (parent name, child name, contact); upcoming bookings sorted by date.
@@ -370,6 +370,20 @@ settings only.
 
 Add one line per finished step: date, step, commit, notes.
 
+- 2026-11-14 — 3.1 Dashboard tabs and search (commit: "Add booking status filters and search to admin dashboard"):
+  default Pending view; Pending/Confirmed/Declined/Cancelled filter tabs with
+  live total counts; case-insensitive, trimmed parent/child/contact search;
+  matching-result count, clear-search empty state, Upcoming soonest first and
+  Past most recent first using the existing tested date helper. Successful
+  status changes refresh the server-rendered dashboard summary. Lint,
+  typecheck and all 156 unit tests pass. Production build passes with
+  `npm run build -- --webpack`; default Turbopack build was blocked by Google
+  Fonts network access, then an environment port-binding restriction.
+  Browser checked the real component with 32 in-memory sample bookings:
+  status counts/filtering, chronological order, parent/child/contact search,
+  whitespace/case handling, no matches, clear search and cancelled state.
+  Temporary sample page removed; no database test data or admin accounts
+  created. Real admin login/status mutation was not exercised this session.
 - 2026-10-23 — Roadmap created. Core features from the first build are in
   place (see "Where things stand").
 - 2026-10-23 — 0.1 Unit test setup: Vitest (`npm test`), 68 tests for
