@@ -2,9 +2,19 @@ import { MongoServerError, ObjectId, type Db, type Document } from "mongodb";
 import { getDb } from "./mongodb";
 import { generateReferenceCode } from "./referenceCode";
 import { DEFAULT_DURATION, toRange, type TimeRange } from "./schedule";
-import type { Booking, BookingStatus, NewBooking } from "./types";
+import type { AdminBooking, Booking, BookingStatus, BookingStatusChange, NewBooking } from "./types";
 
 const COLLECTION = "bookings";
+
+function historyFor(doc: Document): BookingStatusChange[] {
+  if (doc.statusHistory?.length) return doc.statusHistory;
+  // Older bookings only retain their initial request and latest status.
+  const history: BookingStatusChange[] = [{ status: "pending", at: doc.createdAt, actor: "system" }];
+  if (doc.status !== "pending") {
+    history.push({ status: doc.status, at: doc.updatedAt, actor: "unknown" });
+  }
+  return history;
+}
 
 let indexesReady: Promise<unknown> | null = null;
 
@@ -63,6 +73,7 @@ export async function createBooking(
         ...(userId ? { userId } : {}),
         referenceCode,
         status: "pending" satisfies BookingStatus,
+        statusHistory: [{ status: "pending", at: now, actor: "system" }],
         createdAt: now,
         updatedAt: now,
       });
@@ -96,13 +107,14 @@ export async function getConfirmedBookings(): Promise<Booking[]> {
 }
 
 /**
- * Admin confirm/decline. Returns "not_found" for unknown ids and
- * "cancelled" if the customer already cancelled (admins can't undo that).
+ * Status and history are saved together; matching the previous version
+ * prevents concurrent actions from overwriting each other's history.
  */
 export async function updateBookingStatus(
   id: string,
-  status: BookingStatus
-): Promise<"updated" | "not_found" | "cancelled"> {
+  status: BookingStatus,
+  adminId: string
+): Promise<"updated" | "not_found" | "cancelled" | "conflict"> {
   const db = await getDb();
   let objectId: ObjectId;
   try {
@@ -110,15 +122,22 @@ export async function updateBookingStatus(
   } catch {
     return "not_found";
   }
+  const doc = await db.collection(COLLECTION).findOne({ _id: objectId });
+  if (!doc) return "not_found";
+  if (doc.status === "cancelled") return "cancelled";
+  if (doc.status === status) return "updated";
+  const now = new Date().toISOString();
   const result = await db
     .collection(COLLECTION)
     .updateOne(
-      { _id: objectId, status: { $ne: "cancelled" } },
-      { $set: { status, updatedAt: new Date().toISOString() } }
+      { _id: objectId, status: doc.status, updatedAt: doc.updatedAt },
+      { $set: {
+        status, updatedAt: now,
+        statusHistory: [...historyFor(doc), { status, at: now, actor: "admin", actorId: adminId }],
+      } }
     );
   if (result.matchedCount > 0) return "updated";
-  const exists = await db.collection(COLLECTION).countDocuments({ _id: objectId }, { limit: 1 });
-  return exists ? "cancelled" : "not_found";
+  return "conflict";
 }
 
 /**
@@ -139,14 +158,22 @@ export async function cancelBookingForUser(
   } catch {
     return "not_found";
   }
+  const doc = await db.collection(COLLECTION).findOne({ _id: objectId, userId });
+  if (!doc) return "not_found";
+  if (doc.status !== "pending" && doc.status !== "confirmed") return "not_cancellable";
+  const now = new Date().toISOString();
   const result = await db.collection(COLLECTION).updateOne(
     {
       _id: objectId,
       userId,
-      status: { $in: ["pending", "confirmed"] },
+      status: doc.status,
       date: { $gte: today },
+      updatedAt: doc.updatedAt,
     },
-    { $set: { status: "cancelled" satisfies BookingStatus, updatedAt: new Date().toISOString() } }
+    { $set: {
+      status: "cancelled" satisfies BookingStatus, updatedAt: now,
+      statusHistory: [...historyFor(doc), { status: "cancelled", at: now, actor: "customer", actorId: userId }],
+    } }
   );
   if (result.matchedCount > 0) return "cancelled";
   const owned = await db
@@ -175,6 +202,24 @@ export async function getBookingById(id: string): Promise<Booking | null> {
   const db = await getDb();
   const doc = await db.collection(COLLECTION).findOne({ _id: objectId });
   return doc ? toBooking(doc) : null;
+}
+
+/** Private fields are added only for the authenticated admin detail page. */
+export async function getAdminBookingById(id: string): Promise<AdminBooking | null> {
+  if (!ObjectId.isValid(id)) return null;
+  const db = await getDb();
+  const doc = await db.collection(COLLECTION).findOne({ _id: new ObjectId(id) });
+  return doc ? { ...toBooking(doc), adminNotes: doc.adminNotes ?? "", statusHistory: historyFor(doc) } : null;
+}
+
+export async function updateAdminNotes(id: string, adminNotes: string): Promise<boolean> {
+  if (!ObjectId.isValid(id)) return false;
+  const db = await getDb();
+  const result = await db.collection(COLLECTION).updateOne(
+    { _id: new ObjectId(id) },
+    { $set: { adminNotes } }
+  );
+  return result.matchedCount > 0;
 }
 
 /**

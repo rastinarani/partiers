@@ -16,7 +16,8 @@ import { todayString } from "@/lib/bookingDates";
 import { isDateBlocked } from "@/lib/blockedDates";
 import { findOverlap, formatTimeRange, toRange } from "@/lib/schedule";
 import { getUserById } from "@/lib/users";
-import { validateBookingInput } from "@/lib/validation";
+import { getAdminById } from "@/lib/admins";
+import { validateAdminBookingStatusInput, validateBookingInput } from "@/lib/validation";
 
 // Public: submit a new booking request. Always starts out "pending" —
 // nothing is auto-confirmed. Guests can book; if a customer is logged in,
@@ -63,24 +64,23 @@ export async function POST(request: Request) {
   return NextResponse.json({ id, referenceCode }, { status: 201 });
 }
 
-// Admin only: confirm or decline a booking request.
+// Admin only: confirm, decline or cancel a booking request.
 export async function PATCH(request: Request) {
   const cookieStore = await cookies();
-  if (!verifyAdminSessionToken(cookieStore.get(ADMIN_COOKIE_NAME)?.value)) {
+  const adminId = verifyAdminSessionToken(cookieStore.get(ADMIN_COOKIE_NAME)?.value);
+  if (!adminId || !(await getAdminById(adminId))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json().catch(() => null);
-  const id = typeof body?.id === "string" ? body.id : null;
-  const status = body?.status;
-
-  if (!id || (status !== "confirmed" && status !== "declined")) {
+  const input = validateAdminBookingStatusInput(await request.json().catch(() => null));
+  if (!input) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
+  const { id, status, force } = input;
 
   // Warn (don't block) when confirming would clash with another confirmed
   // booking; the admin can resend with force: true to confirm anyway.
-  if (status === "confirmed" && body?.force !== true) {
+  if (status === "confirmed" && !force) {
     const booking = await getBookingById(id);
     if (booking) {
       const taken = await getTakenRanges(booking.date, booking._id);
@@ -101,13 +101,19 @@ export async function PATCH(request: Request) {
     }
   }
 
-  const result = await updateBookingStatus(id, status);
+  const result = await updateBookingStatus(id, status, adminId);
+  if (result === "conflict") {
+    return NextResponse.json(
+      { error: "This booking changed while you were updating it. Refresh and try again." },
+      { status: 409 }
+    );
+  }
   if (result === "not_found") {
     return NextResponse.json({ error: "Booking not found." }, { status: 404 });
   }
   if (result === "cancelled") {
     return NextResponse.json(
-      { error: "The customer cancelled this booking." },
+      { error: "This booking has already been cancelled." },
       { status: 409 }
     );
   }

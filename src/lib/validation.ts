@@ -167,3 +167,21 @@ export function validateBlockDateInput(body: unknown) {
 
   return { date: b.date, reason };
 }
+
+export function validateAdminNotesInput(body: unknown) {
+  if (typeof body !== "object" || body === null) return null;
+  const notes = (body as Record<string, unknown>).adminNotes;
+  if (typeof notes !== "string" || notes.length > 5000) return null;
+  return { adminNotes: notes.trim() };
+}
+
+export function validateAdminBookingStatusInput(body: unknown): {
+  id: string; status: "confirmed" | "declined" | "cancelled"; force: boolean;
+} | null {
+  if (typeof body !== "object" || body === null) return null;
+  const b = body as Record<string, unknown>;
+  if (typeof b.id !== "string" || !/^[a-f\d]{24}$/i.test(b.id)) return null;
+  if (b.status !== "confirmed" && b.status !== "declined" && b.status !== "cancelled") return null;
+  if (b.force !== undefined && typeof b.force !== "boolean") return null;
+  return { id: b.id, status: b.status, force: b.force === true };
+}

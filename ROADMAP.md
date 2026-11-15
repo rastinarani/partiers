@@ -169,7 +169,7 @@ not set up yet** — see 3.4.
   box (parent name, child name, contact); upcoming bookings sorted by date.
 - **Done when:** finding one booking among 30 test bookings takes seconds.
 
-### [ ] 3.2 Booking detail page
+### [x] 3.2 Booking detail page
 
 - `/admin/bookings/[id]`: every detail, the status history, private admin
   notes (only admins can see them), and confirm/decline/cancel actions.
@@ -370,6 +370,25 @@ settings only.
 
 Add one line per finished step: date, step, commit, notes.
 
+- 2026-11-14 — 3.2 Booking detail page (commit: "Add private admin booking details and status history"):
+  `/admin/bookings/[id]` shows family/event details, reference, parent notes,
+  status history, and a private notes editor. Dashboard cards link to it.
+  Admin confirm/decline/cancel actions preserve overlap warnings; cancellation
+  requires confirmation. Notes PATCH and status PATCH verify a signed session
+  and a real admin account. Dedicated admin reader exposes private fields;
+  shared booking readers explicitly omit notes/history. History starts at
+  creation and records both admin and customer changes, with version-matched
+  writes to prevent concurrent history overwrites and no duplicate events for
+  repeated status requests. Older bookings show their known initial/latest
+  status without inventing intervening history. Lint, typecheck, all 178 unit
+  tests and `npm run build -- --webpack` pass (supported build alternative
+  used because of the previously observed Turbopack environment restriction).
+  Local MongoDB integration check verified note persistence/clearing, customer
+  privacy, history, duplicate suppression and cancelled-booking protection;
+  temporary booking and check removed. Browser checked editor cancellation
+  confirmation, failed-save draft retention and logged-out detail-page redirect
+  using a temporary sample page, then removed it. No admin accounts created;
+  full authenticated browser flow awaits the owner's admin setup.
 - 2026-11-14 — 3.1 Dashboard tabs and search (commit: "Add booking status filters and search to admin dashboard"):
   default Pending view; Pending/Confirmed/Declined/Cancelled filter tabs with
   live total counts; case-insensitive, trimmed parent/child/contact search;

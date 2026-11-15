@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { splitUpcomingAndPast } from "@/lib/bookingDates";
 import { formatTimeRange } from "@/lib/schedule";
@@ -142,7 +143,7 @@ export default function AdminBookingsList({ initialBookings, today }: {
               </div>
 
               {b.status === "cancelled" ? (
-                <p className="mt-3 text-sm text-muted">Cancelled by the customer.</p>
+                <p className="mt-3 text-sm text-muted">This booking has been cancelled.</p>
               ) : warning?.bookingId === b._id ? (
                 <div className="mt-3 rounded-xl bg-accent/10 p-3 text-sm">
                   <p>
@@ -183,6 +184,9 @@ export default function AdminBookingsList({ initialBookings, today }: {
                   </Button>
                 </div>
               )}
+              <Link href={`/admin/bookings/${b._id}`} className="mt-3 inline-block text-sm font-medium text-primary underline underline-offset-4">
+                View booking details
+              </Link>
             </Card>
           ))}
         </section>

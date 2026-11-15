@@ -2,6 +2,18 @@ import type { Activity, EventType } from "./eventOptions";
 
 export type BookingStatus = "pending" | "confirmed" | "declined" | "cancelled";
 
+export interface BookingStatusChange {
+  status: BookingStatus;
+  at: string;
+  actor: "system" | "admin" | "customer" | "unknown";
+  actorId?: string;
+}
+
+export interface AdminBooking extends Booking {
+  adminNotes: string;
+  statusHistory: BookingStatusChange[];
+}
+
 export interface Booking {
   _id: string;
   parentName: string;
