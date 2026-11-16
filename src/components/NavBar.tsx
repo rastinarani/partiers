@@ -2,13 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { USER_COOKIE_NAME, verifyUserSessionToken } from "@/lib/auth";
 import { getUserById } from "@/lib/users";
-import LoginLink from "./LoginLink";
-
-const links = [
-  { href: "/", label: "Book Us" },
-  { href: "/reviews", label: "Reviews" },
-  { href: "/about", label: "About" },
-];
+import Navigation from "./Navigation";
 
 export default async function NavBar() {
   const cookieStore = await cookies();
@@ -27,23 +21,7 @@ export default async function NavBar() {
           </span>
           Partiers
         </Link>
-        <nav className="flex min-w-0 items-center gap-2 overflow-x-auto text-xs font-medium whitespace-nowrap text-muted sm:gap-6 sm:text-sm">
-          {links.map((link) => (
-            <Link key={link.href} href={link.href} className="hover:text-foreground">
-              {link.label}
-            </Link>
-          ))}
-          {user ? (
-            <Link
-              href="/account"
-              className="shrink-0 rounded-full bg-primary-soft px-2.5 py-1.5 text-primary hover:opacity-80 sm:px-3"
-            >
-              Hi, {user.name.split(" ")[0]}
-            </Link>
-          ) : (
-            <LoginLink className="shrink-0 rounded-full bg-primary-soft px-2.5 py-1.5 text-primary hover:opacity-80 sm:px-3" />
-          )}
-        </nav>
+        <Navigation userName={user?.name} />
       </div>
     </header>
   );

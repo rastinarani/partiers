@@ -29,7 +29,7 @@ owner's go-ahead) · 🔑 needs the owner to create an account or provide a key
   confirmed-bookings calendar.
 - Vibrant violet/rose/amber theme, mobile-friendly layout.
 
-**Known gaps:** mobile navigation/footer, accessibility pass, emails, rate
+**Known gaps:** accessibility pass, emails, rate
 limiting and a full account/admin end-to-end suite. Public animations
 respect reduced motion, and local browser checks cover public pages and booking.
 
@@ -253,11 +253,11 @@ there's a strong reason not to. Every animation must respect
 - **Done when:** a first-time visitor understands the offer without the About
   page.
 
-### [ ] 5.2 Mobile menu and footer
+### [x] 5.2 Mobile menu and footer
 
 - **Inputs confirmed:** public email **nikkitheawsome@gmail.com** and service
   area **Metro Vancouver**. No further contact-detail decision is needed.
-  These details are recorded but have not yet been added to the footer.
+  These exact details are now in the footer.
 
 - A hamburger menu with an animated drawer on small screens; a richer footer
   (contact email, area served, links).
@@ -371,48 +371,56 @@ settings only.
 
 ---
 
-## Session handoff — 2026-11-16 (ready to resume)
+## Session handoff — 2026-11-16
 
-- Completed and pushed: **0.1–3.3, 4.1–4.5, 5.1, 5.3 and 5.4**.
-  Step 3.4 remains deferred. On 2026-11-16, Git was clean and the completed
-  website commits were confirmed on `origin/main`; this update changes docs only.
-- **Next active step: 5.2 Mobile menu and footer.** It was not started while
-  public contact details were pending. The owner has now explicitly confirmed:
-  **nikkitheawsome@gmail.com** and **Metro Vancouver**. Use those exact public
-  details in the footer; do not invent an address, phone, prices or service rules.
-- **Exact resume procedure:** read AGENTS.md/CLAUDE.md and this handoff, inspect
-  Git status and actual files, then implement **only 5.2** before starting 5.5.
-  Start with `src/components/NavBar.tsx`, `Footer.tsx` and `LoginLink.tsx`; review
-  existing motion helpers and the relevant installed Next.js docs before coding.
-  Add a mobile menu/drawer and richer footer using the confirmed details above.
-  Preserve signed-in account links, logged-out login return paths and desktop
-  navigation. Check 360 px width, long account names, keyboard focus, Escape/
-  close/navigation behavior and reduced motion. Run the project checks and
-  browser checks, update this log, and commit the verified step.
-- **After 5.2:** continue with 5.5 accessibility. Phase 6 requires the owner's
-  email-provider setup/approval; do not invent keys or start paid services.
-- The owner asked to stop because usage is close to ending. **5.5 has not been
-  started**; its unused accessibility-check dependency was removed. No partial
-  implementation is left behind. 5.6 photos and admin setup stay deferred.
-- Lint/typecheck, 224 tests and webpack production build pass. Local Chromium
-  checks cover the home content, approved/pending/deleted testimonial cases,
-  native FAQ keyboard controls, booking links/flow, error retry and sharing
-  metadata/images. Temporary error route/type/flag and database fixtures removed.
-- Still unverified: actual root-layout fault recovery (component rendering only),
-  live chat-app preview/cache behavior, physical phones/Safari/Firefox and full
-  authenticated admin flows. No admin accounts were created. Production database
-  settings were not changed; its known connection issue remains Phase 8.
-- Previous browser checks used a local dev server on port 3000. Check whether
-  it is running before starting another server; do not assume it is still active.
-  `npm run test:motion`, `npm run test:booking`, and `npm run test:seo` are local
-  checks. `npm run build -- --webpack` is the verified build alternative for
-  the previously documented environment restriction on fresh Turbopack CSS builds.
+- Completed: **0.1–3.3, 4.1–4.5, 5.1–5.4**. Current work is on
+  `codex/mobile-accessibility-checkpoint`; do not merge or force-push.
+- **Next active step: 5.5 Accessibility pass.** Read the project rules and
+  installed Next.js guides, then check the calendar, shared fields, focus,
+  contrast and a complete keyboard-only booking. Verify and commit this step
+  before continuing. 3.4/5.6/8.2 stay deferred; no admin accounts or credentials.
+- Phase 6 is blocked on the owner's email-provider account/approval and key.
+  Record that blocker and continue independent authorized Phase 7 work when
+  time permits. No production settings, paid services or secrets may change.
+- The footer now uses the confirmed public email **nikkitheawsome@gmail.com**
+  and service area **Metro Vancouver**. Do not invent prices or service rules.
+- Local verification: lint, typecheck, 224 unit tests and webpack production
+  build pass. The default Turbopack build passed once from cache, but a fresh
+  CSS build hit the documented sandbox process/port restriction; use
+  `npm run build -- --webpack` here. Chromium checks cover 360px/desktop menu,
+  long names, focus wrapping/restoration, Escape/outside/link/resize closing,
+  reduced motion, footer and the full guest booking regression.
+- Use **`npm run test:isolated -- navigation booking motion seo`** for browser
+  checks. It starts a separate source snapshot/server at port 3100 with a random
+  local test database and signing secret, then removes both. It never reads
+  `.env.local` or modifies the owner's existing server/database. Mutating old
+  browser scripts now require an isolated test database. See README.md.
+- Still unverified: physical phones/Safari/Firefox, full authenticated admin
+  flows, actual root-layout fault recovery and live sharing-preview caches.
+  Production database settings and the known live connection issue remain
+  untouched for Phase 8.
 
 ---
 
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-16 — 5.2 Mobile menu and footer (commit: "Add mobile navigation and contact footer"):
+  responsive desktop links and animated native-dialog mobile drawer, current-page
+  labels, preserved account/login return links, long-name handling, modal focus
+  wrapping/restoration, Escape/outside/navigation/desktop-resize close and scroll
+  lock. Drawer respects reduced motion including live preference changes.
+  Footer adds the confirmed public email/area and useful booking/review/about/
+  account links. No invented contact details, prices or account credentials.
+  Lint/typecheck, 224 tests and webpack build pass; fresh default Turbopack build
+  hits the existing sandbox port restriction. Isolated Chromium checks verified
+  360px/640px/desktop, long customer name, main/edge menu interactions, footer
+  details, reduced motion and the complete existing booking regression. Menu
+  screenshot visually inspected. New source-snapshot browser runner uses a random
+  loopback-only test database and secret, leaving the existing server and local
+  data untouched; fixtures/database/source snapshot removed after checks.
+  README explains cloud-safe setup and checks. Next active step: 5.5.
 
 - 2026-11-16 — Repository checkpoint (commit: "Clarify current progress and exact resume point"):
   confirmed completed website commits already pushed and clean local state;

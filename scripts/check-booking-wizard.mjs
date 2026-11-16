@@ -7,10 +7,11 @@ const uri = process.env.MONGODB_URI;
 const baseURL = process.env.PARTIERS_TEST_URL ?? "http://localhost:3000";
 if (
   !uri ||
+  !/^partiers_test_[a-f0-9]+$/.test(process.env.MONGODB_DB ?? "") ||
   !["localhost", "127.0.0.1"].includes(new URL(uri).hostname) ||
   !["localhost", "127.0.0.1"].includes(new URL(baseURL).hostname)
 )
-  throw new Error("This check requires a local website and local MongoDB.");
+  throw new Error("Run with npm run test:isolated -- booking (temporary local database required).");
 const client = new MongoClient(uri, { serverSelectionTimeoutMS: 3000 });
 const fixtureId = new ObjectId();
 const contact = `wizard-${fixtureId}@example.invalid`;

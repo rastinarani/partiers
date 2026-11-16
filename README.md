@@ -5,10 +5,10 @@ events, get-togethers). Built with Next.js (App Router), MongoDB, and Tailwind C
 
 ## Running locally
 
-1. Make sure MongoDB is running locally (this repo's dev setup already installed
-   and started it via Homebrew: `brew services start mongodb/brew/mongodb-community`).
-2. Copy `.env.example` to `.env.local` and fill in the values (a working
-   `.env.local` for local dev already exists in this project).
+1. Make sure MongoDB is running locally. If installed with Homebrew, start it
+   with `brew services start mongodb/brew/mongodb-community`.
+2. Copy `.env.example` to `.env.local` and fill in the values. In a new or cloud
+   workspace, do not assume this file or a local database already exists.
 3. Install dependencies and start the dev server:
 
    ```bash
@@ -21,6 +21,26 @@ events, get-togethers). Built with Next.js (App Router), MongoDB, and Tailwind C
    see [Admin auth](#admin-auth) when the owner is ready.
 
 5. Open http://localhost:3000. The admin dashboard is at `/admin/login`.
+
+## Safe browser checks
+
+With dependencies, Playwright Chromium and a local MongoDB server available:
+
+```bash
+npm run test:isolated -- navigation booking motion seo
+```
+
+This makes a temporary source copy, starts a separate server at
+http://127.0.0.1:3100, and uses a randomly named `partiers_test_…` database.
+It supplies a temporary session-signing secret, never reads `.env.local`,
+and removes its database and source copy afterwards. The existing server,
+accounts and bookings are untouched. No admin accounts are created.
+
+Choose one or more checks from the command above. If port 3100 is occupied,
+use `PARTIERS_TEST_PORT=3101 npm run test:isolated -- navigation`.
+The default database server is `mongodb://127.0.0.1:27017`; an alternative
+loopback-only server can be supplied with `PARTIERS_TEST_MONGODB_URI`.
+Never use a production database for tests.
 
 ## Project structure
 

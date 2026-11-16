@@ -102,7 +102,7 @@ body {
     scroll-behavior: auto !important;
   }
 
-  [data-motion="entrance"], [data-motion="hover"] {
+  [data-motion="entrance"], [data-motion="hover"], [data-motion="drawer"] {
     opacity: 1 !important;
     transform: none !important;
   }

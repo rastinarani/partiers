@@ -3,9 +3,9 @@ import { chromium } from "playwright";
 import { MongoClient, ObjectId } from "mongodb";
 
 const uri = process.env.MONGODB_URI;
-if (!uri || !["localhost", "127.0.0.1"].includes(new URL(uri).hostname)) {
+if (!uri || !/^partiers_test_[a-f0-9]+$/.test(process.env.MONGODB_DB ?? "") || !["localhost", "127.0.0.1"].includes(new URL(uri).hostname)) {
   throw new Error(
-    "This check only uses a local MongoDB database. Start the local site and load its local environment first.",
+    "Run with npm run test:isolated -- motion (temporary local database required).",
   );
 }
 const baseURL = process.env.PARTIERS_TEST_URL ?? "http://localhost:3000";
