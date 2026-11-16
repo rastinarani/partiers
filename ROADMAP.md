@@ -29,8 +29,8 @@ owner's go-ahead) · 🔑 needs the owner to create an account or provide a key
   confirmed-bookings calendar.
 - Vibrant violet/rose/amber theme, mobile-friendly layout.
 
-**Known gaps:** emails, rate
-limiting and a full account/admin end-to-end suite. Public animations
+**Known gaps:** emails, spam protection, session hardening and a full
+account/admin end-to-end suite. Public animations
 respect reduced motion, and local browser checks cover public pages and booking.
 
 **Live site:** a Vercel project exists at `partiers.vercel.app`, but its
@@ -320,7 +320,7 @@ work after 5.5; do not create an account, invent a key or change production.
 
 ## Phase 7 — Security and reliability
 
-### [ ] 7.1 Rate limiting
+### [x] 7.1 Rate limiting
 
 - Limit login, signup, booking and review submissions per IP (e.g. using a
   MongoDB collection with a TTL index, so no extra service is needed).
@@ -377,33 +377,42 @@ work after 5.5; do not create an account, invent a key or change production.
 
 ## Session handoff — 2026-11-16
 
-- Completed: **0.1–3.3, 4.1–4.5, 5.1–5.5**. Work is on
-  `codex/mobile-accessibility-checkpoint`; do not merge or force-push.
-- **Next independent step: 7.1 Rate limiting.** 3.4/5.6/8.2 stay deferred.
+- Completed: **0.1–3.3, 4.1–4.5, 5.1–5.5 and 7.1**. Work is on
+  `codex/mobile-accessibility-checkpoint`; mobile/accessibility commits have
+  been pushed. Do not merge or force-push.
+- **Next independent step: 7.2 Spam protection.** 3.4/5.6/8.2 stay deferred.
   Phase 6 is blocked on the owner's email-provider account/approval and key;
   6.1/6.2 remain unstarted. No admin accounts, owner credentials, paid services
   or production settings may be created/changed.
 - 5.2 added the mobile drawer and confirmed footer contact details. 5.5 added
-  calendar arrow/week/month shortcuts, a single day tab stop, meaningful date
-  labels, skip link, global focus rings, live errors, stronger text/control
-  contrast, non-color star selection, confirmation focus and long-text wrapping.
-- Verification: lint/typecheck, **229 unit tests**, webpack build, isolated
-  Chromium keyboard-only booking/review, A/AA axe scans on public/auth/404 pages
-  and every booking step/error/success, menu tests, full booking regression,
-  motion and SEO checks pass. Screenshots inspected; temporary databases and
-  source snapshots removed. Native select type-ahead is tested because popup
-  arrow handling is outside macOS headless Chromium's automation support.
-- Use **`npm run test:isolated -- navigation accessibility booking motion seo`**.
-  It starts a separate source snapshot/server at port 3100 with a random local
-  test database/signing secret, never reads `.env.local`, and cleans up. Existing
-  server/data stay untouched. `npm run build -- --webpack` avoids the documented
-  fresh Turbopack sandbox process/port restriction.
-- During installation, `npm audit --omit=dev` reported **two existing production
-  dependency alerts (Next.js and sharp)**. No application dependency was changed
-  by 5.5; review safe security updates during Phase 7 before deployment.
+  keyboard calendar navigation, labels, skip link, focus/error announcements,
+  stronger contrast, non-color star selection and mobile long-text wrapping.
+- 7.1 adds atomic MongoDB rate counters with BSON expiry/TTL cleanup and hashed
+  client identity: shared customer/admin login 10/15min, signup 5/hour, booking
+  10/hour, review 5/hour. Counts invalid requests too. HTTP 429 includes a friendly
+  message and Retry-After; unavailable protection fails closed with generic 503.
+  Vercel platform headers supply trusted IPs; direct servers ignore spoofable
+  headers and share a conservative bucket. Recheck the proxy/IP setup before
+  changing hosting. README links the primary platform documentation.
+- Security maintenance: Next.js and matching lint config updated to **16.4.6**,
+  including fixed sharp; compatible development-tool transitive fixes applied.
+  Full `npm audit` now reports **zero vulnerabilities**, clearing the baseline
+  production/development alerts. No force/major audit fix or new service used.
+- Verification: lint/typecheck, **240 unit tests**, default production build
+  (with local compiler process/port permission), and six isolated checks pass:
+  `limits navigation accessibility booking motion seo`. Limits check includes
+  20 concurrent mixed login failures (exactly 10 allowed), browser feedback,
+  all quotas, spoofed headers, TTL index and fresh-window recovery; no accounts
+  or content are created by that check. All test fixtures/databases removed.
+- Use **`npm run test:isolated -- limits navigation accessibility booking motion seo`**.
+  Tests use a separate source snapshot/server at port 3100, random local database
+  and secret, never `.env.local`. Run builds and browser checks sequentially on
+  low-disk machines. One regression attempt hit MongoDB's disk safety threshold;
+  removing only generated `.next/cache` restored space, then all checks passed.
+  Keep the owner's existing server/database and MongoDB safety settings intact.
 - Still unverified: manual screen-reader use, physical phones/Safari/Firefox,
   full authenticated admin flows, actual root-layout fault recovery, live edge
-  behavior and sharing-preview caches. Production database settings and its
+  IP behavior and sharing-preview caches. Production database/settings and its
   known live connection issue remain untouched for Phase 8.
 
 ---
@@ -411,6 +420,27 @@ work after 5.5; do not create an account, invent a key or change production.
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-16 — 7.1 Rate limiting (commit: "Limit repeated submissions and update vulnerable dependencies"):
+  shared customer/admin login quota plus separate signup/booking/review quotas;
+  HMAC-hashed client identities, canonical IPv6, Vercel-only trusted forwarding
+  headers and conservative shared direct-server fallback. Atomic increment/
+  upsert handles first-write collisions, fixed-window IDs reset independently
+  of TTL cleanup, BSON expiry index removes stale buckets. Friendly non-cacheable
+  429/Retry-After and fail-closed generic 503 run before parsing/business writes.
+  Unit tests cover quotas, privacy, windows/IP/action separation, collisions,
+  index recovery and all five route guards. Real isolated MongoDB/HTTP/browser
+  tests cover concurrency (20 requests, exactly 10 admitted), shared login scope,
+  quotas, forged headers, retry UI, index/expiry and stale-bucket recovery with
+  unchanged account/content counts. Lint/typecheck, 240 tests, default build
+  with compiler port permission, and all six isolated browser suites pass.
+  Next.js/lint config 16.4.6 plus compatible transitive patches clear both
+  production and development audit alerts: full npm audit reports zero.
+  Read updated installed route/request/response guides before route edits.
+  One regression run was blocked by disk space, not an application assertion;
+  cleared generated compiler cache only, reran successfully, and documented
+  serial verification. No admin accounts, chosen credentials, production data
+  or settings changed; temporary data removed. Next independent step: 7.2.
 
 - 2026-11-16 — 5.5 Accessibility pass (commit: "Make bookings accessible by keyboard"):
   semantic calendar grid with full date/weekday labels, one roving day tab stop,

@@ -3,9 +3,12 @@ import { NextResponse } from "next/server";
 import { ADMIN_COOKIE_NAME, verifyAdminSessionToken } from "@/lib/auth";
 import { createReview, updateReviewStatus } from "@/lib/reviews";
 import { validateReviewInput } from "@/lib/validation";
+import { rateLimitResponse } from "@/lib/rateLimit";
 
 // Public: submit a new review. Starts "pending" until an admin approves it.
 export async function POST(request: Request) {
+  const limited = await rateLimitResponse(request, "review");
+  if (limited) return limited;
   const body = await request.json().catch(() => null);
   const input = validateReviewInput(body);
 

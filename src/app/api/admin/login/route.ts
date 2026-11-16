@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import { ADMIN_COOKIE_NAME, createAdminSessionToken } from "@/lib/auth";
 import { verifyAdminCredentials } from "@/lib/admins";
 import { validateLoginInput } from "@/lib/validation";
+import { rateLimitResponse } from "@/lib/rateLimit";
 
 export async function POST(request: Request) {
+  const limited = await rateLimitResponse(request, "login");
+  if (limited) return limited;
   const body = await request.json().catch(() => null);
   const input = validateLoginInput(body);
 

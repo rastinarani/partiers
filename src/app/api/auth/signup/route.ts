@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import { USER_COOKIE_NAME, createUserSessionToken } from "@/lib/auth";
 import { createUser } from "@/lib/users";
 import { validateSignupInput } from "@/lib/validation";
+import { rateLimitResponse } from "@/lib/rateLimit";
 
 export async function POST(request: Request) {
+  const limited = await rateLimitResponse(request, "signup");
+  if (limited) return limited;
   const body = await request.json().catch(() => null);
   const input = validateSignupInput(body);
 

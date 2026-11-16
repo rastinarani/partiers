@@ -10,6 +10,7 @@ import { MongoClient } from "mongodb";
 const checks = {
   navigation: "check-navigation.mjs",
   accessibility: "check-accessibility.mjs",
+  limits: "check-rate-limits.mjs",
   booking: "check-booking-wizard.mjs",
   motion: "check-public-motion.mjs",
   seo: "check-seo.mjs",
@@ -27,6 +28,7 @@ const baseURL = `http://127.0.0.1:${port}`;
 const environment = {
   ...process.env,
   NODE_ENV: "development",
+  VERCEL: "",
   MONGODB_URI: uri,
   MONGODB_DB: dbName,
   ADMIN_SESSION_SECRET: randomBytes(32).toString("hex"),

@@ -18,12 +18,15 @@ import { findOverlap, formatTimeRange, toRange } from "@/lib/schedule";
 import { getUserById } from "@/lib/users";
 import { getAdminById } from "@/lib/admins";
 import { validateAdminBookingStatusInput, validateBookingInput } from "@/lib/validation";
+import { rateLimitResponse } from "@/lib/rateLimit";
 
 // Public: submit a new booking request. Always starts out "pending" —
 // nothing is auto-confirmed. Guests can book; if a customer is logged in,
 // the booking is linked to their account via the session cookie (never via
 // the request body).
 export async function POST(request: Request) {
+  const limited = await rateLimitResponse(request, "booking");
+  if (limited) return limited;
   const body = await request.json().catch(() => null);
   const input = validateBookingInput(body);
 

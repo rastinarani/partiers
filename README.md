@@ -27,7 +27,7 @@ events, get-togethers). Built with Next.js (App Router), MongoDB, and Tailwind C
 With dependencies, Playwright Chromium and a local MongoDB server available:
 
 ```bash
-npm run test:isolated -- navigation accessibility booking motion seo
+npm run test:isolated -- navigation accessibility booking motion seo limits
 ```
 
 This makes a temporary source copy, starts a separate server at
@@ -46,6 +46,40 @@ The accessibility check scans the public pages and all five booking screens,
 then sends a real test booking and review using the keyboard alone. It checks
 labels, contrast, calendar shortcuts, error announcements and focus. Automated
 checks do not replace manual screen-reader or physical-phone testing.
+
+Run browser checks and production builds one after another on small machines;
+both need temporary disk space. MongoDB also reserves a safety margin before it
+will create indexes. Generated `.next/cache` files can be rebuilt; never delete
+database files to make room.
+
+## Submission protection
+
+The site uses MongoDB counters with automatic expiry; no extra service or
+account is needed. These fixed-window limits count all attempts, including
+invalid input:
+
+| Action | Limit per client IP |
+| --- | --- |
+| Customer and admin sign-in combined | 10 per 15 minutes |
+| Account signup | 5 per hour |
+| Booking request | 10 per hour |
+| Review submission | 5 per hour |
+
+An excess request gets a friendly message and an HTTP `429` response with a
+`Retry-After` header. Requests cannot proceed when the protection database is
+unavailable; a generic `503` message asks the visitor to retry. Existing booking
+drafts remain available after a rejected send.
+
+On Vercel, the site uses its platform-supplied client-IP header, as documented in
+[Vercel request headers](https://vercel.com/docs/headers/request-headers#x-vercel-forwarded-for).
+It stores a keyed hash instead of the IP address itself. Direct local servers
+ignore caller-supplied forwarding headers and share one conservative bucket.
+Before moving to a different host, verify its trusted proxy/IP setup during
+Phase 8; do not trust arbitrary forwarding headers on a public direct server.
+
+`npm run test:isolated -- limits` checks concurrent requests against real local
+MongoDB, the browser error, quotas, automatic-expiry index, spoofed-header
+resistance and recovery without creating any accounts.
 
 ## Project structure
 
