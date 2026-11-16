@@ -243,7 +243,7 @@ there's a strong reason not to. Every animation must respect
 
 ## Phase 5 — Professional polish
 
-### [ ] 5.1 A real home page
+### [x] 5.1 A real home page
 
 - Above or below the booking area, add: packages/services (e.g. "Party
   host", "Activity hour", "Full party" with what's included), "How it works"
@@ -254,6 +254,9 @@ there's a strong reason not to. Every animation must respect
   page.
 
 ### [ ] 5.2 Mobile menu and footer
+
+- **Input pending (2026-11-15):** owner must confirm the public contact email
+  and service area. Asked in chat; no contact details have been assumed or added.
 
 - A hamburger menu with an animated drawer on small screens; a richer footer
   (contact email, area served, links).
@@ -385,6 +388,18 @@ settings only.
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-15 — 5.1 A real home page (commit: "Explain services and booking on the home page"):
+  service cards drawn from existing event/activity choices, three booking steps,
+  direct booking/activity links, three approved testimonials (or an honest review
+  invitation), and native keyboard/no-JavaScript-capable FAQ disclosure controls
+  covering ages, group size, activities, payment, confirmation and changes.
+  Copy does not invent prices, capacity guarantees or business policies.
+  Existing five-step booking/account prefill preserved. Lint, typecheck, 221
+  tests and webpack build pass; Chromium verifies home content, approved-only
+  reviews including pending/deleted exclusions, FAQ keyboard toggling, booking
+  anchor, phone layout, reduced motion and the real guest booking flow. Fixtures
+  removed and phone screenshot inspected. No credentials/settings changed.
 
 - 2026-11-15 — 4.5 Loading and optimistic updates (commit: "Keep slow pages and admin updates responsive"):
   shared accessible skeletons for home/booking, reviews, account, admin dashboard,
