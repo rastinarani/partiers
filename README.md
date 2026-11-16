@@ -179,3 +179,21 @@ the account page.
 
 That's it — no payment processing to configure since bookings are paid in
 person.
+
+## Animation conventions
+
+Reusable components live in `src/components/motion/`. `MotionProvider` is
+installed in the root layout and follows `prefers-reduced-motion`, including
+changes made while the page is open. Use `useReducedMotionSetting()` for new
+interactive effects, and pass that current value as Motion's `reduceMotion`
+transition option because the animation engine snapshots its mount-time policy.
+
+`FadeIn` provides a short entrance without hiding server-rendered content.
+`StaggerChildren` spaces entrances by 40 ms and caps the last delay at 120 ms.
+Global CSS disables transitions and CSS animations when reduced motion is on.
+Never require an animation to finish before a button or form can be used.
+
+`npm test` includes component interaction tests in a simulated page. For local
+browser checks, Playwright is available; install its browser with
+`npx playwright install chromium`. The full booking/admin end-to-end suite
+remains roadmap step 7.4.

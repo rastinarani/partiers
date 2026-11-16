@@ -94,3 +94,16 @@ body {
   height: 240px;
   background: var(--accent);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+
+  [data-motion="entrance"] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

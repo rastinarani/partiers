@@ -199,7 +199,7 @@ Use the `motion` library (`import { motion } from "motion/react"`) unless
 there's a strong reason not to. Every animation must respect
 `prefers-reduced-motion`.
 
-### [ ] 4.1 Animation setup
+### [x] 4.1 Animation setup
 
 - Install `motion`; create a few reusable pieces (`FadeIn`,
   `StaggerChildren`) in `src/components/motion/`; add a global
@@ -369,6 +369,22 @@ settings only.
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-15 — 4.1 Animation setup (commit: "Add accessible reusable animation setup"):
+  installed Motion; root MotionProvider tracks device preferences live, with a
+  still server snapshot. Reusable FadeIn/StaggerChildren leave content visible
+  before hydration and without JavaScript, cap entrance delays, and stop/reset
+  movement on preference changes. Global reduced-motion CSS disables CSS
+  transitions/animations and entrance transforms. Added local component/browser
+  testing tools and documented animation conventions. Lint, typecheck, 196 unit
+  and component tests, webpack production build and local About HTTP check pass.
+  Playwright Chromium (explicitly authorized after CUA host was unavailable)
+  verified actual movement in normal mode, no movement in reduced mode, live
+  preference changes, no-JavaScript visibility and no browser errors using a
+  temporary sample route, removed afterward. Fixed a real hydration issue caught
+  by that check: Motion snapshots its initial policy; transitions now receive
+  the current preference explicitly. Physical macOS settings were simulated
+  through the equivalent browser media preference. No database changes.
 
 - 2026-11-15 — 3.3 Remove spam (commit: "Hide spam bookings and reviews without erasing records"):
   shared inline Hide/Keep confirmation on dashboard booking/review cards and
