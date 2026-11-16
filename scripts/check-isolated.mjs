@@ -8,6 +8,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import { MongoClient } from "mongodb";
 
 const checks = {
+  sessions: "check-sessions.mjs",
   navigation: "check-navigation.mjs",
   accessibility: "check-accessibility.mjs",
   limits: "check-rate-limits.mjs",

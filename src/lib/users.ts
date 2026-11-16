@@ -1,3 +1,4 @@
+import { createUserSessionToken, sessionRevision } from "./auth";
 import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
 import { ObjectId, type Document } from "mongodb";
 import { getDb } from "./mongodb";
@@ -20,12 +21,12 @@ function toPublicUser(doc: Document): PublicUser {
   return { id: doc._id.toString(), name: doc.name, email: doc.email, phone: doc.phone ?? "" };
 }
 
-/** Returns the new user, or null if that email is already registered. */
+/** Returns the new user and signed session, or null if the email is registered. */
 export async function createUser(
   name: string,
   email: string,
   password: string
-): Promise<PublicUser | null> {
+): Promise<{ user: PublicUser; token: string } | null> {
   const db = await getDb();
   const normalizedEmail = email.toLowerCase();
 
@@ -41,19 +42,21 @@ export async function createUser(
     createdAt: new Date().toISOString(),
   });
 
-  return { id: result.insertedId.toString(), name, email: normalizedEmail, phone: "" };
+  const user = { id: result.insertedId.toString(), name, email: normalizedEmail, phone: "" };
+  return { user, token: createUserSessionToken(user.id, sessionRevision({ passwordHash: hash })) };
 }
 
-/** Returns the user if the email/password match, otherwise null. */
+/** Sign the credential snapshot we checked, so a concurrent logout cannot issue a fresh session. */
 export async function verifyUserCredentials(
   email: string,
   password: string
-): Promise<PublicUser | null> {
+): Promise<{ user: PublicUser; token: string } | null> {
   const db = await getDb();
   const doc = await db.collection(COLLECTION).findOne({ email: email.toLowerCase() });
   if (!doc) return null;
 
-  return passwordMatches(doc, password) ? toPublicUser(doc) : null;
+  if (!passwordMatches(doc, password)) return null;
+  return { user: toPublicUser(doc), token: createUserSessionToken(doc._id.toString(), sessionRevision(doc)) };
 }
 
 function passwordMatches(doc: Document, password: string): boolean {
@@ -97,19 +100,20 @@ export async function updateUserProfile(
 export async function changeUserPassword(
   id: string,
   currentPassword: string,
-  newPassword: string
+  newPassword: string,
+  revision: string
 ): Promise<"changed" | "wrong_password" | "not_found"> {
   const objectId = toObjectId(id);
   if (!objectId) return "not_found";
   const db = await getDb();
   const doc = await db.collection(COLLECTION).findOne({ _id: objectId });
-  if (!doc) return "not_found";
+  if (!doc || sessionRevision(doc) !== revision) return "not_found";
   if (!passwordMatches(doc, currentPassword)) return "wrong_password";
 
   const { salt, hash } = hashPassword(newPassword);
-  await db.collection(COLLECTION).updateOne(
-    { _id: objectId },
-    { $set: { passwordSalt: salt, passwordHash: hash, updatedAt: new Date().toISOString() } }
+  const result = await db.collection(COLLECTION).updateOne(
+    { _id: objectId, passwordHash: doc.passwordHash, sessionVersion: doc.sessionVersion ?? null },
+    { $set: { passwordSalt: salt, passwordHash: hash, sessionVersion: randomBytes(32).toString("hex"), updatedAt: new Date().toISOString() } }
   );
-  return "changed";
+  return result.matchedCount ? "changed" : "not_found";
 }

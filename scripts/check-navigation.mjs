@@ -56,8 +56,11 @@ try {
     await expect(dialog).toBeHidden();
     await expect(page.getByRole("navigation", { name: "Main navigation", exact: true })).toBeVisible();
     assert.equal(await page.evaluate(() => document.body.style.overflow), "");
-    const signature = createHmac("sha256", process.env.ADMIN_SESSION_SECRET).update(id.toString()).digest("hex");
-    await context.addCookies([{ name: "partiers_user_session", value: `${id}.${signature}`, url: baseURL }]);
+    const key = (purpose) => createHmac("sha256", process.env.ADMIN_SESSION_SECRET).update(`partiers:session:v1:${purpose}`).digest();
+    const revision = createHmac("sha256", key("revision")).update(JSON.stringify(["", ""])).digest("hex");
+    const payload = Buffer.from(JSON.stringify({ id: id.toString(), role: "user", revision, expiresAt: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30 })).toString("base64url");
+    const signature = createHmac("sha256", key("user")).update(payload).digest("hex");
+    await context.addCookies([{ name: "partiers_user_session", value: `${payload}.${signature}`, url: baseURL }]);
     await page.reload();
     await expect(page.getByRole("link", { name: `My account: ${name}` }).first()).toHaveAttribute("href", "/account");
     for (const width of [640, 360]) {

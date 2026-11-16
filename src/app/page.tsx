@@ -1,3 +1,4 @@
+import { verifyUserSessionToken } from "@/lib/sessions";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import FadeIn from "@/components/motion/FadeIn";
@@ -10,14 +11,14 @@ import {
 import { buttonClasses } from "@/components/ui";
 import { getApprovedReviews } from "@/lib/reviews";
 import BookingForm from "@/components/BookingForm";
-import { USER_COOKIE_NAME, verifyUserSessionToken } from "@/lib/auth";
+import { USER_COOKIE_NAME } from "@/lib/auth";
 import { todayString } from "@/lib/bookingDates";
 import { getBlockedDates } from "@/lib/blockedDates";
 import { getUserById } from "@/lib/users";
 
 export default async function Home() {
   const cookieStore = await cookies();
-  const userId = verifyUserSessionToken(
+  const userId = await verifyUserSessionToken(
     cookieStore.get(USER_COOKIE_NAME)?.value,
   );
   const [user, blocked, reviews] = await Promise.all([

@@ -1,7 +1,8 @@
+import { verifyAdminSessionToken } from "@/lib/sessions";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ADMIN_COOKIE_NAME, verifyAdminSessionToken } from "@/lib/auth";
+import { ADMIN_COOKIE_NAME } from "@/lib/auth";
 import { getAdminById } from "@/lib/admins";
 import { getAllBookings } from "@/lib/bookings";
 import { todayString } from "@/lib/bookingDates";
@@ -15,7 +16,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
   const cookieStore = await cookies();
-  const adminId = verifyAdminSessionToken(cookieStore.get(ADMIN_COOKIE_NAME)?.value);
+  const adminId = await verifyAdminSessionToken(cookieStore.get(ADMIN_COOKIE_NAME)?.value);
   const admin = adminId ? await getAdminById(adminId) : null;
 
   // proxy.ts already checks the cookie's signature before letting the

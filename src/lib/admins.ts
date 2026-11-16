@@ -1,3 +1,4 @@
+import { createAdminSessionToken, sessionRevision } from "./auth";
 import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
 import { ObjectId, type Document } from "mongodb";
 import { getDb } from "./mongodb";
@@ -24,7 +25,7 @@ function toPublicAdmin(doc: Document): PublicAdmin {
 export async function verifyAdminCredentials(
   email: string,
   password: string
-): Promise<PublicAdmin | null> {
+): Promise<{ admin: PublicAdmin; token: string } | null> {
   const db = await getDb();
   const doc = await db.collection(COLLECTION).findOne({ email: email.toLowerCase() });
   if (!doc) return null;
@@ -34,7 +35,7 @@ export async function verifyAdminCredentials(
   const b = Buffer.from(doc.passwordHash as string, "hex");
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
 
-  return toPublicAdmin(doc);
+  return { admin: toPublicAdmin(doc), token: createAdminSessionToken(doc._id.toString(), sessionRevision(doc)) };
 }
 
 export async function getAdminById(id: string): Promise<PublicAdmin | null> {

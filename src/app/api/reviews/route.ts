@@ -1,7 +1,8 @@
+import { verifyAdminSessionToken } from "@/lib/sessions";
 import { validPublicForm, publicFormRejection } from "@/lib/publicFormProtection";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { ADMIN_COOKIE_NAME, verifyAdminSessionToken } from "@/lib/auth";
+import { ADMIN_COOKIE_NAME } from "@/lib/auth";
 import { createReview, updateReviewStatus } from "@/lib/reviews";
 import { validateReviewInput } from "@/lib/validation";
 import { rateLimitResponse } from "@/lib/rateLimit";
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
 // Admin only: approve or reject a submitted review.
 export async function PATCH(request: Request) {
   const cookieStore = await cookies();
-  if (!verifyAdminSessionToken(cookieStore.get(ADMIN_COOKIE_NAME)?.value)) {
+  if (!(await verifyAdminSessionToken(cookieStore.get(ADMIN_COOKIE_NAME)?.value))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

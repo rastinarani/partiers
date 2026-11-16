@@ -1,11 +1,10 @@
+import { verifyAdminSessionToken, verifyUserSessionToken } from "@/lib/sessions";
 import { validPublicForm, publicFormRejection } from "@/lib/publicFormProtection";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import {
   ADMIN_COOKIE_NAME,
   USER_COOKIE_NAME,
-  verifyAdminSessionToken,
-  verifyUserSessionToken,
 } from "@/lib/auth";
 import {
   createBooking,
@@ -60,7 +59,7 @@ export async function POST(request: Request) {
   }
 
   const cookieStore = await cookies();
-  const sessionUserId = verifyUserSessionToken(cookieStore.get(USER_COOKIE_NAME)?.value);
+  const sessionUserId = await verifyUserSessionToken(cookieStore.get(USER_COOKIE_NAME)?.value);
   // Look the user up so a validly signed id that isn't a customer (e.g. a
   // deleted account) is treated as a guest.
   const user = sessionUserId ? await getUserById(sessionUserId) : null;
@@ -72,7 +71,7 @@ export async function POST(request: Request) {
 // Admin only: confirm, decline or cancel a booking request.
 export async function PATCH(request: Request) {
   const cookieStore = await cookies();
-  const adminId = verifyAdminSessionToken(cookieStore.get(ADMIN_COOKIE_NAME)?.value);
+  const adminId = await verifyAdminSessionToken(cookieStore.get(ADMIN_COOKIE_NAME)?.value);
   if (!adminId || !(await getAdminById(adminId))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, FormError, Input, Label } from "@/components/ui";
 
-export default function LoginForm({ next }: { next: string | null }) {
+export default function LoginForm({ next, passwordChanged = false }: { next: string | null; passwordChanged?: boolean }) {
   const protection = usePublicFormProtection("login");
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -45,6 +45,8 @@ export default function LoginForm({ next }: { next: string | null }) {
         <span className="mb-3 inline-block text-3xl">&#128075;</span>
         <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
       </div>
+
+      {passwordChanged && <p role="status" className="mt-4 text-sm text-success">Password changed. Please log in again with your new password.</p>}
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <PublicFormProtection protection={protection} />

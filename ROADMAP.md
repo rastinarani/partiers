@@ -29,7 +29,7 @@ owner's go-ahead) · 🔑 needs the owner to create an account or provide a key
   confirmed-bookings calendar.
 - Vibrant violet/rose/amber theme, mobile-friendly layout.
 
-**Known gaps:** emails, session hardening and a full
+**Known gaps:** emails and a full
 account/admin end-to-end suite. Public animations
 respect reduced motion, and local browser checks cover public pages and booking.
 
@@ -332,7 +332,7 @@ work after 5.5; do not create an account, invent a key or change production.
 - **Done when:** a scripted submission that fills every field instantly is
   rejected without telling the bot why.
 
-### [ ] 7.3 Session hardening
+### [x] 7.3 Session hardening
 
 - Session cookies carry an expiry, and logging out (or changing password)
   invalidates existing sessions (e.g. a `sessionVersion` on the user).
@@ -377,81 +377,88 @@ work after 5.5; do not create an account, invent a key or change production.
 
 ## Session handoff — 2026-11-16 (stable checkpoint)
 
-- Completed: **0.1–3.3, 4.1–4.5, 5.1–5.5, 7.1 and 7.2**. This session
-  completed **5.2, 5.5, 7.1 and 7.2** on `codex/mobile-accessibility-checkpoint`.
-  All four feature commits are pushed. **[Pull request #1](https://github.com/rastinarani/partiers/pull/1)**
-  is open against `main`; its title and description match the completed work.
-  Do not merge or force-push. No partial feature implementation remains.
-- **Delivery rechecked after the interruption (2026-11-16):** the local feature
-  head and actual GitHub branch both matched `9e3007c`; the existing PR was
-  confirmed open and mergeable, with successful Vercel and Preview Comments
-  checks. Those checks do not verify hosted database behavior or user flows.
-  No duplicate PR was created. This delivery follow-up changes documentation
-  only; the completed application checks below are reused, not rerun.
-  The PR-description scratch file is `/private/tmp/partiers-pr-body.md`, outside
-  the repository; no uncommitted/untracked project files were found. No servers
-  were listening on 3000/3100, and no isolated source snapshots remained.
-- **Next chat setup:** project `/Users/rastin/Desktop/Partiers`, branch
-  `codex/mobile-accessibility-checkpoint`, existing PR #1. Inspect current Git
-  state first and preserve other work. README covers local setup and both
-  isolated verification modes; do not assume another environment has MongoDB,
-  Chromium or `.env.local`. Restart the dev server after dependency changes.
-- **Exact next resume point: 7.3 Session hardening.** Read AGENTS.md/CLAUDE.md,
-  inspect Git status/recent commits and the installed Next.js 16.4.6 guides.
-  Start with `src/lib/auth.ts`, `users.ts`, `admins.ts`, `src/proxy.ts`, the
-  customer/admin logout routes and account password route. Tokens currently
-  lack a signed expiry/revocation version: old copied cookies still need to be
-  invalidated on logout/password change. Review all page/API session consumers,
-  keep admin/customer identities separate, and update test-cookie generation in
-  `scripts/check-navigation.mjs` if the format changes. Verify and commit 7.3
-  before considering 7.4. No work on 7.3 or 7.4 was started this session.
-- **Owner-dependent work:** 6.1/6.2 remain blocked on an email-provider account,
-  approval and API key. 3.4/5.6/8.2 remain deferred. Do not create real OR
-  throwaway admin accounts, choose owner credentials, buy services or change
-  production settings. Existing admin negative-path checks create no accounts.
-- 5.2: mobile dialog drawer, safe account/login links, long names, reduced
-  motion, focus/closing behavior and confirmed public email/Metro Vancouver footer.
-  5.5: keyboard calendar grid, labels, skip link, focus/live errors, stronger
-  contrast, shape-based ratings, confirmation focus and long-text wrapping.
-- 7.1: atomic MongoDB rate counters with BSON expiry/TTL and hashed IP identity;
-  login shared across customer/admin (10/15min), signup 5/hour, booking 10/hour,
-  review 5/hour. Invalid attempts count too; friendly 429/Retry-After and generic
-  fail-closed 503. Vercel-only trusted IP headers; direct servers share a
-  conservative bucket and ignore spoofable headers. Recheck proxy setup if
-  changing hosts. Next.js/lint config 16.4.6 and compatible transitive security
-  patches clear all dependency alerts; **full npm audit: zero vulnerabilities**.
-- 7.2: hidden non-keyboard/non-screen-reader honeypot and server-signed proof
-  of minimum two-second fill time on booking/review/signup/customer/admin login.
-  Proofs are purpose-bound, expire after one day and cannot be backdated by the
-  browser. Same generic rejection for all spam-guard failures. Initial form
-  loading has a short wait; failed loading retries retain text and focus.
-  Guard fields are never stored with business data. No CAPTCHA/provider added.
-  Proofs are reusable within their lifetime; rate limiting remains important.
-- Verification: lint/typecheck, **245 unit tests**, default production build
-  (with compiler process/port permission), isolated webpack production build,
-  and **all seven checks on BOTH development and compiled production servers**:
-  `spam limits navigation accessibility booking motion seo`. This includes
-  real local MongoDB concurrency, actual saved guest bookings/reviews, keyboard
-  flows, error recovery, 360px/desktop layouts, axe A/AA scans, reduced motion
-  and SEO. No customer/admin credentials created; fixtures/databases removed.
-- Safe commands: `npm run test:isolated -- spam limits navigation accessibility booking motion seo`
-  and add `--production` immediately after `--` to test the compiled site.
-  Both use a temporary source snapshot, port 3100, random local test database
-  and secret; never `.env.local`. Run builds/browser checks sequentially on
-  low-disk machines. One earlier run hit MongoDB's disk threshold; removing
-  generated `.next/cache` restored space, then all checks passed. Keep the
-  owner's existing server/data and MongoDB safety settings intact. README has
-  setup, limits, spam-protection details and both verification modes.
-- Still unverified: manual screen-reader use, physical phones/Safari/Firefox,
-  full authenticated customer/admin flows, actual root-layout fault recovery,
-  live Vercel edge-IP behavior and chat-preview caches. Production database/
-  settings and its known live connection issue remain untouched for Phase 8.
+- Completed: **0.1–3.3, 4.1–4.5, 5.1–5.5 and 7.1–7.3**. The latest
+  session completed **only 7.3**, on `codex/mobile-accessibility-checkpoint`.
+  Existing **[PR #1](https://github.com/rastinarani/partiers/pull/1)** targets
+  `main`; keep it open, do not merge or force-push.
+- **Exact next resume point: 7.4 End-to-end tests.** It remains unchecked
+  and unstarted. The new `sessions` check covers the security acceptance
+  criteria for 7.3; it does not implement the broader 7.4 golden-path suite.
+  Do not start it without the owner's next instruction.
+- Read AGENTS.md/CLAUDE.md, inspect actual Git state, and read the installed
+  Next.js guides before writing code. Current project:
+  `/Users/rastin/Desktop/Partiers`. Preserve other work and never assume a
+  fresh environment has local MongoDB, Chromium or `.env.local`.
+- **7.3 behavior:** signed role, identity, 30-day expiry and database revision;
+  strict parsing rejects legacy cookies, extra segments, tampering, expired
+  claims and customer/admin substitution. Admin/customer HMAC keys are
+  purpose-derived from the existing secret; no deployment settings changed.
+  The revision binds the password hash and a random `sessionVersion`.
+- Both logout routes invalidate **all sessions for that identity**, then clear
+  their own cookie. A replayed old logout cannot invalidate a later login.
+  Password changes atomically update the hash/version with a conditional
+  write, clear the current cookie and show a re-login message. Wrong current
+  passwords preserve sessions. Conditional writes prevent stale logout or
+  password requests overwriting a newer revision. Already-authorized requests
+  may finish; subsequent authorization checks enforce revocation.
+- **All consumers checked:** `auth.ts` handles signed claims; `sessions.ts`
+  checks the current identity/revision in MongoDB. Protected account/admin
+  pages and APIs, navigation, booking prefill and ownership use database
+  verification. The admin calendar now checks before loading private data.
+  Proxy intentionally performs only signature/role/expiry checks. Existing
+  documents without a version need no migration; old cookie formats require
+  re-login after deployment. Logout storage failures keep the cookie and show
+  a retry message rather than falsely claiming success.
+- **Verification for 7.3:** lint, typecheck, **286 unit tests**, default
+  Turbopack production build with explicit local test settings, isolated
+  webpack production build, and `sessions navigation accessibility booking`
+  against BOTH development and compiled production servers. Session checks
+  exercise real local customer signup/login, copied-cookie logout/password
+  revocation, failed logout retry, wrong-password recovery, re-login, signed
+  expiry/legacy/tampering rejection, guest navigation and every protected
+  admin page/API's negative path. Successful admin token verification,
+  invalidation and password-hash revision changes use mock records only.
+- **Isolation:** random local `partiers_test_…` databases, temporary source
+  snapshots and ephemeral secrets. The session check uses one disposable
+  customer with random test passwords; customer data, public booking/review
+  fixtures, databases, servers and snapshots are removed. No real or
+  throwaway admin accounts/credentials were created. Production data/settings
+  and the known live database issue remain untouched.
+- Safe commands: `npm run test:isolated -- sessions navigation accessibility booking`
+  and `npm run test:isolated -- --production sessions navigation accessibility booking`.
+  Additional existing checks: `spam limits motion seo`. Run builds/checks
+  sequentially on low-disk machines. Never delete database files or weaken
+  MongoDB disk safeguards. README documents setup and both modes.
+- **Owner-dependent work:** 6.1/6.2 need an email-provider account/key;
+  3.4/5.6/8.2 remain deferred. Do not create admin accounts or credentials,
+  buy services, change production settings or start deferred work.
+- Still unverified: successful real admin login/mutations (no admin accounts
+  created), broader 7.4 account/admin flows, manual screen-reader use,
+  physical phones/Safari/Firefox, actual root-layout fault recovery and live
+  Vercel database/edge-IP/share-preview behavior. Prior 7.1/7.2 checks and
+  zero-vulnerability audit are historical results, not rerun for 7.3.
 
 ---
 
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-16 — 7.3 Session hardening (commit: "Harden session expiry and invalidate copied cookies"):
+  signed 30-day expiry, purpose-separated customer/admin signatures and
+  password/version-bound database verification across every session consumer;
+  added the missing admin-calendar database gate. Logout revokes all sessions
+  for that identity with replay-safe conditional rotation; password changes
+  update hash/version atomically, clear the cookie and require re-login.
+  Failed logout remains retryable. Updated navigation fixtures and added the
+  scoped isolated `sessions` check. Lint/typecheck, 286 unit tests, default
+  production build, isolated webpack production build and four browser checks
+  (`sessions navigation accessibility booking`) pass on development AND
+  compiled production. Disposable local customer/booking/review data and all
+  test servers/snapshots/databases removed; admin success paths use mocks,
+  no admin accounts/credentials created, no production settings/data changed.
+  Existing PR #1 updated on the same branch without merging. 7.4 and all
+  deferred/owner-dependent steps remain unstarted.
 
 - 2026-11-16 — GitHub delivery and handoff (commit: "Record verified GitHub delivery and resume instructions"):
   after interruption, verified clean local state, all four feature commits on

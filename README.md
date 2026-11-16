@@ -30,7 +30,7 @@ events, get-togethers). Built with Next.js (App Router), MongoDB, and Tailwind C
 With dependencies, Playwright Chromium and a local MongoDB server available:
 
 ```bash
-npm run test:isolated -- navigation accessibility booking motion seo limits spam
+npm run test:isolated -- sessions navigation accessibility booking motion seo limits spam
 ```
 
 This makes a temporary source copy, starts a separate server at
@@ -48,7 +48,7 @@ Never use a production database for tests.
 To build and check the compiled production site in the same isolated setup:
 
 ```bash
-npm run test:isolated -- --production spam limits navigation accessibility booking motion seo
+npm run test:isolated -- --production sessions spam limits navigation accessibility booking motion seo
 ```
 
 This runs a webpack production build inside the temporary source copy, then
@@ -141,7 +141,8 @@ src/
     bookings.ts, reviews.ts   Data access functions
     admins.ts                 Admin account data access (password hashing)
     users.ts                  Customer account data access (password hashing)
-    auth.ts                   Session cookie logic (admin + customer)
+    auth.ts                   Signed session claims (admin + customer)
+    sessions.ts               Database session validation and revocation
     validation.ts             Server-side input validation
     types.ts                  Shared TypeScript types
 proxy.ts                      Redirects unauthenticated visitors away from
@@ -175,13 +176,13 @@ scripts/create-admin.mjs      Creates an admin account (no public signup page)
 **admins** collection (separate from customer accounts — see below):
 
 ```
-{ name, email, passwordSalt, passwordHash, createdAt }
+{ name, email, passwordSalt, passwordHash, sessionVersion? (logout revision), createdAt }
 ```
 
 **users** collection (customer accounts — see below):
 
 ```
-{ name, email, passwordSalt, passwordHash, createdAt }
+{ name, email, passwordSalt, passwordHash, sessionVersion? (logout revision), createdAt }
 ```
 
 ### Admin auth
@@ -198,10 +199,10 @@ npm run create-admin -- "Full Name" you@example.com "a real password"
 
 Logging in at `/admin/login` checks the email/password against that
 collection (passwords are salted + hashed with `scrypt`, never stored in
-plain text) and sets a cookie shaped like `<adminId>.<hmac>`, signed with
-`ADMIN_SESSION_SECRET`. `proxy.ts` checks that cookie on every `/admin/*`
-page (redirecting to `/admin/login` if it's missing or invalid), and each
-admin API route double-checks it independently. The dashboard reads the
+plain text) and sets a signed session cookie. `proxy.ts` checks its signature,
+role and expiry on every `/admin/*` page (redirecting to `/admin/login` if
+it is missing or invalid). Each protected page and API also validates the
+session against the current admin document in MongoDB. The dashboard reads the
 same cookie to show "Signed in as ..." — that's how the app knows which
 admin is logged in, not just *that* someone is.
 
@@ -216,7 +217,7 @@ third-party auth provider, everything stored in your own MongoDB:
 - Passwords are never stored in plain text. `lib/users.ts` salts and hashes
   them with `scrypt` before saving.
 - Signing up (at `/signup`, unlike admin accounts) or logging in (at
-  `/login`) sets a cookie shaped like `<userId>.<hmac>`.
+  `/login`) sets a signed session cookie with a server-checked expiry.
 - `/account` is gated by `proxy.ts` the same way `/admin` is, just with a
   separate cookie (`partiers_user_session` vs `partiers_admin_session`)
   and a separate collection, so the two account systems never overlap.
@@ -225,6 +226,39 @@ Bookings made while signed in are linked to that customer, and the booking
 form prefills their name and email. `/account` shows upcoming/past bookings,
 allows cancellation of eligible bookings, and includes profile/password settings.
 Guest booking remains available.
+
+## Session hardening
+
+Both cookie types expire after 30 days; the expiry is signed and checked on
+requests, even if someone keeps or copies an old cookie. Admin and customer
+signatures use distinct purpose-derived keys from `ADMIN_SESSION_SECRET`,
+with a signed role and separate MongoDB collections. No new secret setting
+is required. Cookies remain HttpOnly, SameSite=Lax and Secure in production.
+
+Every authenticated page/API, public account navigation, booking prefill and
+booking ownership check validates the current database session revision.
+Proxy performs the lightweight signature/role/expiry check only. Logout
+rotates a random `sessionVersion` on that identity, invalidating **all its
+sessions on all devices**. Replaying an old logout cannot invalidate a later
+login. Database failures leave logout retryable rather than falsely claiming
+success. Password changes update the password and version atomically, clear
+the current cookie and ask the customer to log in again. The revision also
+covers the password hash, so changing a stored admin/customer password hash
+invalidates prior sessions without needing a separate version update.
+
+Old signed-id cookies are deliberately rejected; existing visitors must log
+in again once this change is deployed. Existing account documents need no
+migration: an absent version is supported until the first rotation. Requests
+that already passed authorization may finish while another request logs out;
+revocation applies to subsequent authorization checks.
+
+`npm run test:isolated -- sessions` checks signup/login, copied cookies after
+logout/password changes, retry behavior, expiry, tampering, legacy-cookie
+rejection and protected pages/APIs using a disposable customer and random
+passwords in the temporary local database. All fixtures are removed. It
+creates no admin accounts; successful admin issuance/revocation and password
+hash changes are checked with mock records in unit tests. This scoped check
+is part of 7.3; the broader 7.4 end-to-end suite remains unstarted.
 
 ## Deploying to production
 

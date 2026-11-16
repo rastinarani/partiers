@@ -1,12 +1,13 @@
+import { verifyUserSessionToken } from "@/lib/sessions";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { USER_COOKIE_NAME, verifyUserSessionToken } from "@/lib/auth";
+import { USER_COOKIE_NAME } from "@/lib/auth";
 import { getUserById } from "@/lib/users";
 import Navigation from "./Navigation";
 
 export default async function NavBar() {
   const cookieStore = await cookies();
-  const userId = verifyUserSessionToken(cookieStore.get(USER_COOKIE_NAME)?.value);
+  const userId = await verifyUserSessionToken(cookieStore.get(USER_COOKIE_NAME)?.value);
   const user = userId ? await getUserById(userId) : null;
 
   return (
