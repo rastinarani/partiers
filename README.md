@@ -16,6 +16,9 @@ events, get-togethers). Built with Next.js (App Router), MongoDB, and Tailwind C
    npm run dev
    ```
 
+   If a development server was already running before dependency updates,
+   stop it with Ctrl+C and start it again.
+
 4. Admin credentials are deferred in the roadmap. Do not create accounts until
    the owner chooses the credentials. The admin login page already exists;
    see [Admin auth](#admin-auth) when the owner is ready.

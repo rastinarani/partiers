@@ -379,8 +379,23 @@ work after 5.5; do not create an account, invent a key or change production.
 
 - Completed: **0.1–3.3, 4.1–4.5, 5.1–5.5, 7.1 and 7.2**. This session
   completed **5.2, 5.5, 7.1 and 7.2** on `codex/mobile-accessibility-checkpoint`.
-  GitHub delivery is recorded below after the final push/PR. Do not merge or
-  force-push. No partial feature implementation remains.
+  All four feature commits are pushed. **[Pull request #1](https://github.com/rastinarani/partiers/pull/1)**
+  is open against `main`; its title and description match the completed work.
+  Do not merge or force-push. No partial feature implementation remains.
+- **Delivery rechecked after the interruption (2026-11-16):** the local feature
+  head and actual GitHub branch both matched `9e3007c`; the existing PR was
+  confirmed open and mergeable, with successful Vercel and Preview Comments
+  checks. Those checks do not verify hosted database behavior or user flows.
+  No duplicate PR was created. This delivery follow-up changes documentation
+  only; the completed application checks below are reused, not rerun.
+  The PR-description scratch file is `/private/tmp/partiers-pr-body.md`, outside
+  the repository; no uncommitted/untracked project files were found. No servers
+  were listening on 3000/3100, and no isolated source snapshots remained.
+- **Next chat setup:** project `/Users/rastin/Desktop/Partiers`, branch
+  `codex/mobile-accessibility-checkpoint`, existing PR #1. Inspect current Git
+  state first and preserve other work. README covers local setup and both
+  isolated verification modes; do not assume another environment has MongoDB,
+  Chromium or `.env.local`. Restart the dev server after dependency changes.
 - **Exact next resume point: 7.3 Session hardening.** Read AGENTS.md/CLAUDE.md,
   inspect Git status/recent commits and the installed Next.js 16.4.6 guides.
   Start with `src/lib/auth.ts`, `users.ts`, `admins.ts`, `src/proxy.ts`, the
@@ -437,6 +452,17 @@ work after 5.5; do not create an account, invent a key or change production.
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-16 — GitHub delivery and handoff (commit: "Record verified GitHub delivery and resume instructions"):
+  after interruption, verified clean local state, all four feature commits on
+  the actual remote branch, and existing open PR #1 targeting main. Its title/
+  description accurately record completed steps, verification and limitations;
+  no duplicate or merge. Vercel checks report success; hosted runtime/database
+  behavior remains unverified. PR scratch file remains outside the repository.
+  No test servers on 3000/3100 or isolated source snapshots remain. Reused the
+  completed 245-test/build/browser/audit results because no application code
+  changed. Documentation-only follow-up; `git diff --check` passes. Next task
+  remains 7.3; no feature or session-hardening work started in this follow-up.
 
 - 2026-11-16 — 7.2 Spam protection (commit: "Protect public forms from instant and honeypot spam"):
   shared hidden honeypot on booking, reviews, signup and both sign-in forms;
