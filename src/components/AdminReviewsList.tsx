@@ -1,5 +1,7 @@
 "use client";
 
+import EmptyState from "./EmptyState";
+
 import { useToast } from "./ToastProvider";
 
 import { useOptimistic, useTransition } from "react";
@@ -58,7 +60,12 @@ export default function AdminReviewsList({
   }
 
   if (reviews.length === 0) {
-    return <p className="text-muted">No reviews yet.</p>;
+    return (
+      <EmptyState
+        title="No reviews to moderate"
+        description="When a family submits a review, it will appear here for approval."
+      />
+    );
   }
 
   return (

@@ -262,7 +262,7 @@ there's a strong reason not to. Every animation must respect
   (contact email, area served, links).
 - **Done when:** the nav never wraps or crowds on a 360 px wide screen.
 
-### [ ] 5.3 Error and empty pages
+### [x] 5.3 Error and empty pages
 
 - Designed `not-found.tsx`, `error.tsx` (with a retry button), and friendly
   empty states everywhere.
@@ -388,6 +388,21 @@ settings only.
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-15 — 5.3 Error and empty pages (commit: "Add friendly error recovery and empty states"):
+  branded missing-page recovery, route error retry using installed Next.js 16.3
+  `retry()` semantics, and a self-contained light global-error document for root
+  layout failures. Error messages stay generic and never render private details.
+  Full-reload home recovery intentionally works even when the router failed.
+  Public reviews, admin bookings/reviews and calendar empty states explain next
+  steps; existing customer/search empty states were already helpful and retained.
+  Lint, typecheck, 224 tests and webpack build pass. Chromium verified actual
+  random-URL 404, home navigation, a forced server error, detail suppression,
+  successful retry/refetch after clearing the fault, 360 px layout and light
+  appearance under dark OS preference. Temporary error page/type/flag removed.
+  Root-global error component is covered by rendering checks; an actual root
+  layout failure was not injected. 5.2 awaits the owner's public email/area;
+  independent error work proceeded without inventing either.
 
 - 2026-11-15 — 5.1 A real home page (commit: "Explain services and booking on the home page"):
   service cards drawn from existing event/activity choices, three booking steps,

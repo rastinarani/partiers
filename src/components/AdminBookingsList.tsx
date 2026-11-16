@@ -1,5 +1,7 @@
 "use client";
 
+import EmptyState from "./EmptyState";
+
 import { useToast } from "./ToastProvider";
 
 import { useState, useOptimistic, useTransition } from "react";
@@ -91,7 +93,14 @@ export default function AdminBookingsList({
   }
 
   if (bookings.length === 0) {
-    return <p className="text-muted">No booking requests yet.</p>;
+    return (
+      <EmptyState
+        title="No booking requests yet"
+        description="New requests will appear here, ready for you to review."
+        href="/admin/calendar"
+        action="View calendar"
+      />
+    );
   }
 
   const query = search.trim().toLowerCase();

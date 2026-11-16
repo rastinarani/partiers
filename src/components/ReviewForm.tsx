@@ -47,7 +47,7 @@ export default function ReviewForm() {
   }
 
   return (
-    <Card className="p-6">
+    <Card id="leave-review" className="scroll-mt-6 p-6">
       <form onSubmit={handleSubmit}>
         <h2 className="mb-4 text-lg font-semibold">Leave a review</h2>
 
