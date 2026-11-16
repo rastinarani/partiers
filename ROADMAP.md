@@ -269,7 +269,7 @@ there's a strong reason not to. Every animation must respect
 - **Done when:** a random URL and a forced server error both show on-brand
   pages.
 
-### [ ] 5.4 SEO and sharing
+### [x] 5.4 SEO and sharing
 
 - Per-page titles and descriptions, an Open Graph image (`opengraph-image`),
   app icon, `sitemap.ts` and `robots.ts` (keep `/admin` and `/account` out).
@@ -388,6 +388,20 @@ settings only.
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-15 — 5.4 SEO and sharing (commit: "Add public page metadata and sharing artwork"):
+  public titles/descriptions/canonical URLs, Open Graph/Twitter card metadata,
+  a generated 1200×630 Partiers preview plus 32 px and 180 px app icons.
+  Sitemap includes only home/reviews/about; robots excludes admin/account/API
+  and sign-in paths, with noindex metadata on private/account/auth pages.
+  Existing authentication is unchanged; crawler instructions are not access
+  control. Uses the existing public Vercel address recorded in this roadmap;
+  no production configuration changes. Lint, typecheck, 224 tests and webpack
+  build pass. `test:seo` verifies actual rendered metadata, private noindex,
+  sitemap/robots, PNG content types/dimensions; preview visually inspected.
+  Existing admin login remains an unchanged client component, with metadata in
+  a server layout. Live chat-app preview/cache behavior awaits later production
+  checks and the known live database fix; local preview generation is verified.
 
 - 2026-11-15 — 5.3 Error and empty pages (commit: "Add friendly error recovery and empty states"):
   branded missing-page recovery, route error retry using installed Next.js 16.3

@@ -1,3 +1,4 @@
+import { publicMetadata } from "@/lib/seo";
 // Photos aren't in yet — swap each placeholder <div> below for a real one
 // using next/image once you have them, e.g.:
 //   import Image from "next/image";
@@ -21,42 +22,59 @@ const team = [
   },
 ];
 
+export const metadata = publicMetadata(
+  "Meet Nikki and Manna",
+  "Meet the friends behind Partiers and discover their favorite games, crafts and party activities.",
+  "/about",
+);
+
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
       <FadeIn className="text-center">
         <h1 className="text-3xl font-bold tracking-tight">About Us</h1>
         <p className="mx-auto mt-2 max-w-xl text-muted">
-          We&rsquo;re two friends who love turning parties and get-togethers into something kids
-          actually remember &mdash; here&rsquo;s a bit about who we are.
+          We&rsquo;re two friends who love turning parties and get-togethers
+          into something kids actually remember &mdash; here&rsquo;s a bit about
+          who we are.
         </p>
       </FadeIn>
 
       <div className="mt-10 grid gap-8 sm:grid-cols-2">
         {team.map((person) => (
-          <HoverLift key={person.name}><Card className="h-full p-6 text-center">
-            {/* Photo placeholder — replace with a real photo, see comment above */}
-            <div className="mx-auto mb-4 flex h-28 w-28 items-center justify-center rounded-full bg-primary-soft text-3xl font-semibold text-primary">
-              {person.name
-                .split(" ")
-                .map((w) => w[0])
-                .join("")}
-            </div>
-            <h2 className="text-lg font-semibold">{person.name}</h2>
-            <p className="mt-2 text-sm text-muted">{person.bio}</p>
-            <p className="mt-3 text-xs font-medium uppercase tracking-wide text-primary">
-              {person.goodWith}
-            </p>
-          </Card></HoverLift>
+          <HoverLift key={person.name}>
+            <Card className="h-full p-6 text-center">
+              {/* Photo placeholder — replace with a real photo, see comment above */}
+              <div className="mx-auto mb-4 flex h-28 w-28 items-center justify-center rounded-full bg-primary-soft text-3xl font-semibold text-primary">
+                {person.name
+                  .split(" ")
+                  .map((w) => w[0])
+                  .join("")}
+              </div>
+              <h2 className="text-lg font-semibold">{person.name}</h2>
+              <p className="mt-2 text-sm text-muted">{person.bio}</p>
+              <p className="mt-3 text-xs font-medium uppercase tracking-wide text-primary">
+                {person.goodWith}
+              </p>
+            </Card>
+          </HoverLift>
         ))}
       </div>
 
       <Card flat className="mt-10 p-6 text-sm text-muted">
-        <h3 className="mb-2 font-semibold text-foreground">A few more things</h3>
+        <h3 className="mb-2 font-semibold text-foreground">
+          A few more things
+        </h3>
         <ul className="list-inside list-disc space-y-1">
-          <li>We&rsquo;re available on weekends and some weeknights &mdash; just ask!</li>
+          <li>
+            We&rsquo;re available on weekends and some weeknights &mdash; just
+            ask!
+          </li>
           <li>Payment is cash or e-transfer, arranged directly with you.</li>
-          <li>We&rsquo;re happy to bring games and activities, or use what you have at home.</li>
+          <li>
+            We&rsquo;re happy to bring games and activities, or use what you
+            have at home.
+          </li>
         </ul>
       </Card>
     </div>

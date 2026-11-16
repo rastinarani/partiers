@@ -12,7 +12,8 @@
     "check-db": "node scripts/check-db.mjs",
     "test": "vitest run",
     "test:motion": "node --env-file-if-exists=.env.local scripts/check-public-motion.mjs",
-    "test:booking": "node --env-file-if-exists=.env.local scripts/check-booking-wizard.mjs"
+    "test:booking": "node --env-file-if-exists=.env.local scripts/check-booking-wizard.mjs",
+    "test:seo": "node scripts/check-seo.mjs"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

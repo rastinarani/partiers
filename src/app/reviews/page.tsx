@@ -1,3 +1,4 @@
+import { publicMetadata } from "@/lib/seo";
 import { getApprovedReviews } from "@/lib/reviews";
 import FadeIn from "@/components/motion/FadeIn";
 import StaggerChildren from "@/components/motion/StaggerChildren";
@@ -7,6 +8,12 @@ import EmptyState from "@/components/EmptyState";
 import { Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
+
+export const metadata = publicMetadata(
+  "Family reviews",
+  "Read approved reviews from families and share your experience with Partiers.",
+  "/reviews",
+);
 
 export default async function ReviewsPage() {
   const reviews = await getApprovedReviews();

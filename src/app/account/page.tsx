@@ -1,3 +1,4 @@
+import { privateMetadata } from "@/lib/seo";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { USER_COOKIE_NAME, verifyUserSessionToken } from "@/lib/auth";
@@ -12,9 +13,16 @@ import { Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = privateMetadata(
+  "My bookings",
+  "Manage your Partiers bookings and account settings.",
+);
+
 export default async function AccountPage() {
   const cookieStore = await cookies();
-  const userId = verifyUserSessionToken(cookieStore.get(USER_COOKIE_NAME)?.value);
+  const userId = verifyUserSessionToken(
+    cookieStore.get(USER_COOKIE_NAME)?.value,
+  );
   const user = userId ? await getUserById(userId) : null;
 
   if (!user) {
@@ -38,17 +46,23 @@ export default async function AccountPage() {
               .toUpperCase()}
           </div>
           <div>
-            <h1 className="text-xl font-semibold">Hi, {user.name}! &#127881;</h1>
+            <h1 className="text-xl font-semibold">
+              Hi, {user.name}! &#127881;
+            </h1>
             <p className="mt-1 text-sm text-muted">{user.email}</p>
           </div>
         </div>
         <LogoutButton endpoint="/api/auth/logout" redirectTo="/login" />
       </Card>
 
-      <h2 className="mt-10 mb-4 text-2xl font-bold tracking-tight">My bookings</h2>
+      <h2 className="mt-10 mb-4 text-2xl font-bold tracking-tight">
+        My bookings
+      </h2>
       <MyBookings upcoming={upcoming} past={past} />
 
-      <h2 className="mt-12 mb-4 text-2xl font-bold tracking-tight">Account settings</h2>
+      <h2 className="mt-12 mb-4 text-2xl font-bold tracking-tight">
+        Account settings
+      </h2>
       <div className="grid gap-6 md:grid-cols-2 md:items-start">
         <ProfileForm initialName={user.name} initialPhone={user.phone} />
         <ChangePasswordForm />

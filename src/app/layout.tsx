@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL, SITE_DESCRIPTION, publicMetadata } from "@/lib/seo";
 import { Geist, Geist_Mono } from "next/font/google";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
@@ -17,9 +18,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Partiers",
-  description:
-    "Book fun, friendly kids' entertainment for your next party or event.",
+  ...publicMetadata("Kids’ party activities", SITE_DESCRIPTION, "/"),
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Partiers | Kids’ party activities",
+    template: "%s | Partiers",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
