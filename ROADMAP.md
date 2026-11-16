@@ -29,7 +29,7 @@ owner's go-ahead) · 🔑 needs the owner to create an account or provide a key
   confirmed-bookings calendar.
 - Vibrant violet/rose/amber theme, mobile-friendly layout.
 
-**Known gaps:** accessibility pass, emails, rate
+**Known gaps:** emails, rate
 limiting and a full account/admin end-to-end suite. Public animations
 respect reduced motion, and local browser checks cover public pages and booking.
 
@@ -277,7 +277,7 @@ there's a strong reason not to. Every animation must respect
 - **Done when:** pasting the site link into a chat app shows a nice preview
   card.
 
-### [ ] 5.5 Accessibility pass
+### [x] 5.5 Accessibility pass
 
 - Keyboard-usable calendar (arrow keys, Enter), visible focus rings, labels
   on every input, color contrast checked, `aria-live` for form errors.
@@ -296,6 +296,10 @@ there's a strong reason not to. Every animation must respect
 Needs an email provider account (Resend's free tier is a good fit). **Ask the
 owner before starting**, and keep the API key in `.env.local` / Vercel
 settings only.
+
+**Blocked this session (2026-11-16):** no email-provider account or API key
+has been supplied. 6.1 and 6.2 remain unstarted. Continue independent Phase 7
+work after 5.5; do not create an account, invent a key or change production.
 
 ### [ ] 6.1 Booking emails
 
@@ -373,38 +377,62 @@ settings only.
 
 ## Session handoff — 2026-11-16
 
-- Completed: **0.1–3.3, 4.1–4.5, 5.1–5.4**. Current work is on
+- Completed: **0.1–3.3, 4.1–4.5, 5.1–5.5**. Work is on
   `codex/mobile-accessibility-checkpoint`; do not merge or force-push.
-- **Next active step: 5.5 Accessibility pass.** Read the project rules and
-  installed Next.js guides, then check the calendar, shared fields, focus,
-  contrast and a complete keyboard-only booking. Verify and commit this step
-  before continuing. 3.4/5.6/8.2 stay deferred; no admin accounts or credentials.
-- Phase 6 is blocked on the owner's email-provider account/approval and key.
-  Record that blocker and continue independent authorized Phase 7 work when
-  time permits. No production settings, paid services or secrets may change.
-- The footer now uses the confirmed public email **nikkitheawsome@gmail.com**
-  and service area **Metro Vancouver**. Do not invent prices or service rules.
-- Local verification: lint, typecheck, 224 unit tests and webpack production
-  build pass. The default Turbopack build passed once from cache, but a fresh
-  CSS build hit the documented sandbox process/port restriction; use
-  `npm run build -- --webpack` here. Chromium checks cover 360px/desktop menu,
-  long names, focus wrapping/restoration, Escape/outside/link/resize closing,
-  reduced motion, footer and the full guest booking regression.
-- Use **`npm run test:isolated -- navigation booking motion seo`** for browser
-  checks. It starts a separate source snapshot/server at port 3100 with a random
-  local test database and signing secret, then removes both. It never reads
-  `.env.local` or modifies the owner's existing server/database. Mutating old
-  browser scripts now require an isolated test database. See README.md.
-- Still unverified: physical phones/Safari/Firefox, full authenticated admin
-  flows, actual root-layout fault recovery and live sharing-preview caches.
-  Production database settings and the known live connection issue remain
-  untouched for Phase 8.
+- **Next independent step: 7.1 Rate limiting.** 3.4/5.6/8.2 stay deferred.
+  Phase 6 is blocked on the owner's email-provider account/approval and key;
+  6.1/6.2 remain unstarted. No admin accounts, owner credentials, paid services
+  or production settings may be created/changed.
+- 5.2 added the mobile drawer and confirmed footer contact details. 5.5 added
+  calendar arrow/week/month shortcuts, a single day tab stop, meaningful date
+  labels, skip link, global focus rings, live errors, stronger text/control
+  contrast, non-color star selection, confirmation focus and long-text wrapping.
+- Verification: lint/typecheck, **229 unit tests**, webpack build, isolated
+  Chromium keyboard-only booking/review, A/AA axe scans on public/auth/404 pages
+  and every booking step/error/success, menu tests, full booking regression,
+  motion and SEO checks pass. Screenshots inspected; temporary databases and
+  source snapshots removed. Native select type-ahead is tested because popup
+  arrow handling is outside macOS headless Chromium's automation support.
+- Use **`npm run test:isolated -- navigation accessibility booking motion seo`**.
+  It starts a separate source snapshot/server at port 3100 with a random local
+  test database/signing secret, never reads `.env.local`, and cleans up. Existing
+  server/data stay untouched. `npm run build -- --webpack` avoids the documented
+  fresh Turbopack sandbox process/port restriction.
+- During installation, `npm audit --omit=dev` reported **two existing production
+  dependency alerts (Next.js and sharp)**. No application dependency was changed
+  by 5.5; review safe security updates during Phase 7 before deployment.
+- Still unverified: manual screen-reader use, physical phones/Safari/Firefox,
+  full authenticated admin flows, actual root-layout fault recovery, live edge
+  behavior and sharing-preview caches. Production database settings and its
+  known live connection issue remain untouched for Phase 8.
 
 ---
 
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-16 — 5.5 Accessibility pass (commit: "Make bookings accessible by keyboard"):
+  semantic calendar grid with full date/weekday labels, one roving day tab stop,
+  arrow/day/week/Home/End/PageUp/PageDown navigation across months/years,
+  leap-month clamping, blocked/past-date guards and preserved admin selections.
+  Added five behavior tests. Skip link, site-wide focus outlines, visible field
+  borders/placeholders, shared assertive form errors, darker CTA/status/error/
+  rating colors and hollow unselected stars. Activities have clear focus rings;
+  booking confirmation focuses its heading, review completion focuses its
+  success card, and long summary/contact text wraps on 360px screens.
+  Added axe/Playwright checks for public/auth/404 pages, all booking steps,
+  errors/confirmation, reviews and modal navigation; a complete real booking
+  and review are sent using only Tab, typing, calendar/rating keys and Enter.
+  Native select type-ahead used after diagnosing macOS headless popup-key limits.
+  Lint/typecheck, 229 unit tests, webpack build and all five isolated browser
+  suites pass (navigation/accessibility/booking/motion/SEO). Automated scans find
+  no WCAG A/AA violations in covered states; this is not a full compliance claim.
+  Visual QA caught/fixed long-contact overflow. Stabilized an existing optimistic
+  retry test by waiting for its disabled button to become ready. No admin
+  accounts/credentials or production data/settings touched; test data removed.
+  Phase 6 blocked on provider/key; next independent work is 7.1. Baseline
+  production dependency audit alerts recorded in the handoff for Phase 7.
 
 - 2026-11-16 — 5.2 Mobile menu and footer (commit: "Add mobile navigation and contact footer"):
   responsive desktop links and animated native-dialog mobile drawer, current-page

@@ -9,6 +9,7 @@ import { MongoClient } from "mongodb";
 
 const checks = {
   navigation: "check-navigation.mjs",
+  accessibility: "check-accessibility.mjs",
   booking: "check-booking-wizard.mjs",
   motion: "check-public-motion.mjs",
   seo: "check-seo.mjs",

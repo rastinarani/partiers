@@ -291,18 +291,11 @@ function BookingWizard({
 
   if (submitted)
     return (
-      <div
-        ref={(element) => {
-          if (element) element.focus();
-        }}
-        tabIndex={-1}
-      >
         <BookingConfirmation
           summary={submitted}
           loggedIn={loggedIn}
           onReset={reset}
         />
-      </div>
     );
 
   return (
@@ -341,7 +334,7 @@ function BookingWizard({
             id="booking-step-title"
             ref={heading}
             tabIndex={-1}
-            className="mt-1 scroll-mt-6 text-2xl font-semibold focus:outline-none"
+            className="mt-1 scroll-mt-6 rounded-lg text-2xl font-semibold"
           >
             {STEPS[step]}
           </h2>
@@ -521,7 +514,7 @@ function BookingWizard({
                         return (
                           <label
                             key={value}
-                            className={`cursor-pointer rounded-full border px-4 py-2 text-sm font-medium has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary/50 ${checked ? "border-primary bg-primary-soft text-primary" : "border-card-border hover:bg-primary-soft/50"}`}
+                            className={`cursor-pointer rounded-full border px-4 py-2 text-sm font-medium has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary has-[:focus-visible]:ring-offset-2 ${checked ? "border-primary bg-primary-soft text-primary" : "border-muted/80 hover:bg-primary-soft/50"}`}
                           >
                             <input
                               type="checkbox"

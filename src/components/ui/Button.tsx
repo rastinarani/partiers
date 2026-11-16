@@ -3,13 +3,13 @@ import { cn } from "./cn";
 
 const VARIANTS = {
   primary:
-    "bg-gradient-to-r from-primary to-secondary font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-60",
+    "bg-gradient-to-r from-primary to-secondary-strong font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-60",
   secondary:
     "border border-card-border font-medium hover:bg-primary-soft hover:text-primary",
   success:
-    "bg-success font-semibold text-white hover:opacity-90 disabled:opacity-40",
+    "bg-success font-semibold text-white hover:brightness-95 disabled:opacity-40",
   danger:
-    "bg-danger font-semibold text-white hover:opacity-90 disabled:opacity-40",
+    "bg-danger font-semibold text-white hover:brightness-95 disabled:opacity-40",
 };
 
 const SIZES = {

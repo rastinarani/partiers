@@ -45,7 +45,7 @@ export default function Navigation({ userName }: { userName?: string }) {
       : "rounded-lg px-1 py-2 hover:text-foreground";
     const accountClass = mobile
       ? "block rounded-xl bg-primary-soft px-4 py-3 text-primary break-words"
-      : "max-w-40 truncate rounded-full bg-primary-soft px-3 py-2 text-primary hover:opacity-80";
+      : "max-w-40 truncate rounded-full bg-primary-soft px-3 py-2 text-primary hover:text-primary-hover";
     return <>
       {links.map(({ href, label }) => (
         <Link key={href} href={href} className={linkClass} onClick={close}

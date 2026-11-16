@@ -42,7 +42,7 @@ export default function BookingSummaryDetails({
           className="grid gap-1 px-4 py-3 sm:grid-cols-[8rem_1fr] sm:gap-4"
         >
           <dt className="font-medium text-muted">{label}</dt>
-          <dd className="break-words">{value}</dd>
+          <dd className="min-w-0 [overflow-wrap:anywhere]">{value}</dd>
         </div>
       ))}
     </dl>

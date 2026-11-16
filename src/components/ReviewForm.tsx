@@ -37,7 +37,8 @@ export default function ReviewForm() {
 
   if (status === "done") {
     return (
-      <Card className="p-6 text-center">
+      <Card className="p-6 text-center" role="status" tabIndex={-1}
+        ref={(element) => { element?.focus(); }}>
         <p className="font-medium">Thanks for the review!</p>
         <p className="mt-1 text-sm text-muted">
           It&rsquo;ll show up here once we&rsquo;ve approved it.

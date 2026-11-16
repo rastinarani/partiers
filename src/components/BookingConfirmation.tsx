@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import BookingCelebration from "./BookingCelebration";
 import Link from "next/link";
 import type { NewBooking } from "@/lib/types";
@@ -18,6 +21,8 @@ export default function BookingConfirmation({
   onReset: () => void;
 }) {
   const s = summary;
+  const heading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => { heading.current?.focus(); }, []);
 
   return (
     <Card className="p-6 sm:p-8">
@@ -26,7 +31,7 @@ export default function BookingConfirmation({
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-success-soft text-2xl text-success">
           &#10003;
         </div>
-        <h2 className="text-xl font-semibold">Request sent!</h2>
+        <h2 ref={heading} tabIndex={-1} className="rounded-lg text-xl font-semibold">Request sent!</h2>
         <p className="mt-2 text-muted">
           Keep this reference handy if you get in touch with us:
         </p>
@@ -47,7 +52,7 @@ export default function BookingConfirmation({
           <li>
             <span className="font-semibold text-primary">2.</span> We get in
             touch at{" "}
-            <span className="font-medium text-foreground">{s.contact}</span>,
+            <span className="font-medium text-foreground [overflow-wrap:anywhere]">{s.contact}</span>,
             usually within a day or two.
           </li>
           <li>

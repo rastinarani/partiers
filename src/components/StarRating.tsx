@@ -30,10 +30,10 @@ export default function StarRating({
             key={star}
             aria-hidden="true"
             style={{
-              color: star <= value ? "var(--accent)" : "var(--card-border)",
+              color: star <= value ? "var(--accent-foreground)" : "var(--muted)",
             }}
           >
-            ★
+            {star <= value ? "★" : "☆"}
           </span>
         ))}
       </span>
@@ -78,10 +78,10 @@ export default function StarRating({
           aria-label={`${star} star${star > 1 ? "s" : ""}`}
           className="cursor-pointer rounded-md px-0.5 transition-transform duration-150 motion-safe:hover:scale-125 motion-safe:focus-visible:scale-110 motion-safe:active:scale-95 focus-visible:outline-2 focus-visible:outline-primary"
           style={{
-            color: star <= display ? "var(--accent)" : "var(--card-border)",
+            color: star <= display ? "var(--accent-foreground)" : "var(--muted)",
           }}
         >
-          ★
+          {star <= display ? "★" : "☆"}
         </button>
       ))}
     </div>

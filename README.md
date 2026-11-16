@@ -27,7 +27,7 @@ events, get-togethers). Built with Next.js (App Router), MongoDB, and Tailwind C
 With dependencies, Playwright Chromium and a local MongoDB server available:
 
 ```bash
-npm run test:isolated -- navigation booking motion seo
+npm run test:isolated -- navigation accessibility booking motion seo
 ```
 
 This makes a temporary source copy, starts a separate server at
@@ -41,6 +41,11 @@ use `PARTIERS_TEST_PORT=3101 npm run test:isolated -- navigation`.
 The default database server is `mongodb://127.0.0.1:27017`; an alternative
 loopback-only server can be supplied with `PARTIERS_TEST_MONGODB_URI`.
 Never use a production database for tests.
+
+The accessibility check scans the public pages and all five booking screens,
+then sends a real test booking and review using the keyboard alone. It checks
+labels, contrast, calendar shortcuts, error announcements and focus. Automated
+checks do not replace manual screen-reader or physical-phone testing.
 
 ## Project structure
 

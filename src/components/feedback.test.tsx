@@ -154,8 +154,10 @@ it("reports review mutation failures without changing the review, then supports 
   fireEvent.click(screen.getByRole("button", { name: "Approve" }));
   await screen.findByText("Please log in again.");
   expect(mocks.refresh).not.toHaveBeenCalled();
+  await waitFor(() => expect(screen.getByRole("button", { name: "Approve" })).toHaveProperty("disabled", false));
   fireEvent.click(screen.getByRole("button", { name: "Approve" }));
   await screen.findByText("Couldn’t connect. Please try again.");
+  await waitFor(() => expect(screen.getByRole("button", { name: "Approve" })).toHaveProperty("disabled", false));
   fireEvent.click(screen.getByRole("button", { name: "Approve" }));
   await screen.findByText("Review approved.");
   expect(mocks.refresh).toHaveBeenCalledTimes(1);
