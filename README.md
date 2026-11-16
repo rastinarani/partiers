@@ -30,14 +30,21 @@ events, get-togethers). Built with Next.js (App Router), MongoDB, and Tailwind C
 With dependencies, Playwright Chromium and a local MongoDB server available:
 
 ```bash
-npm run test:isolated -- sessions navigation accessibility booking motion seo limits spam
+npm run test:e2e
+npm run test:isolated -- sessions navigation accessibility motion seo limits spam
 ```
 
 This makes a temporary source copy, starts a separate server at
 http://127.0.0.1:3100, and uses a randomly named `partiers_test_…` database.
 It supplies a temporary session-signing secret, never reads `.env.local`,
 and removes its database and source copy afterwards. The existing server,
-accounts and bookings are untouched. No admin accounts are created.
+accounts and bookings are untouched. The `e2e` suite creates generated customer
+and admin fixtures only in that disposable database and removes them afterwards.
+
+`npm run test:e2e` runs `booking reliability e2e`: guest wizard/retry, direct API
+validation/concurrent retries, and real customer/admin workflows. It includes
+cross-customer permissions, admin confirmation and review moderation.
+Install Chromium once with `npx playwright install chromium`.
 
 Choose one or more checks from the command above. If port 3100 is occupied,
 use `PARTIERS_TEST_PORT=3101 npm run test:isolated -- navigation`.
@@ -48,7 +55,9 @@ Never use a production database for tests.
 To build and check the compiled production site in the same isolated setup:
 
 ```bash
-npm run test:isolated -- --production sessions spam limits navigation accessibility booking motion seo
+npm run test:e2e -- --production
+# Optional additional focused checks:
+npm run test:isolated -- --production sessions navigation accessibility seo
 ```
 
 This runs a webpack production build inside the temporary source copy, then
@@ -222,6 +231,9 @@ third-party auth provider, everything stored in your own MongoDB:
   separate cookie (`partiers_user_session` vs `partiers_admin_session`)
   and a separate collection, so the two account systems never overlap.
 
+Customer login loads a fresh destination page after setting its cookie, so
+returning after logout cannot reuse a cached signed-out destination.
+
 Bookings made while signed in are linked to that customer, and the booking
 form prefills their name and email. `/account` shows upcoming/past bookings,
 allows cancellation of eligible bookings, and includes profile/password settings.
@@ -258,7 +270,7 @@ rejection and protected pages/APIs using a disposable customer and random
 passwords in the temporary local database. All fixtures are removed. It
 creates no admin accounts; successful admin issuance/revocation and password
 hash changes are checked with mock records in unit tests. This scoped check
-is part of 7.3; the broader 7.4 end-to-end suite remains unstarted.
+is part of 7.3; the broader 7.4 end-to-end suite is available with `npm run test:e2e`.
 
 ## Deploying to production
 
@@ -316,8 +328,7 @@ Never require an animation to finish before a button or form can be used.
 
 `npm test` includes component interaction tests in a simulated page. For local
 browser checks, Playwright is available; install its browser with
-`npx playwright install chromium`. The full booking/admin end-to-end suite
-remains roadmap step 7.4. With the local website and MongoDB running,
+`npx playwright install chromium`. The booking/admin end-to-end suite runs with `npm run test:e2e`. With the local website and MongoDB running,
 `npm run test:motion` checks public animations in Chromium at phone size,
 including reduced motion and no-JavaScript visibility. It only accepts a local
 database and removes its temporary review records when finished.
@@ -334,7 +345,7 @@ With the local website and MongoDB running, `npm run test:booking` uses Chromium
 to check the phone flow, validation, draft restoration, server-error recovery,
 availability and a real test save. It removes its uniquely identified booking
 fixtures in cleanup. Both browser checks reject non-local database/site URLs;
-never point them at production. Full authenticated admin tests remain step 7.4.
+never point them at production. Authenticated admin tests are included in `npm run test:e2e`.
 
 ## Feedback
 
@@ -365,6 +376,27 @@ internal error details. `npm run test:seo` checks page titles, sharing tags,
 private-page indexing instructions, sitemap and generated preview/icon images
 against a running local site. Live chat-app previews still need production checks.
 
-The next roadmap step is the mobile menu and footer (5.2). The owner confirmed
-**nikkitheawsome@gmail.com** and **Metro Vancouver** as the public contact details.
-These are recorded for that step; they have not yet been added to the footer.
+The mobile menu and footer are complete. The footer uses the owner-confirmed
+**nikkitheawsome@gmail.com** and **Metro Vancouver** public details.
+
+
+## Booking retry and date rules
+
+Business dates use `America/Vancouver` on both server and browser. Times in the
+request are Vancouver wall-clock times. The server rejects impossible dates,
+start times outside 09:00–22:00 or off the half hour, and events ending after
+midnight. Pending requests may share a time; only confirmed events block it.
+Admins may explicitly override a confirmation overlap warning.
+
+The wizard saves a random request key with the tab's draft when sending.
+Concurrent sends and unchanged retries, including after a lost response and
+refresh, return the same saved receipt using a unique database index. Editing
+fields starts a new request identity. Clearing the draft or choosing another
+request deliberately starts a new booking. Rate limits still apply to retries.
+Direct API clients should preserve an `Idempotency-Key` UUID across retries;
+legacy calls without one deduplicate identical requests using the form proof.
+No private booking fields are returned in the receipt.
+
+See [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) for the release blockers and
+next task. Local automated checks do not prove hosted database access, email
+delivery or live client-IP handling.

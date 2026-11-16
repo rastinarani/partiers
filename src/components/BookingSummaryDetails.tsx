@@ -16,7 +16,7 @@ export default function BookingSummaryDetails({
         month: "long",
         day: "numeric",
         year: "numeric",
-      })}, ${formatTimeRange(s.time, s.durationMinutes)} (${formatDuration(s.durationMinutes)})`,
+      })}, ${formatTimeRange(s.time, s.durationMinutes)} (${formatDuration(s.durationMinutes)}), Vancouver time`,
     ],
     ["Event", EVENT_TYPES[s.eventType]],
     ["Where", s.location],

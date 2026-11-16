@@ -29,8 +29,7 @@ owner's go-ahead) · 🔑 needs the owner to create an account or provide a key
   confirmed-bookings calendar.
 - Vibrant violet/rose/amber theme, mobile-friendly layout.
 
-**Known gaps:** emails and a full
-account/admin end-to-end suite. Public animations
+**Known gaps:** email notifications, password reset and live release setup. Public animations
 respect reduced motion, and local browser checks cover public pages and booking.
 
 **Live site:** a Vercel project exists at `partiers.vercel.app`, but its
@@ -297,9 +296,10 @@ Needs an email provider account (Resend's free tier is a good fit). **Ask the
 owner before starting**, and keep the API key in `.env.local` / Vercel
 settings only.
 
-**Blocked this session (2026-11-16):** no email-provider account or API key
-has been supplied. 6.1 and 6.2 remain unstarted. Continue independent Phase 7
-work after 5.5; do not create an account, invent a key or change production.
+**Owner setup pending (2026-11-16):** no email-provider account or API key
+has been supplied. 6.1 and 6.2 remain unstarted. The owner approved preparing
+Resend, but this run is scoped to 7.4; see the newest handoff for the next task.
+Do not create an account, invent a key or change production.
 
 ### [ ] 6.1 Booking emails
 
@@ -339,7 +339,7 @@ work after 5.5; do not create an account, invent a key or change production.
   Consider separate secrets for admin and customer cookies.
 - **Done when:** an old copied cookie stops working after logout.
 
-### [ ] 7.4 End-to-end tests
+### [x] 7.4 End-to-end tests
 
 - Playwright tests for the golden paths: book as a guest, sign up and see "My
   bookings", admin confirms a booking, review approval.
@@ -375,7 +375,69 @@ work after 5.5; do not create an account, invent a key or change production.
 
 ---
 
-## Session handoff — 2026-11-16 (stable checkpoint)
+## Session handoff — 2026-11-16 (7.4 release checkpoint)
+
+- **Scope:** completed 7.4 and preserved/tested booking fixes from the interrupted
+  attempt. 7.3 was already complete in `a3d0940`; the earlier unfinished summary
+  is obsolete. Existing PR #1 is open against main, on
+  `codex/mobile-accessibility-checkpoint`; preserve it, no merge/force-push.
+- **New command:** `npm run test:e2e` uses the existing isolated runner for
+  `booking reliability e2e`. Chromium + a loopback MongoDB are required.
+  No `.env.local` is read; the runner creates a random local database, source
+  snapshot and secret, and removes them afterwards. Generated test customer AND
+  admin credentials are permitted only there; no real owner accounts created.
+- **Coverage:** guest five-step save/reference, drafts/Back/Edit, failed sends,
+  lost successful response then refresh/retry; signed-in signup/login, safe
+  return, prefill, own history/profile/cancellation; another customer's history
+  and cancellation isolation; customer denial on admin pages/API; real admin
+  login, confirmation, private notes, failed action retry, overlap warning and
+  explicit override; review submission, approval, public visibility and rejection;
+  admin logout revokes copied cookies through a direct API call.
+- **Reliability fixes:** unique partial request-key index returns one receipt for
+  concurrent/replayed submissions. Wizard preserves the key across retry/refresh;
+  changed details start a new identity, as does a new request/cleared draft.
+  API clients should retain their UUID Idempotency-Key across retries. Rate
+  limits still count attempts. Receipt JSON exposes only id/reference.
+  Business dates now use America/Vancouver in browser/server; impossible dates,
+  invalid ages and start times outside half-hour slots/09:00–22:00 are rejected.
+  Customer login now loads the destination with the newly issued cookie,
+  avoiding a production client-navigation failure after logout.
+  Booking summaries label Vancouver time. Removed an unsupported response-time
+  promise; no prices or new business promises added.
+- **Verification:** lint/typecheck and 293 unit tests pass. Compiled webpack
+  production build and `npm run test:isolated -- --production e2e sessions`
+  pass after the login fix. Compiled `booking reliability` and keyboard/axe
+  accessibility scans passed before the final login navigation-only fix;
+  their booking/markup behavior is unchanged. Fresh npm audit: zero known
+  vulnerabilities; no dependencies changed. Final `npm run test:e2e` passes
+  against development (all three suites in one run). Session signature/revocation
+  logic is unchanged. All test databases, source snapshots and temporary servers
+  were removed; no production data/settings or real accounts changed.
+- **Failures resolved:** new direct API tests caught impossible calendar dates
+  accepted by the old regex; added real-date validation and regression tests.
+  Test-only corrections matched existing receipt/status labels and string time
+  ranges, scoped assertions to active page content and waited for admin refreshes.
+  A hanging diagnostic wait on an aborted login response was stopped; the
+  isolated runner removed its database/server/snapshot. No failed test was
+  counted as a pass; cleanup ran after each failed attempt.
+- **Evidence reuse:** prior navigation/motion/SEO/rate-limit/spam checks remain
+  historical for unchanged features. 245-test evidence predates 7.3; 286 tests
+  were its newer checkpoint. Do not treat those old runs as live verification.
+- **Release verdict: blocked.** Email steps 6.1/6.2 remain unimplemented, live
+  database connectivity/settings unresolved, real admins deferred, hosted IP and
+  email delivery unverified, backup/restore/rollback rehearsal not yet done.
+  RELEASE_CHECKLIST.md records statuses and owner actions. Public live reads
+  could not access the site this run; do not infer current production health.
+- **Exact next task:** prepare 6.1/6.2 for Resend (owner approved preparation),
+  without sending real mail or creating an account. Implement/test retry-safe
+  notifications and single-use expiring hashed password-reset links; document
+  sender/key/recipient setup. Credentials and real delivery remain owner-blocked.
+  Then prepare/rehearse recovery procedures with disposable data, followed by
+  owner-authorized Phase 8 setup/deployment/smoke tests. Do not start deferred work.
+
+---
+
+## Historical handoff — 2026-11-16 (before 7.4)
 
 - Completed: **0.1–3.3, 4.1–4.5, 5.1–5.5 and 7.1–7.3**. The latest
   session completed **only 7.3**, on `codex/mobile-accessibility-checkpoint`.
@@ -443,6 +505,12 @@ work after 5.5; do not create an account, invent a key or change production.
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-16 — 7.4 End-to-end suite and interrupted reliability checkpoint:
+  added repeatable isolated Playwright customer/admin flows and direct API retry
+  checks; retained and verified request deduplication, Vancouver dates, real-date
+  and slot validation. See newest handoff for commands, evidence and blockers.
+
 
 - 2026-11-16 — 7.3 Session hardening (commit: "Harden session expiry and invalidate copied cookies"):
   signed 30-day expiry, purpose-separated customer/admin signatures and

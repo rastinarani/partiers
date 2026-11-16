@@ -21,8 +21,10 @@ function booking(date: string, time: string): Booking {
 }
 
 describe("todayString", () => {
-  it("formats a local date as YYYY-MM-DD", () => {
-    expect(todayString(new Date(2026, 0, 5, 23, 30))).toBe("2026-01-05");
+  it("uses Vancouver dates at UTC midnight and daylight-saving boundaries", () => {
+    expect(todayString(new Date("2026-01-06T07:30:00Z"))).toBe("2026-01-05");
+    expect(todayString(new Date("2026-07-06T06:30:00Z"))).toBe("2026-07-05");
+    expect(todayString(new Date("2026-07-06T07:00:00Z"))).toBe("2026-07-06");
   });
 });
 

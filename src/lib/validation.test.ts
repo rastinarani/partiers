@@ -77,11 +77,11 @@ describe("validateBookingInput", () => {
     }
   );
 
-  it.each(["2026-1-5", "14/11/2026", "2026-11-1x"])("rejects bad date %j", (date) => {
+  it.each(["2026-1-5", "14/11/2026", "2026-11-1x", "2026-02-31"])("rejects bad date %j", (date) => {
     expect(validateBookingInput({ ...valid, date })).toBeNull();
   });
 
-  it.each(["24:00", "9:30", "12:60", "noon"])("rejects bad time %j", (time) => {
+  it.each(["24:00", "9:30", "12:60", "noon", "08:30", "12:01", "22:30"])("rejects bad time %j", (time) => {
     expect(validateBookingInput({ ...valid, time })).toBeNull();
   });
 
@@ -89,7 +89,7 @@ describe("validateBookingInput", () => {
     expect(validateBookingInput({ ...valid, childAge })?.childAge).toBe(childAge);
   });
 
-  it.each([-1, 18, 2.5, "six"])("rejects child age %j", (childAge) => {
+  it.each([-1, 18, 2.5, "six", null, "", false])("rejects child age %j", (childAge) => {
     expect(validateBookingInput({ ...valid, childAge })).toBeNull();
   });
 

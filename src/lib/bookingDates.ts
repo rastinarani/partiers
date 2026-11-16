@@ -1,11 +1,12 @@
 import type { Booking } from "./types";
 
-/** Today's date as "YYYY-MM-DD" in the server's local time zone. */
+export const SERVICE_TIME_ZONE = "America/Vancouver";
+
+/** Business dates always follow Metro Vancouver, regardless of server or visitor. */
 export function todayString(now: Date = new Date()): string {
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: SERVICE_TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(now);
 }
 
 /**

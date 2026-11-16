@@ -52,8 +52,7 @@ export default function BookingConfirmation({
           <li>
             <span className="font-semibold text-primary">2.</span> We get in
             touch at{" "}
-            <span className="font-medium text-foreground [overflow-wrap:anywhere]">{s.contact}</span>,
-            usually within a day or two.
+            <span className="font-medium text-foreground [overflow-wrap:anywhere]">{s.contact}</span>.
           </li>
           <li>
             <span className="font-semibold text-primary">3.</span> On the day,

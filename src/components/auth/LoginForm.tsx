@@ -3,13 +3,11 @@
 import PublicFormProtection, { usePublicFormProtection } from "@/components/PublicFormProtection";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, FormError, Input, Label } from "@/components/ui";
 
 export default function LoginForm({ next, passwordChanged = false }: { next: string | null; passwordChanged?: boolean }) {
   const protection = usePublicFormProtection("login");
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -35,8 +33,9 @@ export default function LoginForm({ next, passwordChanged = false }: { next: str
       return;
     }
 
-    router.push(next ?? "/account");
-    router.refresh();
+    // Load the destination with the new cookie instead of reusing a cached
+    // signed-out account redirect after logout.
+    window.location.assign(next ?? "/account");
   }
 
   return (

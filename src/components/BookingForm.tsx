@@ -117,6 +117,7 @@ function BookingWizard({
   const heading = useRef<HTMLHeadingElement>(null);
   const errorBox = useRef<HTMLDivElement>(null);
   const shouldFocus = useRef(false);
+  const sending = useRef(false);
 
   useEffect(() => {
     if (shouldFocus.current) {
@@ -208,7 +209,7 @@ function BookingWizard({
     setError("");
     setClearPrompt(false);
     shouldFocus.current = true;
-    save({ values: draft, step: nextStep });
+    save({ ...form, values: draft, step: nextStep });
   }
   function check(nextStep: number) {
     if (nextStep <= 1 && dateBlocked) return "Sorry, we're not available that day. Please pick another date.";
@@ -220,7 +221,7 @@ function BookingWizard({
   }
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy || (step === 4 && !protection.ready)) return;
+    if (sending.current || busy || (step === 4 && !protection.ready)) return;
     if (step < 4) {
       const invalid = check(step);
       if (invalid) {
@@ -242,12 +243,15 @@ function BookingWizard({
       setError("Please check your details before sending.");
       return;
     }
+    sending.current = true;
+    const requestKey = form.requestKey ?? crypto.randomUUID();
+    save({ ...form, requestKey });
     setBusy(true);
     setError("");
     try {
       const res = await fetch("/api/bookings", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Idempotency-Key": requestKey },
         body: JSON.stringify({ ...request, ...protection.payload(event.currentTarget) }),
       });
       const data = await res.json().catch(() => ({}));
@@ -276,6 +280,7 @@ function BookingWizard({
           : "Couldn't connect. Please try again.",
       );
     } finally {
+      sending.current = false;
       setBusy(false);
     }
   }

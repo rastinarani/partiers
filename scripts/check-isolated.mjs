@@ -8,6 +8,8 @@ import { setTimeout as delay } from "node:timers/promises";
 import { MongoClient } from "mongodb";
 
 const checks = {
+  e2e: "check-e2e.mjs",
+  reliability: "check-booking-reliability.mjs",
   sessions: "check-sessions.mjs",
   navigation: "check-navigation.mjs",
   accessibility: "check-accessibility.mjs",

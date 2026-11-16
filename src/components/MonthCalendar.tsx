@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import { todayString } from "@/lib/bookingDates";
 import FadeIn from "./motion/FadeIn";
 import { Card } from "./ui";
 
@@ -38,7 +39,7 @@ export default function MonthCalendar({
   unavailableDates,
   allowSelectingUnavailable = false,
 }: MonthCalendarProps) {
-  const initial = selectedDate ? new Date(`${selectedDate}T00:00:00`) : new Date();
+  const initial = new Date(`${selectedDate || todayString()}T00:00:00`);
   const [viewDate, setViewDate] = useState(new Date(initial.getFullYear(), initial.getMonth(), 1));
   const [focusedDate, setFocusedDate] = useState(toDateKey(initial));
   const dayButtons = useRef(new Map<string, HTMLButtonElement>());
@@ -52,7 +53,7 @@ export default function MonthCalendar({
     }
   }, [focusedDate, viewDate]);
 
-  const today = startOfDay(new Date());
+  const today = new Date(`${todayString()}T00:00:00`);
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
 

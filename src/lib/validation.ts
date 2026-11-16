@@ -49,7 +49,9 @@ export function validateBookingInput(body: unknown) {
 
   if (!parentName || !contact || !childName || !date || !time) return null;
   if (notes === null) return null;
-  if (!DATE_RE.test(date) || !TIME_RE.test(time)) return null;
+  if (!isDateString(date) || !TIME_RE.test(time) || time < "09:00" || time > "22:00"
+    || !["00", "30"].includes(time.slice(3))) return null;
+  if (b.childAge === "" || b.childAge === null || typeof b.childAge === "boolean") return null;
   if (!Number.isInteger(childAge) || childAge < 0 || childAge > 17) return null;
   if (!Number.isInteger(numberOfChildren) || numberOfChildren < 1 || numberOfChildren > 50) {
     return null;
@@ -163,7 +165,9 @@ export function safeNextPath(value: unknown): string | null {
 }
 
 export function isDateString(value: unknown): value is string {
-  return typeof value === "string" && DATE_RE.test(value);
+  if (typeof value !== "string" || !DATE_RE.test(value)) return false;
+  const date = new Date(`${value}T12:00:00Z`);
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
 /** Admin: block a date, with an optional private note. */

@@ -121,6 +121,17 @@ try {
   );
   await expect(page.locator("dl")).toContainText(contact);
   await page.unroute("**/api/bookings");
+  // The database accepts the request, but its response is lost. Refresh and retry.
+  await page.route("**/api/bookings", async (route) => {
+    const accepted = await route.fetch();
+    assert.equal(accepted.status(), 201);
+    await route.abort("failed");
+  });
+  await page.getByRole("button", { name: "Send booking request" }).click();
+  await expect(page.locator("form").getByRole("alert")).toBeVisible();
+  await page.unroute("**/api/bookings");
+  await page.reload();
+
   // If availability changes at send time, the form returns to Time with details intact.
   await page.route("**/api/bookings", (route) =>
     route.fulfill({
@@ -149,6 +160,7 @@ try {
   const response = await responsePromise;
   assert.equal(response.status(), 201);
   const { id, referenceCode } = await response.json();
+  assert.equal(await db.collection("bookings").countDocuments({ contact, _id: { $ne: fixtureId } }), 1, "Lost response and refresh must not duplicate the booking");
   await expect(
     page.getByRole("heading", { name: "Request sent!" }),
   ).toBeVisible();

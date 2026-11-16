@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { verifyAdminSessionToken, verifyUserSessionToken } from "@/lib/sessions";
 import { validPublicForm, publicFormRejection } from "@/lib/publicFormProtection";
 import { cookies } from "next/headers";
@@ -8,6 +9,8 @@ import {
 } from "@/lib/auth";
 import {
   createBooking,
+  getBookingReceipt,
+  BookingRequestConflict,
   getBookingById,
   getTakenRanges,
   updateBookingStatus,
@@ -38,34 +41,49 @@ export async function POST(request: Request) {
     );
   }
 
-  if (input.date < todayString()) {
-    return NextResponse.json({ error: "Please pick a date in the future." }, { status: 400 });
-  }
-  if (await isDateBlocked(input.date)) {
-    return NextResponse.json(
-      { error: "Sorry, we're not available that day. Please pick another date." },
-      { status: 409 }
-    );
-  }
-
-  // Only confirmed bookings block a slot; two pending requests for the same
-  // time are fine, and the admin gets a warning when confirming the second.
-  const taken = await getTakenRanges(input.date);
-  if (findOverlap(toRange(input.time, input.durationMinutes), taken)) {
-    return NextResponse.json(
-      { error: "Sorry, that time overlaps another booking. Please pick a different time." },
-      { status: 409 }
-    );
-  }
-
   const cookieStore = await cookies();
   const sessionUserId = await verifyUserSessionToken(cookieStore.get(USER_COOKIE_NAME)?.value);
   // Look the user up so a validly signed id that isn't a customer (e.g. a
   // deleted account) is treated as a guest.
   const user = sessionUserId ? await getUserById(sessionUserId) : null;
 
-  const { id, referenceCode } = await createBooking(input, user?.id);
-  return NextResponse.json({ id, referenceCode }, { status: 201 });
+  const suppliedKey = request.headers.get("Idempotency-Key");
+  if (suppliedKey !== null && !/^[a-f0-9-]{36}$/.test(suppliedKey)) {
+    return NextResponse.json({ error: "Invalid request key." }, { status: 400 });
+  }
+  const hash = createHash("sha256").update(JSON.stringify([input, user?.id ?? "guest"])).digest("hex");
+  const key = createHash("sha256").update(suppliedKey ?? `${body.formToken}:${hash}`).digest("hex");
+  try {
+    const receipt = await getBookingReceipt(key, hash);
+    if (receipt) return NextResponse.json(receipt, { status: 201 });
+    if (input.date < todayString()) {
+      return NextResponse.json({ error: "Please pick a date in the future." }, { status: 400 });
+    }
+    if (await isDateBlocked(input.date)) {
+      return NextResponse.json(
+        { error: "Sorry, we're not available that day. Please pick another date." },
+        { status: 409 }
+      );
+    }
+
+    // Only confirmed bookings block a slot; two pending requests for the same
+    // time are fine, and the admin gets a warning when confirming the second.
+    const taken = await getTakenRanges(input.date);
+    if (findOverlap(toRange(input.time, input.durationMinutes), taken)) {
+      return NextResponse.json(
+        { error: "Sorry, that time overlaps another booking. Please pick a different time." },
+        { status: 409 }
+      );
+    }
+
+    const { id, referenceCode } = await createBooking(input, user?.id, { key, hash });
+    return NextResponse.json({ id, referenceCode }, { status: 201 });
+  } catch (error) {
+    if (error instanceof BookingRequestConflict) {
+      return NextResponse.json({ error: "This request was already sent with different details. Start a new request." }, { status: 409 });
+    }
+    return NextResponse.json({ error: "We couldn’t save your request right now. Please retry with the same details." }, { status: 503 });
+  }
 }
 
 // Admin only: confirm, decline or cancel a booking request.

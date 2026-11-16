@@ -26,6 +26,9 @@ function ensureIndexes(db: Db) {
       { unique: true, partialFilterExpression: { referenceCode: { $type: "string" } } }
     ),
     db.collection(COLLECTION).createIndex({ userId: 1 }),
+    db.collection(COLLECTION).createIndex({ requestKey: 1 }, {
+      unique: true, partialFilterExpression: { requestKey: { $type: "string" } },
+    }),
   ]).catch((err) => {
     indexesReady = null;
     throw err;
@@ -58,7 +61,8 @@ function toBooking(doc: Document): Booking {
 
 export async function createBooking(
   input: NewBooking,
-  userId?: string
+  userId?: string,
+  request?: { key: string; hash: string }
 ): Promise<{ id: string; referenceCode: string }> {
   const db = await getDb();
   await ensureIndexes(db);
@@ -70,6 +74,7 @@ export async function createBooking(
     try {
       const result = await db.collection(COLLECTION).insertOne({
         ...input,
+        ...(request ? { requestKey: request.key, requestHash: request.hash } : {}),
         ...(userId ? { userId } : {}),
         referenceCode,
         status: "pending" satisfies BookingStatus,
@@ -79,6 +84,10 @@ export async function createBooking(
       });
       return { id: result.insertedId.toString(), referenceCode };
     } catch (err) {
+      if (request && err instanceof MongoServerError && err.code === 11000) {
+        const receipt = await getBookingReceipt(request.key, request.hash);
+        if (receipt) return receipt;
+      }
       const duplicateCode =
         err instanceof MongoServerError && err.code === 11000 && attempt < 4;
       if (!duplicateCode) throw err;
@@ -254,4 +263,15 @@ export async function hideBooking(id: string): Promise<boolean> {
     { $set: { deletedAt: new Date() } }
   );
   return result.matchedCount > 0;
+}
+
+export class BookingRequestConflict extends Error {}
+
+/** A retry receives only its receipt, never the saved personal or admin details. */
+export async function getBookingReceipt(key: string, hash: string) {
+  const db = await getDb();
+  const doc = await db.collection(COLLECTION).findOne({ requestKey: key });
+  if (!doc) return null;
+  if (doc.requestHash !== hash) throw new BookingRequestConflict("Request details changed.");
+  return { id: doc._id.toString(), referenceCode: doc.referenceCode as string };
 }
