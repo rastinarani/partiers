@@ -1,12 +1,13 @@
+import { verifyAdminSessionToken } from "@/lib/sessions";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { ADMIN_COOKIE_NAME, verifyAdminSessionToken } from "@/lib/auth";
+import { ADMIN_COOKIE_NAME } from "@/lib/auth";
 import { blockDate, unblockDate } from "@/lib/blockedDates";
 import { isDateString, validateBlockDateInput } from "@/lib/validation";
 
 async function isAdmin() {
   const cookieStore = await cookies();
-  return verifyAdminSessionToken(cookieStore.get(ADMIN_COOKIE_NAME)?.value) !== null;
+  return await verifyAdminSessionToken(cookieStore.get(ADMIN_COOKIE_NAME)?.value) !== null;
 }
 
 // Admin only: mark a date as unavailable.

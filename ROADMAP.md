@@ -29,8 +29,7 @@ owner's go-ahead) · 🔑 needs the owner to create an account or provide a key
   confirmed-bookings calendar.
 - Vibrant violet/rose/amber theme, mobile-friendly layout.
 
-**Known gaps:** mobile navigation/footer, accessibility pass, emails, rate
-limiting and a full account/admin end-to-end suite. Public animations
+**Known gaps:** email notifications, password reset and live release setup. Public animations
 respect reduced motion, and local browser checks cover public pages and booking.
 
 **Live site:** a Vercel project exists at `partiers.vercel.app`, but its
@@ -253,11 +252,11 @@ there's a strong reason not to. Every animation must respect
 - **Done when:** a first-time visitor understands the offer without the About
   page.
 
-### [ ] 5.2 Mobile menu and footer
+### [x] 5.2 Mobile menu and footer
 
 - **Inputs confirmed:** public email **nikkitheawsome@gmail.com** and service
   area **Metro Vancouver**. No further contact-detail decision is needed.
-  These details are recorded but have not yet been added to the footer.
+  These exact details are now in the footer.
 
 - A hamburger menu with an animated drawer on small screens; a richer footer
   (contact email, area served, links).
@@ -277,7 +276,7 @@ there's a strong reason not to. Every animation must respect
 - **Done when:** pasting the site link into a chat app shows a nice preview
   card.
 
-### [ ] 5.5 Accessibility pass
+### [x] 5.5 Accessibility pass
 
 - Keyboard-usable calendar (arrow keys, Enter), visible focus rings, labels
   on every input, color contrast checked, `aria-live` for form errors.
@@ -296,6 +295,11 @@ there's a strong reason not to. Every animation must respect
 Needs an email provider account (Resend's free tier is a good fit). **Ask the
 owner before starting**, and keep the API key in `.env.local` / Vercel
 settings only.
+
+**Owner setup pending (2026-11-16):** no email-provider account or API key
+has been supplied. 6.1 and 6.2 remain unstarted. The owner approved preparing
+Resend, but this run is scoped to 7.4; see the newest handoff for the next task.
+Do not create an account, invent a key or change production.
 
 ### [ ] 6.1 Booking emails
 
@@ -316,26 +320,26 @@ settings only.
 
 ## Phase 7 — Security and reliability
 
-### [ ] 7.1 Rate limiting
+### [x] 7.1 Rate limiting
 
 - Limit login, signup, booking and review submissions per IP (e.g. using a
   MongoDB collection with a TTL index, so no extra service is needed).
 - **Done when:** 20 quick failed logins get a friendly "try again later".
 
-### [ ] 7.2 Spam protection
+### [x] 7.2 Spam protection
 
 - A hidden honeypot field plus a minimum fill time on the public forms.
 - **Done when:** a scripted submission that fills every field instantly is
   rejected without telling the bot why.
 
-### [ ] 7.3 Session hardening
+### [x] 7.3 Session hardening
 
 - Session cookies carry an expiry, and logging out (or changing password)
   invalidates existing sessions (e.g. a `sessionVersion` on the user).
   Consider separate secrets for admin and customer cookies.
 - **Done when:** an old copied cookie stops working after logout.
 
-### [ ] 7.4 End-to-end tests
+### [x] 7.4 End-to-end tests
 
 - Playwright tests for the golden paths: book as a guest, sign up and see "My
   bookings", admin confirms a booking, review approval.
@@ -371,48 +375,250 @@ settings only.
 
 ---
 
-## Session handoff — 2026-11-16 (ready to resume)
+## Session handoff — 2026-11-16 (7.4 release checkpoint)
 
-- Completed and pushed: **0.1–3.3, 4.1–4.5, 5.1, 5.3 and 5.4**.
-  Step 3.4 remains deferred. On 2026-11-16, Git was clean and the completed
-  website commits were confirmed on `origin/main`; this update changes docs only.
-- **Next active step: 5.2 Mobile menu and footer.** It was not started while
-  public contact details were pending. The owner has now explicitly confirmed:
-  **nikkitheawsome@gmail.com** and **Metro Vancouver**. Use those exact public
-  details in the footer; do not invent an address, phone, prices or service rules.
-- **Exact resume procedure:** read AGENTS.md/CLAUDE.md and this handoff, inspect
-  Git status and actual files, then implement **only 5.2** before starting 5.5.
-  Start with `src/components/NavBar.tsx`, `Footer.tsx` and `LoginLink.tsx`; review
-  existing motion helpers and the relevant installed Next.js docs before coding.
-  Add a mobile menu/drawer and richer footer using the confirmed details above.
-  Preserve signed-in account links, logged-out login return paths and desktop
-  navigation. Check 360 px width, long account names, keyboard focus, Escape/
-  close/navigation behavior and reduced motion. Run the project checks and
-  browser checks, update this log, and commit the verified step.
-- **After 5.2:** continue with 5.5 accessibility. Phase 6 requires the owner's
-  email-provider setup/approval; do not invent keys or start paid services.
-- The owner asked to stop because usage is close to ending. **5.5 has not been
-  started**; its unused accessibility-check dependency was removed. No partial
-  implementation is left behind. 5.6 photos and admin setup stay deferred.
-- Lint/typecheck, 224 tests and webpack production build pass. Local Chromium
-  checks cover the home content, approved/pending/deleted testimonial cases,
-  native FAQ keyboard controls, booking links/flow, error retry and sharing
-  metadata/images. Temporary error route/type/flag and database fixtures removed.
-- Still unverified: actual root-layout fault recovery (component rendering only),
-  live chat-app preview/cache behavior, physical phones/Safari/Firefox and full
-  authenticated admin flows. No admin accounts were created. Production database
-  settings were not changed; its known connection issue remains Phase 8.
-- Previous browser checks used a local dev server on port 3000. Check whether
-  it is running before starting another server; do not assume it is still active.
-  `npm run test:motion`, `npm run test:booking`, and `npm run test:seo` are local
-  checks. `npm run build -- --webpack` is the verified build alternative for
-  the previously documented environment restriction on fresh Turbopack CSS builds.
+- **Scope:** completed 7.4 and preserved/tested booking fixes from the interrupted
+  attempt. 7.3 was already complete in `a3d0940`; the earlier unfinished summary
+  is obsolete. Existing PR #1 is open against main, on
+  `codex/mobile-accessibility-checkpoint`; preserve it, no merge/force-push.
+- **New command:** `npm run test:e2e` uses the existing isolated runner for
+  `booking reliability e2e`. Chromium + a loopback MongoDB are required.
+  No `.env.local` is read; the runner creates a random local database, source
+  snapshot and secret, and removes them afterwards. Generated test customer AND
+  admin credentials are permitted only there; no real owner accounts created.
+- **Coverage:** guest five-step save/reference, drafts/Back/Edit, failed sends,
+  lost successful response then refresh/retry; signed-in signup/login, safe
+  return, prefill, own history/profile/cancellation; another customer's history
+  and cancellation isolation; customer denial on admin pages/API; real admin
+  login, confirmation, private notes, failed action retry, overlap warning and
+  explicit override; review submission, approval, public visibility and rejection;
+  admin logout revokes copied cookies through a direct API call.
+- **Reliability fixes:** unique partial request-key index returns one receipt for
+  concurrent/replayed submissions. Wizard preserves the key across retry/refresh;
+  changed details start a new identity, as does a new request/cleared draft.
+  API clients should retain their UUID Idempotency-Key across retries. Rate
+  limits still count attempts. Receipt JSON exposes only id/reference.
+  Business dates now use America/Vancouver in browser/server; impossible dates,
+  invalid ages and start times outside half-hour slots/09:00–22:00 are rejected.
+  Customer login now loads the destination with the newly issued cookie,
+  avoiding a production client-navigation failure after logout.
+  Booking summaries label Vancouver time. Removed an unsupported response-time
+  promise; no prices or new business promises added.
+- **Verification:** lint/typecheck and 293 unit tests pass. Compiled webpack
+  production build and `npm run test:isolated -- --production e2e sessions`
+  pass after the login fix. Compiled `booking reliability` and keyboard/axe
+  accessibility scans passed before the final login navigation-only fix;
+  their booking/markup behavior is unchanged. Fresh npm audit: zero known
+  vulnerabilities; no dependencies changed. Final `npm run test:e2e` passes
+  against development (all three suites in one run). Session signature/revocation
+  logic is unchanged. All test databases, source snapshots and temporary servers
+  were removed; no production data/settings or real accounts changed.
+- **Failures resolved:** new direct API tests caught impossible calendar dates
+  accepted by the old regex; added real-date validation and regression tests.
+  Test-only corrections matched existing receipt/status labels and string time
+  ranges, scoped assertions to active page content and waited for admin refreshes.
+  A hanging diagnostic wait on an aborted login response was stopped; the
+  isolated runner removed its database/server/snapshot. No failed test was
+  counted as a pass; cleanup ran after each failed attempt.
+- **Evidence reuse:** prior navigation/motion/SEO/rate-limit/spam checks remain
+  historical for unchanged features. 245-test evidence predates 7.3; 286 tests
+  were its newer checkpoint. Do not treat those old runs as live verification.
+- **Release verdict: blocked.** Email steps 6.1/6.2 remain unimplemented, live
+  database connectivity/settings unresolved, real admins deferred, hosted IP and
+  email delivery unverified, backup/restore/rollback rehearsal not yet done.
+  RELEASE_CHECKLIST.md records statuses and owner actions. Public live reads
+  could not access the site this run; do not infer current production health.
+- **Exact next task:** prepare 6.1/6.2 for Resend (owner approved preparation),
+  without sending real mail or creating an account. Implement/test retry-safe
+  notifications and single-use expiring hashed password-reset links; document
+  sender/key/recipient setup. Credentials and real delivery remain owner-blocked.
+  Then prepare/rehearse recovery procedures with disposable data, followed by
+  owner-authorized Phase 8 setup/deployment/smoke tests. Do not start deferred work.
+
+---
+
+## Historical handoff — 2026-11-16 (before 7.4)
+
+- Completed: **0.1–3.3, 4.1–4.5, 5.1–5.5 and 7.1–7.3**. The latest
+  session completed **only 7.3**, on `codex/mobile-accessibility-checkpoint`.
+  Existing **[PR #1](https://github.com/rastinarani/partiers/pull/1)** targets
+  `main`; keep it open, do not merge or force-push.
+- **Exact next resume point: 7.4 End-to-end tests.** It remains unchecked
+  and unstarted. The new `sessions` check covers the security acceptance
+  criteria for 7.3; it does not implement the broader 7.4 golden-path suite.
+  Do not start it without the owner's next instruction.
+- Read AGENTS.md/CLAUDE.md, inspect actual Git state, and read the installed
+  Next.js guides before writing code. Current project:
+  `/Users/rastin/Desktop/Partiers`. Preserve other work and never assume a
+  fresh environment has local MongoDB, Chromium or `.env.local`.
+- **7.3 behavior:** signed role, identity, 30-day expiry and database revision;
+  strict parsing rejects legacy cookies, extra segments, tampering, expired
+  claims and customer/admin substitution. Admin/customer HMAC keys are
+  purpose-derived from the existing secret; no deployment settings changed.
+  The revision binds the password hash and a random `sessionVersion`.
+- Both logout routes invalidate **all sessions for that identity**, then clear
+  their own cookie. A replayed old logout cannot invalidate a later login.
+  Password changes atomically update the hash/version with a conditional
+  write, clear the current cookie and show a re-login message. Wrong current
+  passwords preserve sessions. Conditional writes prevent stale logout or
+  password requests overwriting a newer revision. Already-authorized requests
+  may finish; subsequent authorization checks enforce revocation.
+- **All consumers checked:** `auth.ts` handles signed claims; `sessions.ts`
+  checks the current identity/revision in MongoDB. Protected account/admin
+  pages and APIs, navigation, booking prefill and ownership use database
+  verification. The admin calendar now checks before loading private data.
+  Proxy intentionally performs only signature/role/expiry checks. Existing
+  documents without a version need no migration; old cookie formats require
+  re-login after deployment. Logout storage failures keep the cookie and show
+  a retry message rather than falsely claiming success.
+- **Verification for 7.3:** lint, typecheck, **286 unit tests**, default
+  Turbopack production build with explicit local test settings, isolated
+  webpack production build, and `sessions navigation accessibility booking`
+  against BOTH development and compiled production servers. Session checks
+  exercise real local customer signup/login, copied-cookie logout/password
+  revocation, failed logout retry, wrong-password recovery, re-login, signed
+  expiry/legacy/tampering rejection, guest navigation and every protected
+  admin page/API's negative path. Successful admin token verification,
+  invalidation and password-hash revision changes use mock records only.
+- **Isolation:** random local `partiers_test_…` databases, temporary source
+  snapshots and ephemeral secrets. The session check uses one disposable
+  customer with random test passwords; customer data, public booking/review
+  fixtures, databases, servers and snapshots are removed. No real or
+  throwaway admin accounts/credentials were created. Production data/settings
+  and the known live database issue remain untouched.
+- Safe commands: `npm run test:isolated -- sessions navigation accessibility booking`
+  and `npm run test:isolated -- --production sessions navigation accessibility booking`.
+  Additional existing checks: `spam limits motion seo`. Run builds/checks
+  sequentially on low-disk machines. Never delete database files or weaken
+  MongoDB disk safeguards. README documents setup and both modes.
+- **Owner-dependent work:** 6.1/6.2 need an email-provider account/key;
+  3.4/5.6/8.2 remain deferred. Do not create admin accounts or credentials,
+  buy services, change production settings or start deferred work.
+- Still unverified: successful real admin login/mutations (no admin accounts
+  created), broader 7.4 account/admin flows, manual screen-reader use,
+  physical phones/Safari/Firefox, actual root-layout fault recovery and live
+  Vercel database/edge-IP/share-preview behavior. Prior 7.1/7.2 checks and
+  zero-vulnerability audit are historical results, not rerun for 7.3.
 
 ---
 
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-16 — 7.4 End-to-end suite and interrupted reliability checkpoint:
+  added repeatable isolated Playwright customer/admin flows and direct API retry
+  checks; retained and verified request deduplication, Vancouver dates, real-date
+  and slot validation. See newest handoff for commands, evidence and blockers.
+
+
+- 2026-11-16 — 7.3 Session hardening (commit: "Harden session expiry and invalidate copied cookies"):
+  signed 30-day expiry, purpose-separated customer/admin signatures and
+  password/version-bound database verification across every session consumer;
+  added the missing admin-calendar database gate. Logout revokes all sessions
+  for that identity with replay-safe conditional rotation; password changes
+  update hash/version atomically, clear the cookie and require re-login.
+  Failed logout remains retryable. Updated navigation fixtures and added the
+  scoped isolated `sessions` check. Lint/typecheck, 286 unit tests, default
+  production build, isolated webpack production build and four browser checks
+  (`sessions navigation accessibility booking`) pass on development AND
+  compiled production. Disposable local customer/booking/review data and all
+  test servers/snapshots/databases removed; admin success paths use mocks,
+  no admin accounts/credentials created, no production settings/data changed.
+  Existing PR #1 updated on the same branch without merging. 7.4 and all
+  deferred/owner-dependent steps remain unstarted.
+
+- 2026-11-16 — GitHub delivery and handoff (commit: "Record verified GitHub delivery and resume instructions"):
+  after interruption, verified clean local state, all four feature commits on
+  the actual remote branch, and existing open PR #1 targeting main. Its title/
+  description accurately record completed steps, verification and limitations;
+  no duplicate or merge. Vercel checks report success; hosted runtime/database
+  behavior remains unverified. PR scratch file remains outside the repository.
+  No test servers on 3000/3100 or isolated source snapshots remain. Reused the
+  completed 245-test/build/browser/audit results because no application code
+  changed. Documentation-only follow-up; `git diff --check` passes. Next task
+  remains 7.3; no feature or session-hardening work started in this follow-up.
+
+- 2026-11-16 — 7.2 Spam protection (commit: "Protect public forms from instant and honeypot spam"):
+  shared hidden honeypot on booking, reviews, signup and both sign-in forms;
+  stateless server HMAC proofs have purpose, server timestamp and random nonce.
+  Enforces 2s minimum age/24h expiry, strict bounded input, exact signature and
+  generic non-cacheable 400 for missing/filled/early/expired/tampered envelopes.
+  Rate limits run first; business validation strips all guard fields before
+  storage. Validated uncached GET proof endpoint requires no database/account.
+  Shared client hook delays send readiness slightly, excludes the honeypot from
+  keyboard/screen readers, and recovers failed proof loading with typed values
+  and focus retained. A rejected 400 refreshes proof without losing the draft.
+  Five new unit tests cover boundaries, tampering/backdating/future/purpose,
+  malformed input, honeypot coercion, generic errors and missing secret.
+  Real HTTP/browser checks cover all five endpoints, one legitimate booking
+  and review, unchanged user/admin counts, hidden field/reflow and loading retry.
+  Added isolated compiled-production mode (build/start in the source snapshot).
+  Lint/typecheck, 245 tests, default build, isolated webpack production build,
+  full zero-alert audit, and all seven isolated browser suites pass against
+  both development and production servers. Test databases/snapshots removed.
+  No admin accounts/credentials, paid services or production changes. Phase 6
+  remains blocked; next independent step is 7.3. Feature work stops here to
+  leave time for final verification, documentation, commit, push and PR.
+
+- 2026-11-16 — 7.1 Rate limiting (commit: "Limit repeated submissions and update vulnerable dependencies"):
+  shared customer/admin login quota plus separate signup/booking/review quotas;
+  HMAC-hashed client identities, canonical IPv6, Vercel-only trusted forwarding
+  headers and conservative shared direct-server fallback. Atomic increment/
+  upsert handles first-write collisions, fixed-window IDs reset independently
+  of TTL cleanup, BSON expiry index removes stale buckets. Friendly non-cacheable
+  429/Retry-After and fail-closed generic 503 run before parsing/business writes.
+  Unit tests cover quotas, privacy, windows/IP/action separation, collisions,
+  index recovery and all five route guards. Real isolated MongoDB/HTTP/browser
+  tests cover concurrency (20 requests, exactly 10 admitted), shared login scope,
+  quotas, forged headers, retry UI, index/expiry and stale-bucket recovery with
+  unchanged account/content counts. Lint/typecheck, 240 tests, default build
+  with compiler port permission, and all six isolated browser suites pass.
+  Next.js/lint config 16.4.6 plus compatible transitive patches clear both
+  production and development audit alerts: full npm audit reports zero.
+  Read updated installed route/request/response guides before route edits.
+  One regression run was blocked by disk space, not an application assertion;
+  cleared generated compiler cache only, reran successfully, and documented
+  serial verification. No admin accounts, chosen credentials, production data
+  or settings changed; temporary data removed. Next independent step: 7.2.
+
+- 2026-11-16 — 5.5 Accessibility pass (commit: "Make bookings accessible by keyboard"):
+  semantic calendar grid with full date/weekday labels, one roving day tab stop,
+  arrow/day/week/Home/End/PageUp/PageDown navigation across months/years,
+  leap-month clamping, blocked/past-date guards and preserved admin selections.
+  Added five behavior tests. Skip link, site-wide focus outlines, visible field
+  borders/placeholders, shared assertive form errors, darker CTA/status/error/
+  rating colors and hollow unselected stars. Activities have clear focus rings;
+  booking confirmation focuses its heading, review completion focuses its
+  success card, and long summary/contact text wraps on 360px screens.
+  Added axe/Playwright checks for public/auth/404 pages, all booking steps,
+  errors/confirmation, reviews and modal navigation; a complete real booking
+  and review are sent using only Tab, typing, calendar/rating keys and Enter.
+  Native select type-ahead used after diagnosing macOS headless popup-key limits.
+  Lint/typecheck, 229 unit tests, webpack build and all five isolated browser
+  suites pass (navigation/accessibility/booking/motion/SEO). Automated scans find
+  no WCAG A/AA violations in covered states; this is not a full compliance claim.
+  Visual QA caught/fixed long-contact overflow. Stabilized an existing optimistic
+  retry test by waiting for its disabled button to become ready. No admin
+  accounts/credentials or production data/settings touched; test data removed.
+  Phase 6 blocked on provider/key; next independent work is 7.1. Baseline
+  production dependency audit alerts recorded in the handoff for Phase 7.
+
+- 2026-11-16 — 5.2 Mobile menu and footer (commit: "Add mobile navigation and contact footer"):
+  responsive desktop links and animated native-dialog mobile drawer, current-page
+  labels, preserved account/login return links, long-name handling, modal focus
+  wrapping/restoration, Escape/outside/navigation/desktop-resize close and scroll
+  lock. Drawer respects reduced motion including live preference changes.
+  Footer adds the confirmed public email/area and useful booking/review/about/
+  account links. No invented contact details, prices or account credentials.
+  Lint/typecheck, 224 tests and webpack build pass; fresh default Turbopack build
+  hits the existing sandbox port restriction. Isolated Chromium checks verified
+  360px/640px/desktop, long customer name, main/edge menu interactions, footer
+  details, reduced motion and the complete existing booking regression. Menu
+  screenshot visually inspected. New source-snapshot browser runner uses a random
+  loopback-only test database and secret, leaving the existing server and local
+  data untouched; fixtures/database/source snapshot removed after checks.
+  README explains cloud-safe setup and checks. Next active step: 5.5.
 
 - 2026-11-16 — Repository checkpoint (commit: "Clarify current progress and exact resume point"):
   confirmed completed website commits already pushed and clean local state;

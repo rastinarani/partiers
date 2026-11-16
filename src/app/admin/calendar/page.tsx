@@ -1,3 +1,7 @@
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { ADMIN_COOKIE_NAME } from "@/lib/auth";
+import { verifyAdminSessionToken } from "@/lib/sessions";
 import { privateMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { getBlockedDates } from "@/lib/blockedDates";
@@ -12,6 +16,8 @@ export const metadata = privateMetadata(
 );
 
 export default async function AdminCalendarPage() {
+  const cookieStore = await cookies();
+  if (!(await verifyAdminSessionToken(cookieStore.get(ADMIN_COOKIE_NAME)?.value))) redirect("/admin/login");
   const [bookings, blockedDates] = await Promise.all([
     getConfirmedBookings(),
     getBlockedDates(),

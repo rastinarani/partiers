@@ -2,7 +2,7 @@ import type { ComponentProps } from "react";
 import { cn } from "./cn";
 
 const FIELD_BASE =
-  "w-full rounded-xl border border-card-border bg-card px-4 text-sm focus:border-primary focus:outline-none";
+  "w-full rounded-xl border border-muted/80 bg-card px-4 text-sm placeholder:text-muted focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
 const FIELD_SIZES = {
   md: "py-2.5",
@@ -35,6 +35,9 @@ export function Label({ className, ...props }: ComponentProps<"label">) {
 export function FormError({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
       className={cn("rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger", className)}
       {...props}
     />

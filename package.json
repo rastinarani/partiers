@@ -11,6 +11,8 @@
     "create-admin": "node scripts/create-admin.mjs",
     "check-db": "node scripts/check-db.mjs",
     "test": "vitest run",
+    "test:e2e": "node scripts/check-isolated.mjs booking reliability e2e",
+    "test:isolated": "node scripts/check-isolated.mjs",
     "test:motion": "node --env-file-if-exists=.env.local scripts/check-public-motion.mjs",
     "test:booking": "node --env-file-if-exists=.env.local scripts/check-booking-wizard.mjs",
     "test:seo": "node scripts/check-seo.mjs"
@@ -19,11 +21,12 @@
     "canvas-confetti": "^1.9.4",
     "mongodb": "^7.6.0",
     "motion": "^14.14.0",
-    "next": "16.3.6",
+    "next": "16.4.6",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.65.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/react": "^16.3.3",
@@ -33,7 +36,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.6",
+    "eslint-config-next": "16.4.6",
     "jsdom": "^31.0.1",
     "tailwindcss": "^4",
     "typescript": "^5",

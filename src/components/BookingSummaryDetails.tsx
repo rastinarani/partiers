@@ -16,7 +16,7 @@ export default function BookingSummaryDetails({
         month: "long",
         day: "numeric",
         year: "numeric",
-      })}, ${formatTimeRange(s.time, s.durationMinutes)} (${formatDuration(s.durationMinutes)})`,
+      })}, ${formatTimeRange(s.time, s.durationMinutes)} (${formatDuration(s.durationMinutes)}), Vancouver time`,
     ],
     ["Event", EVENT_TYPES[s.eventType]],
     ["Where", s.location],
@@ -42,7 +42,7 @@ export default function BookingSummaryDetails({
           className="grid gap-1 px-4 py-3 sm:grid-cols-[8rem_1fr] sm:gap-4"
         >
           <dt className="font-medium text-muted">{label}</dt>
-          <dd className="break-words">{value}</dd>
+          <dd className="min-w-0 [overflow-wrap:anywhere]">{value}</dd>
         </div>
       ))}
     </dl>

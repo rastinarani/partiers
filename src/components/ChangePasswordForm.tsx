@@ -1,9 +1,11 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, Card, FormError, Input, Label } from "./ui";
 
 export default function ChangePasswordForm() {
+  const router = useRouter();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -39,6 +41,8 @@ export default function ChangePasswordForm() {
     setNewPassword("");
     setConfirmPassword("");
     setStatus("saved");
+    router.push("/login?next=/account&passwordChanged=1");
+    router.refresh();
   }
 
   return (
@@ -90,7 +94,7 @@ export default function ChangePasswordForm() {
           </Button>
           {status === "saved" && (
             <span className="text-sm font-medium text-success" role="status">
-              Password changed!
+              Password changed. Please log in again.
             </span>
           )}
         </div>

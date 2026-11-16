@@ -1,5 +1,7 @@
 "use client";
 
+import PublicFormProtection, { usePublicFormProtection } from "./PublicFormProtection";
+
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   ACTIVITIES,
@@ -74,6 +76,7 @@ function BookingWizard({
   loggedIn = false,
   blockedDates = [],
 }: BookingFormProps) {
+  const protection = usePublicFormProtection("booking");
   const storageKey = `partiers-booking-draft:v1:${loggedIn ? defaultContact : "guest"}`;
   const [initial] = useState(() => {
     try {
@@ -114,6 +117,7 @@ function BookingWizard({
   const heading = useRef<HTMLHeadingElement>(null);
   const errorBox = useRef<HTMLDivElement>(null);
   const shouldFocus = useRef(false);
+  const sending = useRef(false);
 
   useEffect(() => {
     if (shouldFocus.current) {
@@ -205,7 +209,7 @@ function BookingWizard({
     setError("");
     setClearPrompt(false);
     shouldFocus.current = true;
-    save({ values: draft, step: nextStep });
+    save({ ...form, values: draft, step: nextStep });
   }
   function check(nextStep: number) {
     if (nextStep <= 1 && dateBlocked) return "Sorry, we're not available that day. Please pick another date.";
@@ -217,7 +221,7 @@ function BookingWizard({
   }
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy) return;
+    if (sending.current || busy || (step === 4 && !protection.ready)) return;
     if (step < 4) {
       const invalid = check(step);
       if (invalid) {
@@ -239,16 +243,20 @@ function BookingWizard({
       setError("Please check your details before sending.");
       return;
     }
+    sending.current = true;
+    const requestKey = form.requestKey ?? crypto.randomUUID();
+    save({ ...form, requestKey });
     setBusy(true);
     setError("");
     try {
       const res = await fetch("/api/bookings", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(request),
+        headers: { "Content-Type": "application/json", "Idempotency-Key": requestKey },
+        body: JSON.stringify({ ...request, ...protection.payload(event.currentTarget) }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        if (res.status === 400) protection.retry();
         if (res.status === 409) {
           setAvailability(null);
           setAvailabilityVersion((version) => version + 1);
@@ -272,10 +280,12 @@ function BookingWizard({
           : "Couldn't connect. Please try again.",
       );
     } finally {
+      sending.current = false;
       setBusy(false);
     }
   }
   function reset() {
+    protection.retry();
     try {
       sessionStorage.removeItem(storageKey);
     } catch {
@@ -291,18 +301,11 @@ function BookingWizard({
 
   if (submitted)
     return (
-      <div
-        ref={(element) => {
-          if (element) element.focus();
-        }}
-        tabIndex={-1}
-      >
         <BookingConfirmation
           summary={submitted}
           loggedIn={loggedIn}
           onReset={reset}
         />
-      </div>
     );
 
   return (
@@ -313,6 +316,7 @@ function BookingWizard({
         aria-labelledby="booking-step-title"
         className="space-y-6"
       >
+        <PublicFormProtection protection={protection} />
         <nav aria-label="Booking progress">
           <ol className="grid grid-cols-5 gap-1 text-center text-xs sm:gap-3 sm:text-sm">
             {STEPS.map((label, index) => (
@@ -341,7 +345,7 @@ function BookingWizard({
             id="booking-step-title"
             ref={heading}
             tabIndex={-1}
-            className="mt-1 scroll-mt-6 text-2xl font-semibold focus:outline-none"
+            className="mt-1 scroll-mt-6 rounded-lg text-2xl font-semibold"
           >
             {STEPS[step]}
           </h2>
@@ -521,7 +525,7 @@ function BookingWizard({
                         return (
                           <label
                             key={value}
-                            className={`cursor-pointer rounded-full border px-4 py-2 text-sm font-medium has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary/50 ${checked ? "border-primary bg-primary-soft text-primary" : "border-card-border hover:bg-primary-soft/50"}`}
+                            className={`cursor-pointer rounded-full border px-4 py-2 text-sm font-medium has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary has-[:focus-visible]:ring-offset-2 ${checked ? "border-primary bg-primary-soft text-primary" : "border-muted/80 hover:bg-primary-soft/50"}`}
                           >
                             <input
                               type="checkbox"
@@ -673,7 +677,7 @@ function BookingWizard({
               type="submit"
               size="lg"
               className="flex-1 sm:flex-none"
-              disabled={busy || (step === 4 && !canCheckTimes)}
+              disabled={busy || (step === 4 && (!canCheckTimes || !protection.ready))}
             >
               {busy
                 ? "Sending request…"

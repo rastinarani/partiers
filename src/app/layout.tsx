@@ -33,10 +33,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <a href="#main-content" className="skip-link rounded-xl bg-card px-4 py-3 font-semibold text-primary shadow-lg">
+          Skip to main content
+        </a>
         <MotionProvider>
           <ToastProvider>
             <NavBar />
-            <main className="flex-1">{children}</main>
+            <main id="main-content" tabIndex={-1} className="flex-1">{children}</main>
             <Footer />
           </ToastProvider>
         </MotionProvider>

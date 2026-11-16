@@ -1,14 +1,25 @@
 import { isActivity, isEventType } from "./eventOptions";
 import { endsByMidnight, isDuration } from "./schedule";
+import { PUBLIC_FORM_KINDS, type PublicFormKind } from "./publicFormRules";
 
-// Shared server-side validation for the public booking and review forms.
-// Keep this defensive: these are the only two write paths that accept
-// unauthenticated input, and everything here ends up in MongoDB.
+// Validate public form fields before business logic or database writes.
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^\+?[0-9\s().-]{1,30}$/;
+
+export function validatePublicFormKind(value: unknown): PublicFormKind | null {
+  return typeof value === "string" && PUBLIC_FORM_KINDS.includes(value as PublicFormKind)
+    ? value as PublicFormKind : null;
+}
+
+export function validatePublicFormInput(body: unknown): string | null {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return null;
+  const value = body as Record<string, unknown>;
+  return value.website === "" && typeof value.formToken === "string"
+    && value.formToken.length > 0 && value.formToken.length <= 200 ? value.formToken : null;
+}
 
 export function cleanString(value: unknown, maxLength: number): string | null {
   if (typeof value !== "string") return null;
@@ -38,7 +49,9 @@ export function validateBookingInput(body: unknown) {
 
   if (!parentName || !contact || !childName || !date || !time) return null;
   if (notes === null) return null;
-  if (!DATE_RE.test(date) || !TIME_RE.test(time)) return null;
+  if (!isDateString(date) || !TIME_RE.test(time) || time < "09:00" || time > "22:00"
+    || !["00", "30"].includes(time.slice(3))) return null;
+  if (b.childAge === "" || b.childAge === null || typeof b.childAge === "boolean") return null;
   if (!Number.isInteger(childAge) || childAge < 0 || childAge > 17) return null;
   if (!Number.isInteger(numberOfChildren) || numberOfChildren < 1 || numberOfChildren > 50) {
     return null;
@@ -152,7 +165,9 @@ export function safeNextPath(value: unknown): string | null {
 }
 
 export function isDateString(value: unknown): value is string {
-  return typeof value === "string" && DATE_RE.test(value);
+  if (typeof value !== "string" || !DATE_RE.test(value)) return false;
+  const date = new Date(`${value}T12:00:00Z`);
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
 /** Admin: block a date, with an optional private note. */

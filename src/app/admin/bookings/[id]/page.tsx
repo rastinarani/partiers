@@ -1,8 +1,9 @@
+import { verifyAdminSessionToken } from "@/lib/sessions";
 import { privateMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import { ADMIN_COOKIE_NAME, verifyAdminSessionToken } from "@/lib/auth";
+import { ADMIN_COOKIE_NAME } from "@/lib/auth";
 import { getAdminById } from "@/lib/admins";
 import { getAdminBookingById } from "@/lib/bookings";
 import { formatTimeRange } from "@/lib/schedule";
@@ -21,7 +22,7 @@ export default async function BookingDetailPage({
   params,
 }: PageProps<"/admin/bookings/[id]">) {
   const cookieStore = await cookies();
-  const adminId = verifyAdminSessionToken(
+  const adminId = await verifyAdminSessionToken(
     cookieStore.get(ADMIN_COOKIE_NAME)?.value,
   );
   if (!adminId || !(await getAdminById(adminId))) redirect("/admin/login");

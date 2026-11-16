@@ -1,7 +1,8 @@
+import { verifyUserSessionToken } from "@/lib/sessions";
 import { privateMetadata } from "@/lib/seo";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { USER_COOKIE_NAME, verifyUserSessionToken } from "@/lib/auth";
+import { USER_COOKIE_NAME } from "@/lib/auth";
 import { getBookingsForUser } from "@/lib/bookings";
 import { splitUpcomingAndPast, todayString } from "@/lib/bookingDates";
 import { getUserById } from "@/lib/users";
@@ -20,7 +21,7 @@ export const metadata = privateMetadata(
 
 export default async function AccountPage() {
   const cookieStore = await cookies();
-  const userId = verifyUserSessionToken(
+  const userId = await verifyUserSessionToken(
     cookieStore.get(USER_COOKIE_NAME)?.value,
   );
   const user = userId ? await getUserById(userId) : null;

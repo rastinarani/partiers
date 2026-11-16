@@ -1,13 +1,14 @@
+import { verifyUserSessionToken } from "@/lib/sessions";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { USER_COOKIE_NAME, verifyUserSessionToken } from "@/lib/auth";
+import { USER_COOKIE_NAME } from "@/lib/auth";
 import { updateUserProfile } from "@/lib/users";
 import { validateProfileInput } from "@/lib/validation";
 
 // Customer only: update their own name and phone number.
 export async function PATCH(request: Request) {
   const cookieStore = await cookies();
-  const userId = verifyUserSessionToken(cookieStore.get(USER_COOKIE_NAME)?.value);
+  const userId = await verifyUserSessionToken(cookieStore.get(USER_COOKIE_NAME)?.value);
   if (!userId) {
     return NextResponse.json({ error: "Please log in again." }, { status: 401 });
   }

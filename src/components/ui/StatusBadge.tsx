@@ -1,7 +1,7 @@
 import type { BookingStatus, ReviewStatus } from "@/lib/types";
 
 const STATUS_STYLES: Record<BookingStatus | ReviewStatus, string> = {
-  pending: "bg-accent/15 text-accent",
+  pending: "bg-accent/15 text-accent-foreground",
   confirmed: "bg-success-soft text-success",
   approved: "bg-success-soft text-success",
   declined: "bg-danger-soft text-danger",

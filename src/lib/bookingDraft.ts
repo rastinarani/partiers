@@ -6,6 +6,7 @@ import type { BookingDraft } from "./types";
 export interface BookingDraftState {
   values: BookingDraft;
   step: number;
+  requestKey?: string;
 }
 
 export function emptyBookingDraft(
@@ -101,7 +102,7 @@ export function decodeBookingDraft(
       values.time = "";
       step = 0;
     }
-    return { values, step };
+    return { values, step, ...(typeof saved.requestKey === "string" && /^[a-f0-9-]{36}$/.test(saved.requestKey) ? { requestKey: saved.requestKey } : {}) };
   } catch {
     return null;
   }
