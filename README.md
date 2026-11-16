@@ -214,3 +214,10 @@ to check the phone flow, validation, draft restoration, server-error recovery,
 availability and a real test save. It removes its uniquely identified booking
 fixtures in cleanup. Both browser checks reject non-local database/site URLs;
 never point them at production. Full authenticated admin tests remain step 7.4.
+
+## Feedback
+
+`ToastProvider` keeps admin action notices visible across navigation. Use
+`useToast()` for success/error notices; errors stay until dismissed. Booking
+celebration code loads only after success and skips reduced-motion users.
+CSS press/star effects use `motion-safe` and the global reduced-motion guard.

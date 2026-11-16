@@ -4,9 +4,12 @@ import { cn } from "./cn";
 const VARIANTS = {
   primary:
     "bg-gradient-to-r from-primary to-secondary font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-60",
-  secondary: "border border-card-border font-medium hover:bg-primary-soft hover:text-primary",
-  success: "bg-success font-semibold text-white hover:opacity-90 disabled:opacity-40",
-  danger: "bg-danger font-semibold text-white hover:opacity-90 disabled:opacity-40",
+  secondary:
+    "border border-card-border font-medium hover:bg-primary-soft hover:text-primary",
+  success:
+    "bg-success font-semibold text-white hover:opacity-90 disabled:opacity-40",
+  danger:
+    "bg-danger font-semibold text-white hover:opacity-90 disabled:opacity-40",
 };
 
 const SIZES = {
@@ -26,12 +29,33 @@ interface ButtonStyleOptions {
 }
 
 /** For links that should look like buttons, e.g. `<Link className={buttonClasses({ variant: "secondary" })}>`. */
-export function buttonClasses({ variant = "primary", size = "md", className }: ButtonStyleOptions = {}) {
-  return cn(SIZES[size], VARIANTS[variant], className);
+export function buttonClasses({
+  variant = "primary",
+  size = "md",
+  className,
+}: ButtonStyleOptions = {}) {
+  return cn(
+    SIZES[size],
+    VARIANTS[variant],
+    "transition-[transform,opacity,background-color] duration-150 motion-safe:active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed",
+    className,
+  );
 }
 
 type ButtonProps = ComponentProps<"button"> & ButtonStyleOptions;
 
-export function Button({ variant, size, className, type = "button", ...props }: ButtonProps) {
-  return <button type={type} className={buttonClasses({ variant, size, className })} {...props} />;
+export function Button({
+  variant,
+  size,
+  className,
+  type = "button",
+  ...props
+}: ButtonProps) {
+  return (
+    <button
+      type={type}
+      className={buttonClasses({ variant, size, className })}
+      {...props}
+    />
+  );
 }

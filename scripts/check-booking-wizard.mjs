@@ -21,17 +21,15 @@ const date = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")
 let browser;
 try {
   const db = client.db(process.env.MONGODB_DB || "partiers");
-  await db
-    .collection("bookings")
-    .insertOne({
-      _id: fixtureId,
-      date,
-      time: "10:00",
-      durationMinutes: 120,
-      status: "confirmed",
-      parentName: "Temporary availability fixture",
-      contact,
-    });
+  await db.collection("bookings").insertOne({
+    _id: fixtureId,
+    date,
+    time: "10:00",
+    durationMinutes: 120,
+    status: "confirmed",
+    parentName: "Temporary availability fixture",
+    contact,
+  });
   browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
     viewport: { width: 360, height: 800 },
@@ -154,6 +152,14 @@ try {
     page.getByRole("heading", { name: "Request sent!" }),
   ).toBeVisible();
   await expect(page.getByText(referenceCode, { exact: true })).toBeVisible();
+  await page.waitForFunction(() => {
+    const canvas = document.querySelector("[data-booking-celebration]");
+    if (!canvas) return false;
+    return canvas
+      .getContext("2d")
+      .getImageData(0, 0, canvas.width, canvas.height)
+      .data.some((value, index) => index % 4 === 3 && value > 0);
+  });
   const stored = await db
     .collection("bookings")
     .findOne({ _id: new ObjectId(id) });
@@ -251,9 +257,49 @@ try {
     false,
     "Wizard steps stay still with reduced motion",
   );
+  await edge.unroute("**/api/availability?*");
+  await edge.evaluate(
+    ({ date, contact }) =>
+      sessionStorage.setItem(
+        "partiers-booking-draft:v1:guest",
+        JSON.stringify({
+          version: 1,
+          savedAt: Date.now(),
+          step: 4,
+          values: {
+            date,
+            time: "12:00",
+            durationMinutes: 120,
+            eventType: "birthday",
+            location: "Test park",
+            activities: [],
+            notes: "",
+            parentName: "Sample",
+            contact,
+            childName: "Sample",
+            childAge: "6",
+            numberOfChildren: "1",
+          },
+        }),
+      ),
+    { date, contact },
+  );
+  await edge.route("**/api/bookings", (route) =>
+    route.fulfill({ status: 201, json: { referenceCode: "PT-TEST" } }),
+  );
+  await edge.reload();
+  await edge.getByRole("button", { name: "Send booking request" }).click();
+  await expect(
+    edge.getByRole("heading", { name: "Request sent!" }),
+  ).toBeVisible();
+  assert.equal(
+    await edge.locator("[data-booking-celebration]").count(),
+    0,
+    "No confetti with reduced motion",
+  );
   await reduced.close();
   console.log(
-    "PASS: five-step guest booking, validation, overlap slots, Back/Edit, refresh persistence, send failure/conflict recovery, real save/reference, draft cleanup, failed/blocked availability, reduced-motion steps and 360px layout.",
+    "PASS: five-step guest booking, validation, overlap slots, Back/Edit, refresh persistence, send failure/conflict recovery, real save/reference, draft cleanup, failed/blocked availability, reduced-motion steps/confetti, celebration pixels and 360px layout.",
   );
 } finally {
   try {

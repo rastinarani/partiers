@@ -53,8 +53,9 @@ export default function ReviewForm() {
 
         <div className="space-y-4">
           <div>
-            <Label>Your name</Label>
+            <Label htmlFor="review-name">Your name</Label>
             <Input
+              id="review-name"
               type="text"
               required
               value={name}
@@ -64,13 +65,14 @@ export default function ReviewForm() {
           </div>
 
           <div>
-            <Label>Rating</Label>
+            <p className="mb-1 text-sm font-medium">Rating</p>
             <StarRating value={rating} onChange={setRating} />
           </div>
 
           <div>
-            <Label>Comment</Label>
+            <Label htmlFor="review-comment">Comment</Label>
             <Textarea
+              id="review-comment"
               required
               rows={3}
               maxLength={1000}

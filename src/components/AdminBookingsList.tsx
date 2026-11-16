@@ -1,5 +1,7 @@
 "use client";
 
+import { useToast } from "./ToastProvider";
+
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,7 +12,12 @@ import HideRecordButton from "./HideRecordButton";
 import type { Booking, BookingStatus } from "@/lib/types";
 import { Button, Card, Input, Label, StatusBadge } from "./ui";
 
-const STATUSES: BookingStatus[] = ["pending", "confirmed", "declined", "cancelled"];
+const STATUSES: BookingStatus[] = [
+  "pending",
+  "confirmed",
+  "declined",
+  "cancelled",
+];
 
 function formatDateTime(date: string, time: string, durationMinutes: number) {
   const day = new Date(`${date}T00:00:00`).toLocaleDateString("en-US", {
@@ -27,18 +34,26 @@ interface OverlapWarning {
   time: string;
 }
 
-export default function AdminBookingsList({ initialBookings, today }: {
+export default function AdminBookingsList({
+  initialBookings,
+  today,
+}: {
   initialBookings: Booking[];
   today: string;
 }) {
   const router = useRouter();
+  const notify = useToast();
   const bookings = initialBookings;
   const [status, setStatus] = useState<BookingStatus>("pending");
   const [search, setSearch] = useState("");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [warning, setWarning] = useState<OverlapWarning | null>(null);
 
-  async function updateStatus(id: string, status: BookingStatus, force = false) {
+  async function updateStatus(
+    id: string,
+    status: BookingStatus,
+    force = false,
+  ) {
     setUpdatingId(id);
     setWarning(null);
     try {
@@ -48,11 +63,19 @@ export default function AdminBookingsList({ initialBookings, today }: {
         body: JSON.stringify({ id, status, force }),
       });
       if (res.ok) {
+        notify(`Booking ${status}.`);
         router.refresh();
-      } else if (res.status === 409) {
+      } else {
         const data = await res.json().catch(() => ({}));
         if (data.overlap) setWarning({ bookingId: id, ...data.overlap });
+        else
+          notify(
+            data.error ?? "Couldn’t update this booking. Please try again.",
+            "error",
+          );
       }
+    } catch {
+      notify("Couldn’t connect. Please try again.", "error");
     } finally {
       setUpdatingId(null);
     }
@@ -63,17 +86,22 @@ export default function AdminBookingsList({ initialBookings, today }: {
   }
 
   const query = search.trim().toLowerCase();
-  const matching = bookings.filter((booking) =>
-    booking.status === status &&
-    [booking.parentName, booking.childName, booking.contact].some((value) =>
-      value.toLowerCase().includes(query)
-    )
+  const matching = bookings.filter(
+    (booking) =>
+      booking.status === status &&
+      [booking.parentName, booking.childName, booking.contact].some((value) =>
+        value.toLowerCase().includes(query),
+      ),
   );
   const { upcoming, past } = splitUpcomingAndPast(matching, today);
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Booking status">
+      <div
+        className="flex flex-wrap gap-2"
+        role="group"
+        aria-label="Booking status"
+      >
         {STATUSES.map((value) => (
           <Button
             key={value}
@@ -85,7 +113,8 @@ export default function AdminBookingsList({ initialBookings, today }: {
               setWarning(null);
             }}
           >
-            {value} ({bookings.filter((booking) => booking.status === value).length})
+            {value} (
+            {bookings.filter((booking) => booking.status === value).length})
           </Button>
         ))}
       </div>
@@ -102,96 +131,138 @@ export default function AdminBookingsList({ initialBookings, today }: {
       </div>
       <p id="booking-results" className="text-sm text-muted" role="status">
         {matching.length} {status} booking{matching.length === 1 ? "" : "s"}
-        {query ? " matching your search" : ""}. Upcoming bookings appear soonest first.
+        {query ? " matching your search" : ""}. Upcoming bookings appear soonest
+        first.
       </p>
       {matching.length === 0 && (
         <Card className="p-6 text-center">
           <p className="text-muted">
-            {query ? "No bookings match your search in this status." : `No ${status} bookings yet.`}
+            {query
+              ? "No bookings match your search in this status."
+              : `No ${status} bookings yet.`}
           </p>
           {query && (
-            <Button className="mt-3" variant="secondary" onClick={() => setSearch("")}>
+            <Button
+              className="mt-3"
+              variant="secondary"
+              onClick={() => setSearch("")}
+            >
               Clear search
             </Button>
           )}
         </Card>
       )}
-      {[{ title: "Upcoming", items: upcoming }, { title: "Past", items: past }].map(({ title, items }) => items.length > 0 && (
-        <section key={title} aria-label={`${title} ${status} bookings`} className="space-y-3">
-          <h3 className="pt-2 font-semibold">{title}</h3>
-          {items.map((b) => (
-            <Card key={b._id} className="p-4">
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <div>
-                  <p className="font-semibold">
-                    {b.parentName} &middot; <span className="text-muted">{b.contact}</span>
-                    {b.referenceCode && (
-                      <span className="ml-2 rounded-md bg-primary-soft px-1.5 py-0.5 font-mono text-xs text-primary">
-                        {b.referenceCode}
-                      </span>
-                    )}
-                  </p>
-                  <p className="text-sm text-muted">
-                    For {b.childName} (age {b.childAge}) &mdash; {b.numberOfChildren}{" "}
-                    {b.numberOfChildren === 1 ? "child" : "children"} &mdash;{" "}
-                    {formatDateTime(b.date, b.time, b.durationMinutes)}
-                  </p>
-                  <EventDetails booking={b} />
-                  {b.notes && <p className="mt-1 text-sm text-muted italic">&ldquo;{b.notes}&rdquo;</p>}
-                </div>
-                <StatusBadge status={b.status} />
-              </div>
-
-              {b.status === "cancelled" ? (
-                <p className="mt-3 text-sm text-muted">This booking has been cancelled.</p>
-              ) : warning?.bookingId === b._id ? (
-                <div className="mt-3 rounded-xl bg-accent/10 p-3 text-sm">
-                  <p>
-                    <strong>Heads up:</strong> this overlaps {warning.parentName}&rsquo;s confirmed
-                    booking ({warning.time}). Confirm anyway?
-                  </p>
-                  <div className="mt-2 flex gap-2">
-                    <Button
-                      variant="success"
-                      size="xs"
-                      disabled={updatingId === b._id}
-                      onClick={() => updateStatus(b._id, "confirmed", true)}
-                    >
-                      Confirm anyway
-                    </Button>
-                    <Button variant="secondary" size="xs" onClick={() => setWarning(null)}>
-                      Never mind
-                    </Button>
+      {[
+        { title: "Upcoming", items: upcoming },
+        { title: "Past", items: past },
+      ].map(
+        ({ title, items }) =>
+          items.length > 0 && (
+            <section
+              key={title}
+              aria-label={`${title} ${status} bookings`}
+              className="space-y-3"
+            >
+              <h3 className="pt-2 font-semibold">{title}</h3>
+              {items.map((b) => (
+                <Card key={b._id} className="p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <p className="font-semibold">
+                        {b.parentName} &middot;{" "}
+                        <span className="text-muted">{b.contact}</span>
+                        {b.referenceCode && (
+                          <span className="ml-2 rounded-md bg-primary-soft px-1.5 py-0.5 font-mono text-xs text-primary">
+                            {b.referenceCode}
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-sm text-muted">
+                        For {b.childName} (age {b.childAge}) &mdash;{" "}
+                        {b.numberOfChildren}{" "}
+                        {b.numberOfChildren === 1 ? "child" : "children"}{" "}
+                        &mdash;{" "}
+                        {formatDateTime(b.date, b.time, b.durationMinutes)}
+                      </p>
+                      <EventDetails booking={b} />
+                      {b.notes && (
+                        <p className="mt-1 text-sm text-muted italic">
+                          &ldquo;{b.notes}&rdquo;
+                        </p>
+                      )}
+                    </div>
+                    <StatusBadge status={b.status} />
                   </div>
-                </div>
-              ) : (
-                <div className="mt-3 flex gap-2">
-                  <Button
-                    variant="success"
-                    size="xs"
-                    disabled={updatingId === b._id || b.status === "confirmed"}
-                    onClick={() => updateStatus(b._id, "confirmed")}
+
+                  {b.status === "cancelled" ? (
+                    <p className="mt-3 text-sm text-muted">
+                      This booking has been cancelled.
+                    </p>
+                  ) : warning?.bookingId === b._id ? (
+                    <div className="mt-3 rounded-xl bg-accent/10 p-3 text-sm">
+                      <p>
+                        <strong>Heads up:</strong> this overlaps{" "}
+                        {warning.parentName}&rsquo;s confirmed booking (
+                        {warning.time}). Confirm anyway?
+                      </p>
+                      <div className="mt-2 flex gap-2">
+                        <Button
+                          variant="success"
+                          size="xs"
+                          disabled={updatingId === b._id}
+                          onClick={() => updateStatus(b._id, "confirmed", true)}
+                        >
+                          Confirm anyway
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="xs"
+                          onClick={() => setWarning(null)}
+                        >
+                          Never mind
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-3 flex gap-2">
+                      <Button
+                        variant="success"
+                        size="xs"
+                        disabled={
+                          updatingId === b._id || b.status === "confirmed"
+                        }
+                        onClick={() => updateStatus(b._id, "confirmed")}
+                      >
+                        Confirm
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="xs"
+                        disabled={
+                          updatingId === b._id || b.status === "declined"
+                        }
+                        onClick={() => updateStatus(b._id, "declined")}
+                      >
+                        Decline
+                      </Button>
+                    </div>
+                  )}
+                  <HideRecordButton
+                    id={b._id}
+                    kind="booking"
+                    disabled={updatingId === b._id}
+                  />
+                  <Link
+                    href={`/admin/bookings/${b._id}`}
+                    className="mt-3 inline-block text-sm font-medium text-primary underline underline-offset-4"
                   >
-                    Confirm
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="xs"
-                    disabled={updatingId === b._id || b.status === "declined"}
-                    onClick={() => updateStatus(b._id, "declined")}
-                  >
-                    Decline
-                  </Button>
-                </div>
-              )}
-              <HideRecordButton id={b._id} kind="booking" disabled={updatingId === b._id} />
-              <Link href={`/admin/bookings/${b._id}`} className="mt-3 inline-block text-sm font-medium text-primary underline underline-offset-4">
-                View booking details
-              </Link>
-            </Card>
-          ))}
-        </section>
-      ))}
+                    View booking details
+                  </Link>
+                </Card>
+              ))}
+            </section>
+          ),
+      )}
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import BookingCelebration from "./BookingCelebration";
 import Link from "next/link";
 import type { NewBooking } from "@/lib/types";
 import BookingSummaryDetails from "./BookingSummaryDetails";
@@ -20,6 +21,7 @@ export default function BookingConfirmation({
 
   return (
     <Card className="p-6 sm:p-8">
+      <BookingCelebration />
       <div className="text-center">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-success-soft text-2xl text-success">
           &#10003;

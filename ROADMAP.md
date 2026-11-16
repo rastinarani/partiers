@@ -29,7 +29,7 @@ owner's go-ahead) · 🔑 needs the owner to create an account or provide a key
   confirmed-bookings calendar.
 - Vibrant violet/rose/amber theme, mobile-friendly layout.
 
-**Known gaps:** no celebration/toast feedback or loading states yet; no emails;
+**Known gaps:** no loading states yet; no emails;
 no rate limiting; no full account/admin end-to-end suite. Public animations
 respect reduced motion, and local browser checks cover public pages and booking.
 
@@ -225,7 +225,7 @@ there's a strong reason not to. Every animation must respect
 - **Done when:** a booking can be completed on a phone without scrolling past
   fields you haven't reached yet.
 
-### [ ] 4.4 Delightful feedback
+### [x] 4.4 Delightful feedback
 
 - Confetti when a booking is sent (`canvas-confetti`, off with reduced
   motion), toast notifications for admin actions and errors, button press
@@ -370,6 +370,22 @@ settings only.
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-15 — 4.4 Delightful feedback (commit: "Add booking celebrations and clear action feedback"):
+  a short, lazy-loaded canvas-confetti burst follows successful bookings; device
+  reduced motion skips it, live changes stop it, and failed imports never affect
+  saved requests. Root toast provider reports admin booking/review changes,
+  notes, hiding and date blocks, including network/server errors; errors stay
+  until dismissed and success notices expire after eight seconds. Existing
+  detailed inline errors are retained. Shared buttons have gentle press feedback;
+  stars pop on hover/focus, work as keyboard radios and describe read-only ratings.
+  Lint, typecheck, 213 unit/component tests and webpack build pass. Chromium
+  verified actual confetti pixels and absence in reduced mode through the local
+  booking check; temporary sample admin UI with mocked responses verified
+  success/error notices, dismissal, notes/date feedback, keyboard stars and
+  normal/reduced button/star effects. Sample route and generated type removed.
+  Existing API permission tests still pass; real authenticated admin browser
+  actions remain unverified because admin setup is deferred. No accounts created.
 
 - 2026-11-15 — 4.3 Multi-step booking wizard (commit: "Guide bookings through five saved steps"):
   Date → Time → Event details → Your info → Review & send, with progress,

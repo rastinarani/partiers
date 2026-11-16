@@ -1,5 +1,7 @@
 "use client";
 
+import { useToast } from "./ToastProvider";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import HideRecordButton from "./HideRecordButton";
@@ -7,8 +9,13 @@ import type { Review, ReviewStatus } from "@/lib/types";
 import StarRating from "./StarRating";
 import { Button, Card, StatusBadge } from "./ui";
 
-export default function AdminReviewsList({ initialReviews }: { initialReviews: Review[] }) {
+export default function AdminReviewsList({
+  initialReviews,
+}: {
+  initialReviews: Review[];
+}) {
   const router = useRouter();
+  const notify = useToast();
   const reviews = initialReviews;
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
@@ -21,8 +28,17 @@ export default function AdminReviewsList({ initialReviews }: { initialReviews: R
         body: JSON.stringify({ id, status }),
       });
       if (res.ok) {
+        notify(`Review ${status}.`);
         router.refresh();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        notify(
+          data.error ?? "Couldn’t update this review. Please try again.",
+          "error",
+        );
       }
+    } catch {
+      notify("Couldn’t connect. Please try again.", "error");
     } finally {
       setUpdatingId(null);
     }
@@ -65,7 +81,11 @@ export default function AdminReviewsList({ initialReviews }: { initialReviews: R
               Reject
             </Button>
           </div>
-          <HideRecordButton id={r._id} kind="review" disabled={updatingId === r._id} />
+          <HideRecordButton
+            id={r._id}
+            kind="review"
+            disabled={updatingId === r._id}
+          />
         </Card>
       ))}
     </div>

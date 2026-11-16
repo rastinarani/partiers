@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
+import ToastProvider from "@/components/ToastProvider";
 import MotionProvider from "@/components/motion/MotionProvider";
 import "./globals.css";
 
@@ -17,7 +18,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Partiers",
-  description: "Book fun, friendly kids' entertainment for your next party or event.",
+  description:
+    "Book fun, friendly kids' entertainment for your next party or event.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -28,9 +30,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <MotionProvider>
-          <NavBar />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <ToastProvider>
+            <NavBar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </ToastProvider>
         </MotionProvider>
       </body>
     </html>

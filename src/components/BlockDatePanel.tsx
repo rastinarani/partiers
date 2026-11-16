@@ -1,5 +1,7 @@
 "use client";
 
+import { useToast } from "./ToastProvider";
+
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, Card, FormError, Input, Label } from "./ui";
@@ -16,6 +18,7 @@ export default function BlockDatePanel({
   isPast: boolean;
 }) {
   const router = useRouter();
+  const notify = useToast();
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -31,9 +34,13 @@ export default function BlockDatePanel({
       });
       if (!res.ok) throw new Error("Couldn't save that. Please try again.");
       setReason("");
+      notify(method === "POST" ? "Date blocked." : "Date unblocked.");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      const message =
+        err instanceof Error ? err.message : "Something went wrong.";
+      setError(message);
+      notify(message, "error");
     } finally {
       setBusy(false);
     }
@@ -43,7 +50,9 @@ export default function BlockDatePanel({
     return (
       <Card flat className="mb-4 bg-danger-soft/40 p-4">
         <p className="text-sm font-semibold">This date is blocked</p>
-        {blockedReason && <p className="mt-1 text-sm text-muted">{blockedReason}</p>}
+        {blockedReason && (
+          <p className="mt-1 text-sm text-muted">{blockedReason}</p>
+        )}
         <Button
           variant="secondary"
           size="sm"
@@ -70,7 +79,9 @@ export default function BlockDatePanel({
       >
         <Label htmlFor="block-reason">
           Not available this day?{" "}
-          <span className="font-normal text-muted">(note is only visible to admins)</span>
+          <span className="font-normal text-muted">
+            (note is only visible to admins)
+          </span>
         </Label>
         <div className="flex flex-wrap gap-2">
           <Input
