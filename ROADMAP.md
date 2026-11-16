@@ -255,8 +255,9 @@ there's a strong reason not to. Every animation must respect
 
 ### [ ] 5.2 Mobile menu and footer
 
-- **Input pending (2026-11-15):** owner must confirm the public contact email
-  and service area. Asked in chat; no contact details have been assumed or added.
+- **Inputs confirmed:** public email **nikkitheawsome@gmail.com** and service
+  area **Metro Vancouver**. No further contact-detail decision is needed.
+  These details are recorded but have not yet been added to the footer.
 
 - A hamburger menu with an animated drawer on small screens; a richer footer
   (contact email, area served, links).
@@ -370,14 +371,26 @@ settings only.
 
 ---
 
-## Session handoff — 2026-11-15 (owner requested wrap-up)
+## Session handoff — 2026-11-16 (ready to resume)
 
-- This session completed and verified **5.1, 5.3 and 5.4**, with one commit per
-  step. Steps 4.1–4.5 were already complete and preserved.
+- Completed and pushed: **0.1–3.3, 4.1–4.5, 5.1, 5.3 and 5.4**.
+  Step 3.4 remains deferred. On 2026-11-16, Git was clean and the completed
+  website commits were confirmed on `origin/main`; this update changes docs only.
 - **Next active step: 5.2 Mobile menu and footer.** It was not started while
   public contact details were pending. The owner has now explicitly confirmed:
   **nikkitheawsome@gmail.com** and **Metro Vancouver**. Use those exact public
   details in the footer; do not invent an address, phone, prices or service rules.
+- **Exact resume procedure:** read AGENTS.md/CLAUDE.md and this handoff, inspect
+  Git status and actual files, then implement **only 5.2** before starting 5.5.
+  Start with `src/components/NavBar.tsx`, `Footer.tsx` and `LoginLink.tsx`; review
+  existing motion helpers and the relevant installed Next.js docs before coding.
+  Add a mobile menu/drawer and richer footer using the confirmed details above.
+  Preserve signed-in account links, logged-out login return paths and desktop
+  navigation. Check 360 px width, long account names, keyboard focus, Escape/
+  close/navigation behavior and reduced motion. Run the project checks and
+  browser checks, update this log, and commit the verified step.
+- **After 5.2:** continue with 5.5 accessibility. Phase 6 requires the owner's
+  email-provider setup/approval; do not invent keys or start paid services.
 - The owner asked to stop because usage is close to ending. **5.5 has not been
   started**; its unused accessibility-check dependency was removed. No partial
   implementation is left behind. 5.6 photos and admin setup stay deferred.
@@ -389,7 +402,8 @@ settings only.
   live chat-app preview/cache behavior, physical phones/Safari/Firefox and full
   authenticated admin flows. No admin accounts were created. Production database
   settings were not changed; its known connection issue remains Phase 8.
-- Local dev server was already running on port 3000 and was preserved.
+- Previous browser checks used a local dev server on port 3000. Check whether
+  it is running before starting another server; do not assume it is still active.
   `npm run test:motion`, `npm run test:booking`, and `npm run test:seo` are local
   checks. `npm run build -- --webpack` is the verified build alternative for
   the previously documented environment restriction on fresh Turbopack CSS builds.
@@ -399,6 +413,14 @@ settings only.
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-16 — Repository checkpoint (commit: "Clarify current progress and exact resume point"):
+  confirmed completed website commits already pushed and clean local state;
+  corrected stale 5.2 input-pending note, retained confirmed public email/area,
+  and specified resume files, behavior, verification and next-step boundaries.
+  Documentation-only change; `git diff --check` passes. No application changes
+  or new feature completion claims; last application verification remains the
+  2026-11-15 lint/typecheck, 224 tests, webpack build and documented browser checks.
 
 - 2026-11-15 — 5.4 SEO and sharing (commit: "Add public page metadata and sharing artwork"):
   public titles/descriptions/canonical URLs, Open Graph/Twitter card metadata,
