@@ -2,7 +2,7 @@
 
 import { useToast } from "./ToastProvider";
 
-import { useState } from "react";
+import { useState, useOptimistic, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { splitUpcomingAndPast } from "@/lib/bookingDates";
@@ -43,18 +43,29 @@ export default function AdminBookingsList({
 }) {
   const router = useRouter();
   const notify = useToast();
-  const bookings = initialBookings;
+  const [isPending, startTransition] = useTransition();
+  const [bookings, applyOptimisticStatus] = useOptimistic(
+    initialBookings,
+    (previous, change: { id: string; status: BookingStatus }) =>
+      previous.map((record) =>
+        record._id === change.id
+          ? { ...record, status: change.status }
+          : record,
+      ),
+  );
   const [status, setStatus] = useState<BookingStatus>("pending");
   const [search, setSearch] = useState("");
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [warning, setWarning] = useState<OverlapWarning | null>(null);
 
-  async function updateStatus(
-    id: string,
-    status: BookingStatus,
-    force = false,
-  ) {
-    setUpdatingId(id);
+  function updateStatus(id: string, status: BookingStatus, force = false) {
+    if (isPending) return;
+    startTransition(async () => {
+      applyOptimisticStatus({ id, status });
+      await sendStatus(id, status, force);
+    });
+  }
+
+  async function sendStatus(id: string, status: BookingStatus, force = false) {
     setWarning(null);
     try {
       const res = await fetch("/api/bookings", {
@@ -76,8 +87,6 @@ export default function AdminBookingsList({
       }
     } catch {
       notify("Couldn’t connect. Please try again.", "error");
-    } finally {
-      setUpdatingId(null);
     }
   }
 
@@ -97,6 +106,11 @@ export default function AdminBookingsList({
 
   return (
     <div className="space-y-3">
+      {isPending && (
+        <p role="status" className="text-sm text-muted">
+          Saving booking…
+        </p>
+      )}
       <div
         className="flex flex-wrap gap-2"
         role="group"
@@ -209,7 +223,7 @@ export default function AdminBookingsList({
                         <Button
                           variant="success"
                           size="xs"
-                          disabled={updatingId === b._id}
+                          disabled={isPending}
                           onClick={() => updateStatus(b._id, "confirmed", true)}
                         >
                           Confirm anyway
@@ -228,9 +242,7 @@ export default function AdminBookingsList({
                       <Button
                         variant="success"
                         size="xs"
-                        disabled={
-                          updatingId === b._id || b.status === "confirmed"
-                        }
+                        disabled={isPending || b.status === "confirmed"}
                         onClick={() => updateStatus(b._id, "confirmed")}
                       >
                         Confirm
@@ -238,9 +250,7 @@ export default function AdminBookingsList({
                       <Button
                         variant="danger"
                         size="xs"
-                        disabled={
-                          updatingId === b._id || b.status === "declined"
-                        }
+                        disabled={isPending || b.status === "declined"}
                         onClick={() => updateStatus(b._id, "declined")}
                       >
                         Decline
@@ -250,7 +260,7 @@ export default function AdminBookingsList({
                   <HideRecordButton
                     id={b._id}
                     kind="booking"
-                    disabled={updatingId === b._id}
+                    disabled={isPending}
                   />
                   <Link
                     href={`/admin/bookings/${b._id}`}

@@ -2,7 +2,7 @@
 
 import { useToast } from "./ToastProvider";
 
-import { useState } from "react";
+import { useOptimistic, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import HideRecordButton from "./HideRecordButton";
 import type { Review, ReviewStatus } from "@/lib/types";
@@ -16,11 +16,26 @@ export default function AdminReviewsList({
 }) {
   const router = useRouter();
   const notify = useToast();
-  const reviews = initialReviews;
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const [reviews, applyOptimisticStatus] = useOptimistic(
+    initialReviews,
+    (previous, change: { id: string; status: ReviewStatus }) =>
+      previous.map((record) =>
+        record._id === change.id
+          ? { ...record, status: change.status }
+          : record,
+      ),
+  );
 
-  async function updateStatus(id: string, status: ReviewStatus) {
-    setUpdatingId(id);
+  function updateStatus(id: string, status: ReviewStatus) {
+    if (isPending) return;
+    startTransition(async () => {
+      applyOptimisticStatus({ id, status });
+      await sendStatus(id, status);
+    });
+  }
+
+  async function sendStatus(id: string, status: ReviewStatus) {
     try {
       const res = await fetch("/api/reviews", {
         method: "PATCH",
@@ -39,8 +54,6 @@ export default function AdminReviewsList({
       }
     } catch {
       notify("Couldn’t connect. Please try again.", "error");
-    } finally {
-      setUpdatingId(null);
     }
   }
 
@@ -50,6 +63,11 @@ export default function AdminReviewsList({
 
   return (
     <div className="space-y-3">
+      {isPending && (
+        <p role="status" className="text-sm text-muted">
+          Saving review…
+        </p>
+      )}
       {reviews.map((r) => (
         <Card key={r._id} className="p-4">
           <div className="flex flex-wrap items-start justify-between gap-2">
@@ -67,7 +85,7 @@ export default function AdminReviewsList({
             <Button
               variant="success"
               size="xs"
-              disabled={updatingId === r._id || r.status === "approved"}
+              disabled={isPending || r.status === "approved"}
               onClick={() => updateStatus(r._id, "approved")}
             >
               Approve
@@ -75,17 +93,13 @@ export default function AdminReviewsList({
             <Button
               variant="danger"
               size="xs"
-              disabled={updatingId === r._id || r.status === "rejected"}
+              disabled={isPending || r.status === "rejected"}
               onClick={() => updateStatus(r._id, "rejected")}
             >
               Reject
             </Button>
           </div>
-          <HideRecordButton
-            id={r._id}
-            kind="review"
-            disabled={updatingId === r._id}
-          />
+          <HideRecordButton id={r._id} kind="review" disabled={isPending} />
         </Card>
       ))}
     </div>

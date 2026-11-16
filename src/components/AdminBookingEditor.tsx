@@ -2,7 +2,7 @@
 
 import { useToast } from "./ToastProvider";
 
-import { useState, type FormEvent } from "react";
+import { useState, useOptimistic, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { BookingStatus } from "@/lib/types";
 import HideRecordButton from "./HideRecordButton";
@@ -10,7 +10,7 @@ import { Button, Card, FormError, Label, Textarea } from "./ui";
 
 export default function AdminBookingEditor({
   id,
-  status,
+  status: initialStatus,
   initialNotes,
 }: {
   id: string;
@@ -20,7 +20,13 @@ export default function AdminBookingEditor({
   const router = useRouter();
   const notify = useToast();
   const [notes, setNotes] = useState(initialNotes);
-  const [busy, setBusy] = useState(false);
+  const [saving, setBusy] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [status, applyOptimisticStatus] = useOptimistic(
+    initialStatus,
+    (_previous, next: BookingStatus) => next,
+  );
+  const busy = saving || isPending;
   const [cancelPrompt, setCancelPrompt] = useState(false);
   const [overlap, setOverlap] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -31,7 +37,15 @@ export default function AdminBookingEditor({
     notify(message, "error");
   }
 
-  async function changeStatus(nextStatus: BookingStatus, force = false) {
+  function changeStatus(nextStatus: BookingStatus, force = false) {
+    if (busy) return;
+    startTransition(async () => {
+      applyOptimisticStatus(nextStatus);
+      await sendStatus(nextStatus, force);
+    });
+  }
+
+  async function sendStatus(nextStatus: BookingStatus, force = false) {
     setBusy(true);
     setError("");
     setMessage("");
@@ -98,6 +112,11 @@ export default function AdminBookingEditor({
   return (
     <Card className="space-y-5 p-6">
       <h2 className="text-xl font-semibold">Manage booking</h2>
+      {isPending && (
+        <p role="status" className="text-sm text-muted">
+          Saving booking…
+        </p>
+      )}
       {status === "cancelled" ? (
         <p className="text-sm text-muted">This booking has been cancelled.</p>
       ) : (

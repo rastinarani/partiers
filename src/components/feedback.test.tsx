@@ -160,3 +160,11 @@ it("reports review mutation failures without changing the review, then supports 
   await screen.findByText("Review approved.");
   expect(mocks.refresh).toHaveBeenCalledTimes(1);
 });
+
+it("keeps an unresolved error when later success messages fill the stack", () => {
+  render(<ToastProvider><Notices /></ToastProvider>);
+  fireEvent.click(screen.getByText("Failure"));
+  for (let count = 0; count < 4; count++) fireEvent.click(screen.getByText("Success"));
+  expect(screen.getByRole("alert").textContent).toBe("Try again.");
+  expect(screen.getAllByRole("status")).toHaveLength(3);
+});

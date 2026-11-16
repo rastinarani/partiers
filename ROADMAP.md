@@ -29,8 +29,8 @@ owner's go-ahead) · 🔑 needs the owner to create an account or provide a key
   confirmed-bookings calendar.
 - Vibrant violet/rose/amber theme, mobile-friendly layout.
 
-**Known gaps:** no loading states yet; no emails;
-no rate limiting; no full account/admin end-to-end suite. Public animations
+**Known gaps:** home page service details, fuller navigation/SEO/error pages,
+emails, rate limiting and a full account/admin end-to-end suite. Public animations
 respect reduced motion, and local browser checks cover public pages and booking.
 
 **Live site:** a Vercel project exists at `partiers.vercel.app`, but its
@@ -232,7 +232,7 @@ there's a strong reason not to. Every animation must respect
   states, and star ratings that pop on hover.
 - **Done when:** every action gives clear, quick feedback.
 
-### [ ] 4.5 Loading and optimistic updates
+### [x] 4.5 Loading and optimistic updates
 
 - `loading.tsx` skeletons for data pages; admin status changes update
   instantly and roll back with an error toast if the server fails.
@@ -367,9 +367,47 @@ settings only.
 
 ---
 
+## Session handoff — 2026-11-15
+
+- Implemented and verified steps 4.1–4.5 in order, with a local commit per step.
+- Next active step: **5.1 A real home page**. Keep 3.4, 5.6 and 8.2 deferred.
+- Start the existing local site with `npm run dev` (or `npm run dev -- --webpack`
+  if this environment blocks Turbopack). Browser tooling: CUA host was unavailable;
+  owner explicitly authorized Playwright for local checks. `npm run test:motion`
+  and `npm run test:booking` are repeatable local-only checks with fixture cleanup.
+- No unfinished implementation. Still needed later: authenticated admin browser
+  testing after the owner sets up credentials; the full account/admin suite in
+  7.4; physical phone/Safari/Firefox checks. Chromium phone-size/reduced-motion
+  behavior has been tested. Production database settings were not changed.
+
+---
+
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-15 — 4.5 Loading and optimistic updates (commit: "Keep slow pages and admin updates responsive"):
+  shared accessible skeletons for home/booking, reviews, account, admin dashboard,
+  admin calendar and booking details. Placeholder pulses respect reduced motion
+  and contain no customer data. React useOptimistic/useTransition makes booking
+  and review status/badge/count changes immediate, keeps controls protected while
+  saving, adopts refreshed server data on success and rolls back on failures.
+  Booking detail cancellation/confirmation/decline follows the same pattern;
+  overlap warnings, cancellation confirmation and private note drafts remain.
+  Error notices survive later successes; the notice stack scrolls when needed.
+  Lint, typecheck, 219 unit/component tests and final webpack production build
+  pass. A cached default Turbopack build passed once, but fresh CSS builds and
+  an escalated retry hit the environment’s process/port restriction.
+  Chromium with network latency and an intentionally slow temporary server page
+  verified streamed skeleton appearance/replacement, reduced-motion stillness,
+  immediate changes before a delayed response, failed-save rollback, successful
+  refresh from disposable local records, review updates and detail cancellation
+  rollback. Admin responses were mocked; actual admin login/endpoints in a full
+  browser session remain untested (credentials deferred), while existing API
+  permission tests pass. Temporary page, generated type and fixture records
+  removed. Public motion and real guest booking checks pass against both the
+  development server and the finished webpack production build running locally;
+  fixture cleanup was also independently checked.
 
 - 2026-11-15 — 4.4 Delightful feedback (commit: "Add booking celebrations and clear action feedback"):
   a short, lazy-loaded canvas-confetti burst follows successful bookings; device

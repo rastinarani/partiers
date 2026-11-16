@@ -32,7 +32,15 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
   const notify = useCallback<Notify>(
     (message, kind = "success") => {
       const id = ++nextId.current;
-      setToasts((previous) => [...previous, { id, message, kind }].slice(-3));
+      setToasts((previous) => {
+        const next = [...previous, { id, message, kind }];
+        const recentSuccesses = next
+          .filter((toast) => toast.kind === "success")
+          .slice(-3);
+        return next.filter(
+          (toast) => toast.kind === "error" || recentSuccesses.includes(toast),
+        );
+      });
       // Errors stay until dismissed so a slower reader never loses the explanation.
       if (kind === "success")
         timers.current.set(
@@ -55,7 +63,7 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       <section
         aria-label="Notifications"
-        className="pointer-events-none fixed inset-x-4 bottom-4 z-50 ml-auto max-w-sm space-y-2"
+        className="pointer-events-none fixed inset-x-4 bottom-4 z-50 ml-auto max-h-[50vh] max-w-sm space-y-2 overflow-y-auto"
       >
         {toasts.map((toast) => (
           <FadeIn key={toast.id}>

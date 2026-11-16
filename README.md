@@ -16,12 +16,9 @@ events, get-togethers). Built with Next.js (App Router), MongoDB, and Tailwind C
    npm run dev
    ```
 
-4. Create an admin account (there's no public admin signup — see
-   [Admin auth](#admin-auth) below):
-
-   ```bash
-   npm run create-admin -- "Your Name" you@example.com "a real password"
-   ```
+4. Admin credentials are deferred in the roadmap. Do not create accounts until
+   the owner chooses the credentials. The admin login page already exists;
+   see [Admin auth](#admin-auth) when the owner is ready.
 
 5. Open http://localhost:3000. The admin dashboard is at `/admin/login`.
 
@@ -39,7 +36,7 @@ src/
       calendar/page.tsx      Calendar of confirmed bookings
     login/page.tsx           Customer login (demo account system)
     signup/page.tsx          Customer signup
-    account/page.tsx         "Logged in" landing page
+    account/page.tsx         Profile settings and the customer’s bookings
     api/
       bookings/route.ts      POST (public, create) / PATCH (admin, confirm/decline)
       reviews/route.ts       POST (public, create) / PATCH (admin, approve/reject)
@@ -121,9 +118,9 @@ admin is logged in, not just *that* someone is.
 You can create more than one admin account (e.g. one each for you and
 your cousin) by running `create-admin` again with different emails.
 
-### Customer accounts (login / signup demo)
+### Customer accounts
 
-This is a working demo of a real account system for site visitors — no
+Customer accounts let parents keep track of their bookings — no
 third-party auth provider, everything stored in your own MongoDB:
 
 - Passwords are never stored in plain text. `lib/users.ts` salts and hashes
@@ -134,10 +131,10 @@ third-party auth provider, everything stored in your own MongoDB:
   separate cookie (`partiers_user_session` vs `partiers_admin_session`)
   and a separate collection, so the two account systems never overlap.
 
-Right now this is a self-contained demo (accounts don't yet link to
-bookings or reviews) — the natural next step is to prefill the booking
-form from a logged-in user's saved details, or show "your bookings" on
-the account page.
+Bookings made while signed in are linked to that customer, and the booking
+form prefills their name and email. `/account` shows upcoming/past bookings,
+allows cancellation of eligible bookings, and includes profile/password settings.
+Guest booking remains available.
 
 ## Deploying to production
 
@@ -221,3 +218,17 @@ never point them at production. Full authenticated admin tests remain step 7.4.
 `useToast()` for success/error notices; errors stay until dismissed. Booking
 celebration code loads only after success and skips reduced-motion users.
 CSS press/star effects use `motion-safe` and the global reduced-motion guard.
+
+## Slow pages and admin updates
+
+Data pages use `loading.tsx` placeholders while the server is working. Loading
+skeletons contain no private records and stop pulsing with reduced motion.
+Admin status changes use React optimistic transitions: changes appear before the
+request finishes, roll back on failure, and reconcile with the refreshed server
+on success. Keep server authentication/validation in every write route.
+
+Checks: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`.
+In environments where Turbopack cannot spawn its CSS processing helper, the
+supported alternative is `npm run build -- --webpack` (the final verified build
+for this session). A cached default build passed once, but rebuilding fresh CSS
+still hit this environment’s process/port restriction, including an escalated retry.

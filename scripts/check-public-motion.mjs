@@ -64,7 +64,9 @@ try {
   await noJs.close();
   console.log("PASS: public entrances, review stagger, About hover, calendar use, reduced motion, phone layout and no-JavaScript content.");
 } finally {
-  await browser?.close();
-  await client.db(process.env.MONGODB_DB || "partiers").collection("reviews").deleteMany({ _id: { $in: ids } });
-  await client.close();
+  try { await browser?.close(); }
+  finally {
+    try { await client.db(process.env.MONGODB_DB || "partiers").collection("reviews").deleteMany({ _id: { $in: ids } }); }
+    finally { await client.close(); }
+  }
 }
