@@ -185,3 +185,69 @@ export function validateAdminBookingStatusInput(body: unknown): {
   if (b.force !== undefined && typeof b.force !== "boolean") return null;
   return { id: b.id, status: b.status, force: b.force === true };
 }
+
+/** Client step checks; the booking API still validates the entire request. */
+export function validateBookingStep(
+  step: number,
+  draft: import("./types").BookingDraft,
+  today: string,
+): string | null {
+  if (step === 0) {
+    const date = new Date(`${draft.date}T12:00:00Z`);
+    if (
+      !DATE_RE.test(draft.date) ||
+      !Number.isFinite(date.getTime()) ||
+      date.toISOString().slice(0, 10) !== draft.date ||
+      draft.date < today
+    ) {
+      return "Please choose an available date today or later.";
+    }
+  }
+  if (step === 1) {
+    if (
+      !TIME_RE.test(draft.time) ||
+      draft.time < "09:00" ||
+      draft.time > "22:00" ||
+      !["00", "30"].includes(draft.time.slice(3))
+    )
+      return "Please choose a start time.";
+    if (
+      !isDuration(draft.durationMinutes) ||
+      !endsByMidnight(draft.time, draft.durationMinutes)
+    )
+      return "Please choose a duration that ends by midnight.";
+  }
+  if (step === 2) {
+    if (!isEventType(draft.eventType))
+      return "Please choose what kind of event it is.";
+    if (!cleanString(draft.location, 200))
+      return "Please enter an address or general area (up to 200 characters).";
+    if (draft.notes.length > 1000)
+      return "Please keep your notes to 1,000 characters.";
+    if (!draft.activities.every(isActivity))
+      return "Please choose activities from the list.";
+  }
+  if (step === 3) {
+    if (!cleanString(draft.parentName, 100))
+      return "Please enter your name (up to 100 characters).";
+    if (!cleanString(draft.contact, 150))
+      return "Please enter a phone number or email (up to 150 characters).";
+    if (!cleanString(draft.childName, 100))
+      return "Please enter your child's name (up to 100 characters).";
+    if (
+      draft.childAge.trim() === "" ||
+      !Number.isInteger(Number(draft.childAge)) ||
+      Number(draft.childAge) < 0 ||
+      Number(draft.childAge) > 17
+    )
+      return "Please enter a child's age from 0 to 17.";
+    if (
+      draft.numberOfChildren.trim() === "" ||
+      !Number.isInteger(Number(draft.numberOfChildren)) ||
+      Number(draft.numberOfChildren) < 1 ||
+      Number(draft.numberOfChildren) > 50
+    )
+      return "Please enter between 1 and 50 children.";
+  }
+  return null;
+}

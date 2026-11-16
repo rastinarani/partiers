@@ -17,20 +17,21 @@ owner's go-ahead) · 🔑 needs the owner to create an account or provide a key
 
 **Built and working locally:**
 
-- Public booking page: custom month calendar, time picker (9:00 AM–10:00 PM,
+- Public booking page: five-step wizard with saved progress, custom month calendar, time picker (9:00 AM–10:00 PM,
   30-minute slots), parent/child details, number of children, notes. Saves as
   `pending`.
 - Reviews page: approved reviews plus a form; new reviews wait for approval.
 - About page with Nikki's and Manna's bios (photos are initials placeholders).
-- Customer accounts (demo): `/signup`, `/login`, `/account`. Accounts are not
-  yet linked to bookings.
+- Customer accounts: `/signup`, `/login`, `/account`, with linked bookings,
+  cancellation, profile editing and password changes.
 - Admin area: `/admin/login` (email + password, `admins` collection),
   dashboard to confirm/decline bookings and approve/reject reviews, and a
   confirmed-bookings calendar.
 - Vibrant violet/rose/amber theme, mobile-friendly layout.
 
-**Known gaps:** no animations or loading states; no emails; no rate
-limiting; no end-to-end tests. (Phases 0–2 are done: see the progress log.)
+**Known gaps:** no celebration/toast feedback or loading states yet; no emails;
+no rate limiting; no full account/admin end-to-end suite. Public animations
+respect reduced motion, and local browser checks cover public pages and booking.
 
 **Live site:** a Vercel project exists at `partiers.vercel.app`, but its
 database connection string is wrong, so pages that use the database return
@@ -215,7 +216,7 @@ there's a strong reason not to. Every animation must respect
 - Keep it subtle: short (150–400 ms), and nothing that delays reading.
 - **Done when:** the site feels lively but still loads instantly.
 
-### [ ] 4.3 Multi-step booking wizard
+### [x] 4.3 Multi-step booking wizard
 
 - Turn the long booking form into steps: **Date → Time → Event details →
   Your info → Review & send**, with a progress bar, Back/Next buttons,
@@ -369,6 +370,26 @@ settings only.
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-15 — 4.3 Multi-step booking wizard (commit: "Guide bookings through five saved steps"):
+  Date → Time → Event details → Your info → Review & send, with progress,
+  Back/Edit controls, short accessible entrances, step-specific validation and
+  focused headings/errors. Shared summary appears before and after submission.
+  Session-only drafts survive refresh for up to 24 hours, are separated by
+  guest/account identity, validate/whitelist stored fields, rewind incomplete or
+  stale data, and clear after success or confirmed Clear draft. Storage-disabled
+  browsers remain usable with a clear notice. Availability is refetched on
+  restore; failed/blocked lookups cannot enable times or silently strand the
+  final send button. Failed sends retain all details; 409 returns to time
+  selection and refreshes availability. Server validation/auth are preserved.
+  Lint, typecheck, 208 unit/component tests and webpack build pass. Local
+  Chromium `test:booking` verifies real guest save/reference, validation and
+  child/count boundaries, occupied versus touching slots, Back/Edit, refresh,
+  failed send, conflict recovery, draft cleanup, failed/blocked availability,
+  reduced-motion steps and 360 px layout; fixtures removed afterward.
+  `test:motion` still passes. Phone screenshots of Review and About inspected.
+  Component tests verify guest/account draft isolation and storage failures.
+  No accounts created or production settings changed.
 
 - 2026-11-15 — 4.2 Page and section entrances (commit: "Add gentle public page and calendar animations"):
   hero and guest login links enter gently, approved review cards stagger, About

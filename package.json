@@ -11,7 +11,8 @@
     "create-admin": "node scripts/create-admin.mjs",
     "check-db": "node scripts/check-db.mjs",
     "test": "vitest run",
-    "test:motion": "node --env-file-if-exists=.env.local scripts/check-public-motion.mjs"
+    "test:motion": "node --env-file-if-exists=.env.local scripts/check-public-motion.mjs",
+    "test:booking": "node --env-file-if-exists=.env.local scripts/check-booking-wizard.mjs"
   },
   "dependencies": {
     "mongodb": "^7.6.0",

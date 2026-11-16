@@ -200,3 +200,17 @@ remains roadmap step 7.4. With the local website and MongoDB running,
 `npm run test:motion` checks public animations in Chromium at phone size,
 including reduced motion and no-JavaScript visibility. It only accepts a local
 database and removes its temporary review records when finished.
+
+## Booking wizard and local checks
+
+The booking form has five steps. Drafts live in `sessionStorage` (this browser
+tab only), expire after a day, and clear on successful submission or confirmed
+Clear draft. Guests and signed-in customers use separate draft keys. No booking
+exists in MongoDB until the customer presses **Send booking request** and the
+server accepts it. Availability is checked again by the server.
+
+With the local website and MongoDB running, `npm run test:booking` uses Chromium
+to check the phone flow, validation, draft restoration, server-error recovery,
+availability and a real test save. It removes its uniquely identified booking
+fixtures in cleanup. Both browser checks reject non-local database/site URLs;
+never point them at production. Full authenticated admin tests remain step 7.4.

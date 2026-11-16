@@ -62,3 +62,18 @@ export interface Review {
 }
 
 export type NewReview = Pick<Review, "name" | "rating" | "comment">;
+
+export interface BookingDraft {
+  date: string;
+  time: string;
+  durationMinutes: number;
+  eventType: EventType | "";
+  location: string;
+  activities: Activity[];
+  notes: string;
+  parentName: string;
+  contact: string;
+  childName: string;
+  childAge: string;
+  numberOfChildren: string;
+}
