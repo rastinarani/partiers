@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import HideRecordButton from "./HideRecordButton";
 import type { Review, ReviewStatus } from "@/lib/types";
 import StarRating from "./StarRating";
 import { Button, Card, StatusBadge } from "./ui";
 
 export default function AdminReviewsList({ initialReviews }: { initialReviews: Review[] }) {
-  const [reviews, setReviews] = useState(initialReviews);
+  const router = useRouter();
+  const reviews = initialReviews;
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   async function updateStatus(id: string, status: ReviewStatus) {
@@ -18,7 +21,7 @@ export default function AdminReviewsList({ initialReviews }: { initialReviews: R
         body: JSON.stringify({ id, status }),
       });
       if (res.ok) {
-        setReviews((prev) => prev.map((r) => (r._id === id ? { ...r, status } : r)));
+        router.refresh();
       }
     } finally {
       setUpdatingId(null);
@@ -62,6 +65,7 @@ export default function AdminReviewsList({ initialReviews }: { initialReviews: R
               Reject
             </Button>
           </div>
+          <HideRecordButton id={r._id} kind="review" disabled={updatingId === r._id} />
         </Card>
       ))}
     </div>

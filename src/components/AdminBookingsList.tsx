@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { splitUpcomingAndPast } from "@/lib/bookingDates";
 import { formatTimeRange } from "@/lib/schedule";
 import EventDetails from "./EventDetails";
+import HideRecordButton from "./HideRecordButton";
 import type { Booking, BookingStatus } from "@/lib/types";
 import { Button, Card, Input, Label, StatusBadge } from "./ui";
 
@@ -31,7 +32,7 @@ export default function AdminBookingsList({ initialBookings, today }: {
   today: string;
 }) {
   const router = useRouter();
-  const [bookings, setBookings] = useState(initialBookings);
+  const bookings = initialBookings;
   const [status, setStatus] = useState<BookingStatus>("pending");
   const [search, setSearch] = useState("");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -47,7 +48,6 @@ export default function AdminBookingsList({ initialBookings, today }: {
         body: JSON.stringify({ id, status, force }),
       });
       if (res.ok) {
-        setBookings((prev) => prev.map((b) => (b._id === id ? { ...b, status } : b)));
         router.refresh();
       } else if (res.status === 409) {
         const data = await res.json().catch(() => ({}));
@@ -184,6 +184,7 @@ export default function AdminBookingsList({ initialBookings, today }: {
                   </Button>
                 </div>
               )}
+              <HideRecordButton id={b._id} kind="booking" disabled={updatingId === b._id} />
               <Link href={`/admin/bookings/${b._id}`} className="mt-3 inline-block text-sm font-medium text-primary underline underline-offset-4">
                 View booking details
               </Link>

@@ -176,7 +176,7 @@ not set up yet** — see 3.4.
 - **Done when:** notes persist and never appear in customer-facing pages or
   APIs.
 
-### [ ] 3.3 Remove spam
+### [x] 3.3 Remove spam
 
 - Admins can delete reviews and bookings (soft delete: hidden, not erased),
   with a confirmation step.
@@ -369,6 +369,32 @@ settings only.
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-15 — 3.3 Remove spam (commit: "Hide spam bookings and reviews without erasing records"):
+  shared inline Hide/Keep confirmation on dashboard booking/review cards and
+  booking details; failed requests keep the item and show an error, and
+  successful detail-page hiding returns to the dashboard. Dedicated DELETE
+  routes verify both the signed admin cookie and an existing admin account.
+  Atomic updates add a BSON Date `deletedAt` without erasing data; repeated
+  requests return 404 and preserve the original timestamp. Every booking and
+  review reader excludes hidden records, covering dashboard counts/search,
+  customer bookings, detail links, approved reviews, calendar and availability
+  (including booking/confirmation overlap checks). Notes, moderation, admin
+  status and customer cancellation writes also exclude hidden records, with
+  atomic guards against deletion during another update. Lists use refreshed
+  server data so deleted cards and counts disappear together. Lint, typecheck,
+  all 192 unit tests and `npm run build -- --webpack` pass. Default Turbopack
+  build still fails on this environment's process/port restriction, including
+  an escalated retry. Local MongoDB integration verified retained fields and
+  deletion dates, all readers, freed confirmed time, legacy visible records,
+  ownership, repeat hiding and blocked later edits; isolated temporary database
+  and temporary integration test removed. No accounts created or credentials,
+  production settings or secrets changed. Running local HTTP checks returned
+  401 for both logged-out DELETE endpoints. Browser access host unavailable:
+  on-screen confirmation/Keep, successful hiding/redirect/count refresh and
+  failure-message interactions remain unverified in a real browser; full
+  authenticated browser testing also awaits the owner's admin setup. No
+  unfinished implementation; next active step is 4.1 (3.4 stays deferred).
 
 - 2026-11-14 — 3.2 Booking detail page (commit: "Add private admin booking details and status history"):
   `/admin/bookings/[id]` shows family/event details, reference, parent notes,

@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { BookingStatus } from "@/lib/types";
+import HideRecordButton from "./HideRecordButton";
 import { Button, Card, FormError, Label, Textarea } from "./ui";
 
 export default function AdminBookingEditor({ id, status, initialNotes }: {
@@ -94,6 +95,7 @@ export default function AdminBookingEditor({ id, status, initialNotes }: {
           </div>
         </div>
       )}
+      <HideRecordButton id={id} kind="booking" disabled={busy} returnToDashboard />
       <form onSubmit={saveNotes} className="space-y-3 border-t border-card-border pt-5">
         <div>
           <Label htmlFor="admin-notes">Private admin notes</Label>

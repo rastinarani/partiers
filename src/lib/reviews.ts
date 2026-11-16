@@ -29,7 +29,7 @@ export async function getApprovedReviews(): Promise<Review[]> {
   const db = await getDb();
   const docs = await db
     .collection(COLLECTION)
-    .find({ status: "approved" })
+    .find({ status: "approved", deletedAt: { $exists: false } })
     .sort({ createdAt: -1 })
     .toArray();
   return docs.map(toReview);
@@ -39,7 +39,7 @@ export async function getAllReviews(): Promise<Review[]> {
   const db = await getDb();
   const docs = await db
     .collection(COLLECTION)
-    .find({})
+    .find({ deletedAt: { $exists: false } })
     .sort({ createdAt: -1 })
     .toArray();
   return docs.map(toReview);
@@ -58,6 +58,16 @@ export async function updateReviewStatus(
   }
   const result = await db
     .collection(COLLECTION)
-    .updateOne({ _id: objectId }, { $set: { status } });
+    .updateOne({ _id: objectId, deletedAt: { $exists: false } }, { $set: { status } });
+  return result.matchedCount > 0;
+}
+
+export async function hideReview(id: string): Promise<boolean> {
+  if (!ObjectId.isValid(id)) return false;
+  const db = await getDb();
+  const result = await db.collection(COLLECTION).updateOne(
+    { _id: new ObjectId(id), deletedAt: { $exists: false } },
+    { $set: { deletedAt: new Date() } }
+  );
   return result.matchedCount > 0;
 }

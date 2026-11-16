@@ -90,7 +90,7 @@ export async function getAllBookings(): Promise<Booking[]> {
   const db = await getDb();
   const docs = await db
     .collection(COLLECTION)
-    .find({})
+    .find({ deletedAt: { $exists: false } })
     .sort({ createdAt: -1 })
     .toArray();
   return docs.map(toBooking);
@@ -100,7 +100,7 @@ export async function getConfirmedBookings(): Promise<Booking[]> {
   const db = await getDb();
   const docs = await db
     .collection(COLLECTION)
-    .find({ status: "confirmed" })
+    .find({ status: "confirmed", deletedAt: { $exists: false } })
     .sort({ date: 1, time: 1 })
     .toArray();
   return docs.map(toBooking);
@@ -122,7 +122,7 @@ export async function updateBookingStatus(
   } catch {
     return "not_found";
   }
-  const doc = await db.collection(COLLECTION).findOne({ _id: objectId });
+  const doc = await db.collection(COLLECTION).findOne({ _id: objectId, deletedAt: { $exists: false } });
   if (!doc) return "not_found";
   if (doc.status === "cancelled") return "cancelled";
   if (doc.status === status) return "updated";
@@ -130,7 +130,7 @@ export async function updateBookingStatus(
   const result = await db
     .collection(COLLECTION)
     .updateOne(
-      { _id: objectId, status: doc.status, updatedAt: doc.updatedAt },
+      { _id: objectId, status: doc.status, updatedAt: doc.updatedAt, deletedAt: { $exists: false } },
       { $set: {
         status, updatedAt: now,
         statusHistory: [...historyFor(doc), { status, at: now, actor: "admin", actorId: adminId }],
@@ -158,7 +158,7 @@ export async function cancelBookingForUser(
   } catch {
     return "not_found";
   }
-  const doc = await db.collection(COLLECTION).findOne({ _id: objectId, userId });
+  const doc = await db.collection(COLLECTION).findOne({ _id: objectId, userId, deletedAt: { $exists: false } });
   if (!doc) return "not_found";
   if (doc.status !== "pending" && doc.status !== "confirmed") return "not_cancellable";
   const now = new Date().toISOString();
@@ -166,6 +166,7 @@ export async function cancelBookingForUser(
     {
       _id: objectId,
       userId,
+      deletedAt: { $exists: false },
       status: doc.status,
       date: { $gte: today },
       updatedAt: doc.updatedAt,
@@ -178,7 +179,7 @@ export async function cancelBookingForUser(
   if (result.matchedCount > 0) return "cancelled";
   const owned = await db
     .collection(COLLECTION)
-    .countDocuments({ _id: objectId, userId }, { limit: 1 });
+    .countDocuments({ _id: objectId, userId, deletedAt: { $exists: false } }, { limit: 1 });
   return owned ? "not_cancellable" : "not_found";
 }
 
@@ -186,7 +187,7 @@ export async function getBookingsForUser(userId: string): Promise<Booking[]> {
   const db = await getDb();
   const docs = await db
     .collection(COLLECTION)
-    .find({ userId })
+    .find({ userId, deletedAt: { $exists: false } })
     .sort({ date: 1, time: 1 })
     .toArray();
   return docs.map(toBooking);
@@ -200,7 +201,7 @@ export async function getBookingById(id: string): Promise<Booking | null> {
     return null;
   }
   const db = await getDb();
-  const doc = await db.collection(COLLECTION).findOne({ _id: objectId });
+  const doc = await db.collection(COLLECTION).findOne({ _id: objectId, deletedAt: { $exists: false } });
   return doc ? toBooking(doc) : null;
 }
 
@@ -208,7 +209,7 @@ export async function getBookingById(id: string): Promise<Booking | null> {
 export async function getAdminBookingById(id: string): Promise<AdminBooking | null> {
   if (!ObjectId.isValid(id)) return null;
   const db = await getDb();
-  const doc = await db.collection(COLLECTION).findOne({ _id: new ObjectId(id) });
+  const doc = await db.collection(COLLECTION).findOne({ _id: new ObjectId(id), deletedAt: { $exists: false } });
   return doc ? { ...toBooking(doc), adminNotes: doc.adminNotes ?? "", statusHistory: historyFor(doc) } : null;
 }
 
@@ -216,7 +217,7 @@ export async function updateAdminNotes(id: string, adminNotes: string): Promise<
   if (!ObjectId.isValid(id)) return false;
   const db = await getDb();
   const result = await db.collection(COLLECTION).updateOne(
-    { _id: new ObjectId(id) },
+    { _id: new ObjectId(id), deletedAt: { $exists: false } },
     { $set: { adminNotes } }
   );
   return result.matchedCount > 0;
@@ -233,7 +234,7 @@ export async function getTakenRanges(
   const db = await getDb();
   const docs = await db
     .collection(COLLECTION)
-    .find({ date, status: "confirmed" })
+    .find({ date, status: "confirmed", deletedAt: { $exists: false } })
     .project({ time: 1, durationMinutes: 1 })
     .sort({ time: 1 })
     .toArray();
@@ -243,4 +244,14 @@ export async function getTakenRanges(
       id: d._id.toString(),
       ...toRange(d.time, d.durationMinutes ?? DEFAULT_DURATION),
     }));
+}
+
+export async function hideBooking(id: string): Promise<boolean> {
+  if (!ObjectId.isValid(id)) return false;
+  const db = await getDb();
+  const result = await db.collection(COLLECTION).updateOne(
+    { _id: new ObjectId(id), deletedAt: { $exists: false } },
+    { $set: { deletedAt: new Date() } }
+  );
+  return result.matchedCount > 0;
 }
