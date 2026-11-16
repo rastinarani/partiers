@@ -207,7 +207,7 @@ there's a strong reason not to. Every animation must respect
 - **Done when:** with "Reduce motion" enabled in macOS accessibility
   settings, nothing slides or bounces.
 
-### [ ] 4.2 Page and section entrances
+### [x] 4.2 Page and section entrances
 
 - Hero text and buttons fade/slide in, review cards stagger in, the About
   cards lift slightly on hover, and the calendar animates when changing
@@ -369,6 +369,18 @@ settings only.
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-15 — 4.2 Page and section entrances (commit: "Add gentle public page and calendar animations"):
+  hero and guest login links enter gently, approved review cards stagger, About
+  heading enters and team cards lift 3 px on hover, and calendar day grids enter
+  on month changes without delaying interaction. Reduced-motion CSS also guards
+  hover transforms; calendar announces its month and selected date. Added
+  `npm run test:motion`, a repeatable Playwright check limited to a loopback site
+  and database; its three temporary approved reviews are removed in cleanup.
+  Chromium verified normal/reduced entrances, review visibility, hover behavior,
+  immediate calendar selection, 390 px layout, no-JavaScript content and no
+  browser errors. Lint, typecheck, 196 unit/component tests and webpack production
+  build pass. No admin accounts or production settings changed.
 
 - 2026-11-15 — 4.1 Animation setup (commit: "Add accessible reusable animation setup"):
   installed Motion; root MotionProvider tracks device preferences live, with a

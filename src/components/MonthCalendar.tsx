@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import FadeIn from "./motion/FadeIn";
 import { Card } from "./ui";
 
 const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
@@ -74,7 +75,7 @@ export default function MonthCalendar({
         >
           &larr;
         </button>
-        <p className="text-sm font-semibold">{monthLabel}</p>
+        <p className="text-sm font-semibold" aria-live="polite">{monthLabel}</p>
         <button
           type="button"
           onClick={() => setViewDate(new Date(year, month + 1, 1))}
@@ -93,7 +94,7 @@ export default function MonthCalendar({
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-1">
+      <FadeIn key={`${year}-${month}`} className="grid grid-cols-7 gap-1">
         {cells.map(({ date, inMonth }, i) => {
           const key = toDateKey(date);
           const isToday = key === toDateKey(today);
@@ -108,6 +109,7 @@ export default function MonthCalendar({
               key={i}
               type="button"
               disabled={disabled}
+              aria-pressed={isSelected}
               onClick={() => onSelectDate(key)}
               aria-label={isUnavailable ? `${date.toDateString()} (unavailable)` : undefined}
               className={[
@@ -133,7 +135,7 @@ export default function MonthCalendar({
             </button>
           );
         })}
-      </div>
+      </FadeIn>
     </Card>
   );
 }

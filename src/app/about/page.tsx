@@ -4,6 +4,8 @@
 //   <Image src="/photos/nikki.jpg" alt="Nikki Mazloomi" width={160} height={160} className="rounded-full object-cover" />
 // and drop the image file in the `public/photos/` folder.
 
+import FadeIn from "@/components/motion/FadeIn";
+import HoverLift from "@/components/motion/HoverLift";
 import { Card } from "@/components/ui";
 
 const team = [
@@ -22,17 +24,17 @@ const team = [
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
-      <div className="text-center">
+      <FadeIn className="text-center">
         <h1 className="text-3xl font-bold tracking-tight">About Us</h1>
         <p className="mx-auto mt-2 max-w-xl text-muted">
           We&rsquo;re two friends who love turning parties and get-togethers into something kids
           actually remember &mdash; here&rsquo;s a bit about who we are.
         </p>
-      </div>
+      </FadeIn>
 
       <div className="mt-10 grid gap-8 sm:grid-cols-2">
         {team.map((person) => (
-          <Card key={person.name} className="p-6 text-center">
+          <HoverLift key={person.name}><Card className="h-full p-6 text-center">
             {/* Photo placeholder — replace with a real photo, see comment above */}
             <div className="mx-auto mb-4 flex h-28 w-28 items-center justify-center rounded-full bg-primary-soft text-3xl font-semibold text-primary">
               {person.name
@@ -45,7 +47,7 @@ export default function AboutPage() {
             <p className="mt-3 text-xs font-medium uppercase tracking-wide text-primary">
               {person.goodWith}
             </p>
-          </Card>
+          </Card></HoverLift>
         ))}
       </div>
 

@@ -196,4 +196,7 @@ Never require an animation to finish before a button or form can be used.
 `npm test` includes component interaction tests in a simulated page. For local
 browser checks, Playwright is available; install its browser with
 `npx playwright install chromium`. The full booking/admin end-to-end suite
-remains roadmap step 7.4.
+remains roadmap step 7.4. With the local website and MongoDB running,
+`npm run test:motion` checks public animations in Chromium at phone size,
+including reduced motion and no-JavaScript visibility. It only accepts a local
+database and removes its temporary review records when finished.

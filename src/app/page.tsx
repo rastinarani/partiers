@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
+import FadeIn from "@/components/motion/FadeIn";
 import BookingForm from "@/components/BookingForm";
 import { USER_COOKIE_NAME, verifyUserSessionToken } from "@/lib/auth";
 import { todayString } from "@/lib/bookingDates";
@@ -23,7 +24,7 @@ export default async function Home() {
           <span className="blob blob-3" />
         </div>
 
-        <div className="relative">
+        <FadeIn className="relative">
           <span className="mb-4 inline-block rounded-full bg-primary-soft px-4 py-1 text-sm font-semibold text-primary">
             &#127881; Games &middot; parties &middot; pure chaos (the good kind)
           </span>
@@ -34,11 +35,11 @@ export default async function Home() {
             Pick a date and time below and tell us about your event. We&rsquo;ll follow up to
             confirm &mdash; nothing is booked automatically.
           </p>
-        </div>
+        </FadeIn>
       </div>
 
       {!user && (
-        <p className="mb-6 rounded-2xl bg-secondary-soft px-5 py-3 text-center text-sm">
+        <FadeIn><p className="mb-6 rounded-2xl bg-secondary-soft px-5 py-3 text-center text-sm">
           <Link href="/login?next=/" className="font-semibold text-primary hover:underline">
             Log in
           </Link>{" "}
@@ -47,7 +48,7 @@ export default async function Home() {
             create an account
           </Link>{" "}
           to keep track of your bookings. You can also book as a guest.
-        </p>
+        </p></FadeIn>
       )}
 
       <BookingForm
