@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { chromium, request } from "playwright";
 import { expect } from "@playwright/test";
 import { MongoClient } from "mongodb";
+import { setTimeout as delay } from "node:timers/promises";
 
 const baseURL = process.env.PARTIERS_TEST_URL;
 const uri = process.env.MONGODB_URI;
@@ -17,7 +18,9 @@ try {
   const collections = ["users", "admins", "bookings", "reviews"];
   const before = await Promise.all(collections.map((name) => db.collection(name).countDocuments()));
   await counters.deleteMany({});
-  const payload = { email: "nobody-for-rate-check@example.invalid", password: "intentionally-incorrect" };
+  const challenge = await (await api.get("/api/form-token?form=login")).json();
+  await delay(2200);
+  const payload = { email: "nobody-for-rate-check@example.invalid", password: "intentionally-incorrect", formToken: challenge.token, website: "" };
   // Both sign-in endpoints must consume the same atomic quota, even concurrently.
   const responses = await Promise.all(Array.from({ length: 20 }, (_, index) =>
     api.post(index % 2 ? "/api/admin/login" : "/api/auth/login", { data: payload })));

@@ -1,5 +1,7 @@
 "use client";
 
+import PublicFormProtection, { usePublicFormProtection } from "./PublicFormProtection";
+
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   ACTIVITIES,
@@ -74,6 +76,7 @@ function BookingWizard({
   loggedIn = false,
   blockedDates = [],
 }: BookingFormProps) {
+  const protection = usePublicFormProtection("booking");
   const storageKey = `partiers-booking-draft:v1:${loggedIn ? defaultContact : "guest"}`;
   const [initial] = useState(() => {
     try {
@@ -217,7 +220,7 @@ function BookingWizard({
   }
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy) return;
+    if (busy || (step === 4 && !protection.ready)) return;
     if (step < 4) {
       const invalid = check(step);
       if (invalid) {
@@ -245,10 +248,11 @@ function BookingWizard({
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(request),
+        body: JSON.stringify({ ...request, ...protection.payload(event.currentTarget) }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        if (res.status === 400) protection.retry();
         if (res.status === 409) {
           setAvailability(null);
           setAvailabilityVersion((version) => version + 1);
@@ -276,6 +280,7 @@ function BookingWizard({
     }
   }
   function reset() {
+    protection.retry();
     try {
       sessionStorage.removeItem(storageKey);
     } catch {
@@ -306,6 +311,7 @@ function BookingWizard({
         aria-labelledby="booking-step-title"
         className="space-y-6"
       >
+        <PublicFormProtection protection={protection} />
         <nav aria-label="Booking progress">
           <ol className="grid grid-cols-5 gap-1 text-center text-xs sm:gap-3 sm:text-sm">
             {STEPS.map((label, index) => (
@@ -666,7 +672,7 @@ function BookingWizard({
               type="submit"
               size="lg"
               className="flex-1 sm:flex-none"
-              disabled={busy || (step === 4 && !canCheckTimes)}
+              disabled={busy || (step === 4 && (!canCheckTimes || !protection.ready))}
             >
               {busy
                 ? "Sending request…"

@@ -1,3 +1,4 @@
+import { validPublicForm, publicFormRejection } from "@/lib/publicFormProtection";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import {
@@ -28,6 +29,7 @@ export async function POST(request: Request) {
   const limited = await rateLimitResponse(request, "booking");
   if (limited) return limited;
   const body = await request.json().catch(() => null);
+  if (!validPublicForm(body, "booking")) return publicFormRejection();
   const input = validateBookingInput(body);
 
   if (!input) {

@@ -1,3 +1,4 @@
+import { validPublicForm, publicFormRejection } from "@/lib/publicFormProtection";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { ADMIN_COOKIE_NAME, verifyAdminSessionToken } from "@/lib/auth";
@@ -10,6 +11,7 @@ export async function POST(request: Request) {
   const limited = await rateLimitResponse(request, "review");
   if (limited) return limited;
   const body = await request.json().catch(() => null);
+  if (!validPublicForm(body, "review")) return publicFormRejection();
   const input = validateReviewInput(body);
 
   if (!input) {

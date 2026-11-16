@@ -1,11 +1,14 @@
 "use client";
 
+import PublicFormProtection, { usePublicFormProtection } from "@/components/PublicFormProtection";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, FormError, Input, Label } from "@/components/ui";
 
 export default function SignupForm({ next }: { next: string | null }) {
+  const protection = usePublicFormProtection("signup");
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -13,18 +16,20 @@ export default function SignupForm({ next }: { next: string | null }) {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!protection.ready) return;
     setSubmitting(true);
     setError("");
 
     const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, ...protection.payload(e.currentTarget) }),
     });
 
     if (!res.ok) {
+      if (res.status === 400) protection.retry();
       setSubmitting(false);
       const data = await res.json().catch(() => ({}));
       setError(data.error || "Something went wrong.");
@@ -44,6 +49,7 @@ export default function SignupForm({ next }: { next: string | null }) {
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <PublicFormProtection protection={protection} />
         <div>
           <Label htmlFor="name">Name</Label>
           <Input
@@ -81,7 +87,7 @@ export default function SignupForm({ next }: { next: string | null }) {
 
         {error && <FormError>{error}</FormError>}
 
-        <Button type="submit" disabled={submitting} className="w-full">
+        <Button type="submit" disabled={submitting || !protection.ready} className="w-full">
           {submitting ? "Creating account..." : "Sign up"}
         </Button>
       </form>

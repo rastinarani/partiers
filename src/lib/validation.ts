@@ -1,14 +1,25 @@
 import { isActivity, isEventType } from "./eventOptions";
 import { endsByMidnight, isDuration } from "./schedule";
+import { PUBLIC_FORM_KINDS, type PublicFormKind } from "./publicFormRules";
 
-// Shared server-side validation for the public booking and review forms.
-// Keep this defensive: these are the only two write paths that accept
-// unauthenticated input, and everything here ends up in MongoDB.
+// Validate public form fields before business logic or database writes.
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^\+?[0-9\s().-]{1,30}$/;
+
+export function validatePublicFormKind(value: unknown): PublicFormKind | null {
+  return typeof value === "string" && PUBLIC_FORM_KINDS.includes(value as PublicFormKind)
+    ? value as PublicFormKind : null;
+}
+
+export function validatePublicFormInput(body: unknown): string | null {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return null;
+  const value = body as Record<string, unknown>;
+  return value.website === "" && typeof value.formToken === "string"
+    && value.formToken.length > 0 && value.formToken.length <= 200 ? value.formToken : null;
+}
 
 export function cleanString(value: unknown, maxLength: number): string | null {
   if (typeof value !== "string") return null;

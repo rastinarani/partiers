@@ -118,6 +118,7 @@ try {
   await expect(page.getByRole("radio", { name: "4 stars" })).toBeFocused();
   await tabTo(page, page.getByLabel("Comment"));
   await page.keyboard.type("A temporary keyboard accessibility check.");
+  await expect(page.getByRole("button", { name: "Submit review" })).toBeEnabled({ timeout: 15000 });
   await tabTo(page, page.getByRole("button", { name: "Submit review" }));
   await page.route("**/api/reviews", (route) => route.fulfill({ status: 500, json: { error: "Please try again." } }));
   await page.keyboard.press("Enter");

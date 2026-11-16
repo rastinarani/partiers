@@ -1,18 +1,22 @@
 "use client";
 
+import PublicFormProtection, { usePublicFormProtection } from "./PublicFormProtection";
+
 import { useState } from "react";
 import StarRating from "./StarRating";
 import { Button, Card, FormError, Input, Label, Textarea } from "./ui";
 
 export default function ReviewForm() {
+  const protection = usePublicFormProtection("review");
   const [name, setName] = useState("");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!protection.ready) return;
     setStatus("submitting");
     setErrorMessage("");
 
@@ -20,10 +24,11 @@ export default function ReviewForm() {
       const res = await fetch("/api/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, rating, comment }),
+        body: JSON.stringify({ name, rating, comment, ...protection.payload(e.currentTarget) }),
       });
 
       if (!res.ok) {
+        if (res.status === 400) protection.retry();
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Something went wrong. Please try again.");
       }
@@ -50,6 +55,7 @@ export default function ReviewForm() {
   return (
     <Card id="leave-review" className="scroll-mt-6 p-6">
       <form onSubmit={handleSubmit}>
+        <PublicFormProtection protection={protection} />
         <h2 className="mb-4 text-lg font-semibold">Leave a review</h2>
 
         <div className="space-y-4">
@@ -85,7 +91,7 @@ export default function ReviewForm() {
 
           {status === "error" && <FormError>{errorMessage}</FormError>}
 
-          <Button type="submit" disabled={status === "submitting"}>
+          <Button type="submit" disabled={status === "submitting" || !protection.ready}>
             {status === "submitting" ? "Submitting..." : "Submit review"}
           </Button>
         </div>

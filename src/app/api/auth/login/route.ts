@@ -1,3 +1,4 @@
+import { validPublicForm, publicFormRejection } from "@/lib/publicFormProtection";
 import { NextResponse } from "next/server";
 import { USER_COOKIE_NAME, createUserSessionToken } from "@/lib/auth";
 import { verifyUserCredentials } from "@/lib/users";
@@ -8,6 +9,7 @@ export async function POST(request: Request) {
   const limited = await rateLimitResponse(request, "login");
   if (limited) return limited;
   const body = await request.json().catch(() => null);
+  if (!validPublicForm(body, "login")) return publicFormRejection();
   const input = validateLoginInput(body);
 
   if (!input) {

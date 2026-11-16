@@ -29,7 +29,7 @@ owner's go-ahead) · 🔑 needs the owner to create an account or provide a key
   confirmed-bookings calendar.
 - Vibrant violet/rose/amber theme, mobile-friendly layout.
 
-**Known gaps:** emails, spam protection, session hardening and a full
+**Known gaps:** emails, session hardening and a full
 account/admin end-to-end suite. Public animations
 respect reduced motion, and local browser checks cover public pages and booking.
 
@@ -326,7 +326,7 @@ work after 5.5; do not create an account, invent a key or change production.
   MongoDB collection with a TTL index, so no extra service is needed).
 - **Done when:** 20 quick failed logins get a friendly "try again later".
 
-### [ ] 7.2 Spam protection
+### [x] 7.2 Spam protection
 
 - A hidden honeypot field plus a minimum fill time on the public forms.
 - **Done when:** a scripted submission that fills every field instantly is
@@ -375,51 +375,90 @@ work after 5.5; do not create an account, invent a key or change production.
 
 ---
 
-## Session handoff — 2026-11-16
+## Session handoff — 2026-11-16 (stable checkpoint)
 
-- Completed: **0.1–3.3, 4.1–4.5, 5.1–5.5 and 7.1**. Work is on
-  `codex/mobile-accessibility-checkpoint`; mobile/accessibility commits have
-  been pushed. Do not merge or force-push.
-- **Next independent step: 7.2 Spam protection.** 3.4/5.6/8.2 stay deferred.
-  Phase 6 is blocked on the owner's email-provider account/approval and key;
-  6.1/6.2 remain unstarted. No admin accounts, owner credentials, paid services
-  or production settings may be created/changed.
-- 5.2 added the mobile drawer and confirmed footer contact details. 5.5 added
-  keyboard calendar navigation, labels, skip link, focus/error announcements,
-  stronger contrast, non-color star selection and mobile long-text wrapping.
-- 7.1 adds atomic MongoDB rate counters with BSON expiry/TTL cleanup and hashed
-  client identity: shared customer/admin login 10/15min, signup 5/hour, booking
-  10/hour, review 5/hour. Counts invalid requests too. HTTP 429 includes a friendly
-  message and Retry-After; unavailable protection fails closed with generic 503.
-  Vercel platform headers supply trusted IPs; direct servers ignore spoofable
-  headers and share a conservative bucket. Recheck the proxy/IP setup before
-  changing hosting. README links the primary platform documentation.
-- Security maintenance: Next.js and matching lint config updated to **16.4.6**,
-  including fixed sharp; compatible development-tool transitive fixes applied.
-  Full `npm audit` now reports **zero vulnerabilities**, clearing the baseline
-  production/development alerts. No force/major audit fix or new service used.
-- Verification: lint/typecheck, **240 unit tests**, default production build
-  (with local compiler process/port permission), and six isolated checks pass:
-  `limits navigation accessibility booking motion seo`. Limits check includes
-  20 concurrent mixed login failures (exactly 10 allowed), browser feedback,
-  all quotas, spoofed headers, TTL index and fresh-window recovery; no accounts
-  or content are created by that check. All test fixtures/databases removed.
-- Use **`npm run test:isolated -- limits navigation accessibility booking motion seo`**.
-  Tests use a separate source snapshot/server at port 3100, random local database
-  and secret, never `.env.local`. Run builds and browser checks sequentially on
-  low-disk machines. One regression attempt hit MongoDB's disk safety threshold;
-  removing only generated `.next/cache` restored space, then all checks passed.
-  Keep the owner's existing server/database and MongoDB safety settings intact.
+- Completed: **0.1–3.3, 4.1–4.5, 5.1–5.5, 7.1 and 7.2**. This session
+  completed **5.2, 5.5, 7.1 and 7.2** on `codex/mobile-accessibility-checkpoint`.
+  GitHub delivery is recorded below after the final push/PR. Do not merge or
+  force-push. No partial feature implementation remains.
+- **Exact next resume point: 7.3 Session hardening.** Read AGENTS.md/CLAUDE.md,
+  inspect Git status/recent commits and the installed Next.js 16.4.6 guides.
+  Start with `src/lib/auth.ts`, `users.ts`, `admins.ts`, `src/proxy.ts`, the
+  customer/admin logout routes and account password route. Tokens currently
+  lack a signed expiry/revocation version: old copied cookies still need to be
+  invalidated on logout/password change. Review all page/API session consumers,
+  keep admin/customer identities separate, and update test-cookie generation in
+  `scripts/check-navigation.mjs` if the format changes. Verify and commit 7.3
+  before considering 7.4. No work on 7.3 or 7.4 was started this session.
+- **Owner-dependent work:** 6.1/6.2 remain blocked on an email-provider account,
+  approval and API key. 3.4/5.6/8.2 remain deferred. Do not create real OR
+  throwaway admin accounts, choose owner credentials, buy services or change
+  production settings. Existing admin negative-path checks create no accounts.
+- 5.2: mobile dialog drawer, safe account/login links, long names, reduced
+  motion, focus/closing behavior and confirmed public email/Metro Vancouver footer.
+  5.5: keyboard calendar grid, labels, skip link, focus/live errors, stronger
+  contrast, shape-based ratings, confirmation focus and long-text wrapping.
+- 7.1: atomic MongoDB rate counters with BSON expiry/TTL and hashed IP identity;
+  login shared across customer/admin (10/15min), signup 5/hour, booking 10/hour,
+  review 5/hour. Invalid attempts count too; friendly 429/Retry-After and generic
+  fail-closed 503. Vercel-only trusted IP headers; direct servers share a
+  conservative bucket and ignore spoofable headers. Recheck proxy setup if
+  changing hosts. Next.js/lint config 16.4.6 and compatible transitive security
+  patches clear all dependency alerts; **full npm audit: zero vulnerabilities**.
+- 7.2: hidden non-keyboard/non-screen-reader honeypot and server-signed proof
+  of minimum two-second fill time on booking/review/signup/customer/admin login.
+  Proofs are purpose-bound, expire after one day and cannot be backdated by the
+  browser. Same generic rejection for all spam-guard failures. Initial form
+  loading has a short wait; failed loading retries retain text and focus.
+  Guard fields are never stored with business data. No CAPTCHA/provider added.
+  Proofs are reusable within their lifetime; rate limiting remains important.
+- Verification: lint/typecheck, **245 unit tests**, default production build
+  (with compiler process/port permission), isolated webpack production build,
+  and **all seven checks on BOTH development and compiled production servers**:
+  `spam limits navigation accessibility booking motion seo`. This includes
+  real local MongoDB concurrency, actual saved guest bookings/reviews, keyboard
+  flows, error recovery, 360px/desktop layouts, axe A/AA scans, reduced motion
+  and SEO. No customer/admin credentials created; fixtures/databases removed.
+- Safe commands: `npm run test:isolated -- spam limits navigation accessibility booking motion seo`
+  and add `--production` immediately after `--` to test the compiled site.
+  Both use a temporary source snapshot, port 3100, random local test database
+  and secret; never `.env.local`. Run builds/browser checks sequentially on
+  low-disk machines. One earlier run hit MongoDB's disk threshold; removing
+  generated `.next/cache` restored space, then all checks passed. Keep the
+  owner's existing server/data and MongoDB safety settings intact. README has
+  setup, limits, spam-protection details and both verification modes.
 - Still unverified: manual screen-reader use, physical phones/Safari/Firefox,
-  full authenticated admin flows, actual root-layout fault recovery, live edge
-  IP behavior and sharing-preview caches. Production database/settings and its
-  known live connection issue remain untouched for Phase 8.
+  full authenticated customer/admin flows, actual root-layout fault recovery,
+  live Vercel edge-IP behavior and chat-preview caches. Production database/
+  settings and its known live connection issue remain untouched for Phase 8.
 
 ---
 
 ## Progress log
 
 Add one line per finished step: date, step, commit, notes.
+
+- 2026-11-16 — 7.2 Spam protection (commit: "Protect public forms from instant and honeypot spam"):
+  shared hidden honeypot on booking, reviews, signup and both sign-in forms;
+  stateless server HMAC proofs have purpose, server timestamp and random nonce.
+  Enforces 2s minimum age/24h expiry, strict bounded input, exact signature and
+  generic non-cacheable 400 for missing/filled/early/expired/tampered envelopes.
+  Rate limits run first; business validation strips all guard fields before
+  storage. Validated uncached GET proof endpoint requires no database/account.
+  Shared client hook delays send readiness slightly, excludes the honeypot from
+  keyboard/screen readers, and recovers failed proof loading with typed values
+  and focus retained. A rejected 400 refreshes proof without losing the draft.
+  Five new unit tests cover boundaries, tampering/backdating/future/purpose,
+  malformed input, honeypot coercion, generic errors and missing secret.
+  Real HTTP/browser checks cover all five endpoints, one legitimate booking
+  and review, unchanged user/admin counts, hidden field/reflow and loading retry.
+  Added isolated compiled-production mode (build/start in the source snapshot).
+  Lint/typecheck, 245 tests, default build, isolated webpack production build,
+  full zero-alert audit, and all seven isolated browser suites pass against
+  both development and production servers. Test databases/snapshots removed.
+  No admin accounts/credentials, paid services or production changes. Phase 6
+  remains blocked; next independent step is 7.3. Feature work stops here to
+  leave time for final verification, documentation, commit, push and PR.
 
 - 2026-11-16 — 7.1 Rate limiting (commit: "Limit repeated submissions and update vulnerable dependencies"):
   shared customer/admin login quota plus separate signup/booking/review quotas;

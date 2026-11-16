@@ -27,7 +27,7 @@ events, get-togethers). Built with Next.js (App Router), MongoDB, and Tailwind C
 With dependencies, Playwright Chromium and a local MongoDB server available:
 
 ```bash
-npm run test:isolated -- navigation accessibility booking motion seo limits
+npm run test:isolated -- navigation accessibility booking motion seo limits spam
 ```
 
 This makes a temporary source copy, starts a separate server at
@@ -41,6 +41,15 @@ use `PARTIERS_TEST_PORT=3101 npm run test:isolated -- navigation`.
 The default database server is `mongodb://127.0.0.1:27017`; an alternative
 loopback-only server can be supplied with `PARTIERS_TEST_MONGODB_URI`.
 Never use a production database for tests.
+
+To build and check the compiled production site in the same isolated setup:
+
+```bash
+npm run test:isolated -- --production spam limits navigation accessibility booking motion seo
+```
+
+This runs a webpack production build inside the temporary source copy, then
+starts it with the temporary database and secret. It does not deploy anything.
 
 The accessibility check scans the public pages and all five booking screens,
 then sends a real test booking and review using the keyboard alone. It checks
@@ -80,6 +89,25 @@ Phase 8; do not trust arbitrary forwarding headers on a public direct server.
 `npm run test:isolated -- limits` checks concurrent requests against real local
 MongoDB, the browser error, quotas, automatic-expiry index, spoofed-header
 resistance and recovery without creating any accounts.
+
+## Spam protection
+
+Booking, review, signup and both sign-in forms include a hidden website field
+that keyboard and screen-reader users skip. The server rejects requests that
+fill it. Forms also receive signed, purpose-specific proofs from
+`/api/form-token`; the server enforces a two-second minimum age and a one-day
+expiry, so changing the browser's timestamp cannot backdate a proof.
+
+The send button waits briefly while the form gets ready. If loading fails,
+visitors can retry with their typed details and focus preserved. Rejections
+use the same generic message for missing, early, expired, tampered and
+honeypot-filled requests. Protection fields are excluded from stored records.
+No CAPTCHA or external account is involved.
+
+Proofs are reusable within their lifetime. This is a hurdle for simple bots;
+the per-IP limits remain important against determined automation. Run
+`npm run test:isolated -- spam` to check real requests and failure recovery
+without creating accounts or credentials.
 
 ## Project structure
 

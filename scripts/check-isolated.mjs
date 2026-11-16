@@ -11,11 +11,13 @@ const checks = {
   navigation: "check-navigation.mjs",
   accessibility: "check-accessibility.mjs",
   limits: "check-rate-limits.mjs",
+  spam: "check-spam-protection.mjs",
   booking: "check-booking-wizard.mjs",
   motion: "check-public-motion.mjs",
   seo: "check-seo.mjs",
 };
-const requested = process.argv.slice(2);
+const production = process.argv.includes("--production");
+const requested = process.argv.slice(2).filter((argument) => argument !== "--production");
 assert.ok(requested.length && requested.every((name) => checks[name]),
   `Choose checks: ${Object.keys(checks).join(", ")}`);
 const root = resolve(import.meta.dirname, "..");
@@ -27,7 +29,7 @@ assert.match(port, /^\d+$/);
 const baseURL = `http://127.0.0.1:${port}`;
 const environment = {
   ...process.env,
-  NODE_ENV: "development",
+  NODE_ENV: production ? "production" : "development",
   VERCEL: "",
   MONGODB_URI: uri,
   MONGODB_DB: dbName,
@@ -61,8 +63,19 @@ try {
     if (error.code !== "ENOENT") throw error;
   });
   await symlink(join(root, "node_modules"), join(snapshot, "node_modules"), "dir");
-  server = spawn(process.execPath, [join(root, "node_modules/next/dist/bin/next"), "dev", snapshot,
-    "--webpack", "--hostname", "127.0.0.1", "--port", port], {
+  const next = join(root, "node_modules/next/dist/bin/next");
+  if (production) {
+    console.log("Building the isolated production site (webpack).");
+    await new Promise((resolveBuild, reject) => {
+      const build = spawn(process.execPath, [next, "build", snapshot, "--webpack"], {
+        cwd: snapshot, env: environment, stdio: "inherit",
+      });
+      build.once("error", reject);
+      build.once("exit", (code) => code === 0 ? resolveBuild() : reject(new Error(`Isolated production build failed (${code}).`)));
+    });
+  }
+  server = spawn(process.execPath, [next, production ? "start" : "dev", snapshot,
+    ...(!production ? ["--webpack"] : []), "--hostname", "127.0.0.1", "--port", port], {
     cwd: snapshot, env: environment, detached: process.platform !== "win32", stdio: ["ignore", "pipe", "pipe"],
   });
   server.on("error", (error) => { serverLog += error.message; });
