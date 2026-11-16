@@ -29,8 +29,8 @@ owner's go-ahead) · 🔑 needs the owner to create an account or provide a key
   confirmed-bookings calendar.
 - Vibrant violet/rose/amber theme, mobile-friendly layout.
 
-**Known gaps:** home page service details, fuller navigation/SEO/error pages,
-emails, rate limiting and a full account/admin end-to-end suite. Public animations
+**Known gaps:** mobile navigation/footer, accessibility pass, emails, rate
+limiting and a full account/admin end-to-end suite. Public animations
 respect reduced motion, and local browser checks cover public pages and booking.
 
 **Live site:** a Vercel project exists at `partiers.vercel.app`, but its
@@ -370,18 +370,29 @@ settings only.
 
 ---
 
-## Session handoff — 2026-11-15
+## Session handoff — 2026-11-15 (owner requested wrap-up)
 
-- Implemented and verified steps 4.1–4.5 in order, with a local commit per step.
-- Next active step: **5.1 A real home page**. Keep 3.4, 5.6 and 8.2 deferred.
-- Start the existing local site with `npm run dev` (or `npm run dev -- --webpack`
-  if this environment blocks Turbopack). Browser tooling: CUA host was unavailable;
-  owner explicitly authorized Playwright for local checks. `npm run test:motion`
-  and `npm run test:booking` are repeatable local-only checks with fixture cleanup.
-- No unfinished implementation. Still needed later: authenticated admin browser
-  testing after the owner sets up credentials; the full account/admin suite in
-  7.4; physical phone/Safari/Firefox checks. Chromium phone-size/reduced-motion
-  behavior has been tested. Production database settings were not changed.
+- This session completed and verified **5.1, 5.3 and 5.4**, with one commit per
+  step. Steps 4.1–4.5 were already complete and preserved.
+- **Next active step: 5.2 Mobile menu and footer.** It was not started while
+  public contact details were pending. The owner has now explicitly confirmed:
+  **nikkitheawsome@gmail.com** and **Metro Vancouver**. Use those exact public
+  details in the footer; do not invent an address, phone, prices or service rules.
+- The owner asked to stop because usage is close to ending. **5.5 has not been
+  started**; its unused accessibility-check dependency was removed. No partial
+  implementation is left behind. 5.6 photos and admin setup stay deferred.
+- Lint/typecheck, 224 tests and webpack production build pass. Local Chromium
+  checks cover the home content, approved/pending/deleted testimonial cases,
+  native FAQ keyboard controls, booking links/flow, error retry and sharing
+  metadata/images. Temporary error route/type/flag and database fixtures removed.
+- Still unverified: actual root-layout fault recovery (component rendering only),
+  live chat-app preview/cache behavior, physical phones/Safari/Firefox and full
+  authenticated admin flows. No admin accounts were created. Production database
+  settings were not changed; its known connection issue remains Phase 8.
+- Local dev server was already running on port 3000 and was preserved.
+  `npm run test:motion`, `npm run test:booking`, and `npm run test:seo` are local
+  checks. `npm run build -- --webpack` is the verified build alternative for
+  the previously documented environment restriction on fresh Turbopack CSS builds.
 
 ---
 

@@ -232,3 +232,15 @@ In environments where Turbopack cannot spawn its CSS processing helper, the
 supported alternative is `npm run build -- --webpack` (the final verified build
 for this session). A cached default build passed once, but rebuilding fresh CSS
 still hit this environment’s process/port restriction, including an escalated retry.
+
+## Public page checks and next step
+
+The home page explains the existing services, booking process and FAQs, and
+shows only approved reviews. Error pages offer recovery without displaying
+internal error details. `npm run test:seo` checks page titles, sharing tags,
+private-page indexing instructions, sitemap and generated preview/icon images
+against a running local site. Live chat-app previews still need production checks.
+
+The next roadmap step is the mobile menu and footer (5.2). The owner confirmed
+**nikkitheawsome@gmail.com** and **Metro Vancouver** as the public contact details.
+These are recorded for that step; they have not yet been added to the footer.
